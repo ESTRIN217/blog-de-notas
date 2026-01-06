@@ -1,0 +1,19 @@
+<resources>
+    <string name="app_name">Blog de Notas</string>
+    <string name="buscar_nota">Buscar en Blog de nota</string>
+    <string name="tus_notas_guardadas">Tus notas guardadas:</string>
+    <string name="editor_de_notas">Editor de Notas</string>
+    <string name="opciones_de_configuración">Configuración</string>
+    <string name="material_you">Colores Dinámicos</string>
+    <string name="opciones_de_apariencia">Apariencia:</string>
+    <string name="claro">Tema claro</string>
+    <string name="oscuro">Tema oscuro</string>
+    <string name="usar_configuración_del_sistema">Seguir sistema</string>
+    <string name="editor_de_texto">Editor de Texto</string>
+    <string name="tamaño_de_letra">Tamaño de letra</string>
+    <string name="color_de_fondo">Color de fondo</string>
+    <string name="sistema">Sistema / Por defecto</string>
+    <string name="papel">Papel (Crema suave)</string>
+    <string name="alto_contraste">Alto Contraste (Negro puro)</string>
+    <string name="texto_de_ejemplo">Texto de ejemplo (16sp)</string>
+</resources>

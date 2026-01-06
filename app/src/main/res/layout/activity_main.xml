@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.coordinatorlayout.widget.CoordinatorLayout
+     xmlns:android="http://schemas.android.com/apk/res/android"
+     xmlns:app="http://schemas.android.com/apk/res-auto"
+     android:layout_height="match_parent"
+     android:layout_width="match_parent"
+     android:background="?attr/android:colorBackground">
+
+    <LinearLayout
+         android:layout_height="match_parent"
+         android:layout_width="match_parent"
+         android:orientation="vertical"
+         android:fitsSystemWindows="true"
+         android:paddingHorizontal="16dp">
+
+        <LinearLayout
+             android:layout_height="wrap_content"
+             android:layout_width="match_parent"
+             android:gravity="center_vertical"
+             android:orientation="horizontal"
+             android:layout_marginTop="16dp">
+
+            <ImageView
+                 android:layout_height="48dp"
+                 android:layout_width="48dp"
+                 android:layout_marginEnd="8dp"
+                 android:src="@drawable/outline_view_agenda"
+                 android:background="?@attr/selectableItemBackgroundBorderless"
+                 android:clickable="true"
+                 android:padding="12dp"
+                 android:focusable="true"
+                 android:id="@+id/modoVistaTargeta" />
+
+            <com.google.android.material.textfield.TextInputLayout
+                 android:layout_height="wrap_content"
+                 android:layout_width="0dp"
+                 app:boxCornerRadiusTopEnd="28dp"
+                 android:hint="@string/buscar_nota"
+                 app:boxCornerRadiusBottomStart="28dp"
+                 app:boxStrokeWidthFocused="0dp"
+                 app:boxCornerRadiusBottomEnd="28dp"
+                 app:boxBackgroundColor="?attr/colorSurfaceVariant"
+                 app:startIconDrawable="@drawable/search_24px"
+                 app:boxCornerRadiusTopStart="28dp"
+                 android:layout_weight="1"
+                 app:boxStrokeWidth="0dp">
+
+                <com.google.android.material.textfield.TextInputEditText
+                     android:layout_height="wrap_content"
+                     android:layout_width="match_parent"
+                     android:maxLines="1"
+                     android:inputType="text"
+                     android:id="@+id/buscar" />
+
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <ImageView
+                 android:layout_height="48dp"
+                 android:layout_width="48dp"
+                 android:src="@drawable/settings_24px"
+                 android:background="?attr/selectableItemBackgroundBorderless"
+                 android:clickable="true"
+                 android:padding="12dp"
+                 app:tint="?attr/colorOnSurface"
+                 android:layout_marginStart="8dp"
+                 android:focusable="true"
+                 android:id="@+id/btnSettings" />
+
+        </LinearLayout>
+
+        <com.google.android.material.textview.MaterialTextView
+             android:layout_height="wrap_content"
+             android:layout_width="wrap_content"
+             android:layout_marginBottom="8dp"
+             android:textSize="14sp"
+             android:textColor="?attr/colorPrimary"
+             android:layout_marginTop="24dp"
+             android:letterSpacing="0.1"
+             android:text="@string/tus_notas_guardadas"
+             android:textStyle="bold" />
+
+        <androidx.recyclerview.widget.RecyclerView
+             android:layout_height="0dp"
+             android:layout_width="match_parent"
+             android:scrollbars="vertical"
+             android:paddingBottom="88dp"
+             android:clipToPadding="false"
+             android:layout_weight="1"
+             android:id="@+id/recyclerNotas" />
+
+    </LinearLayout>
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+         android:layout_height="wrap_content"
+         android:layout_width="wrap_content"
+         android:contentDescription="Nueva Nota"
+         android:src="@drawable/add_24px"
+         app:maxImageSize="32dp"
+         app:backgroundTint="?attr/colorPrimaryContainer"
+         android:layout_margin="24dp"
+         app:tint="?attr/colorOnPrimaryContainer"
+         app:elevation="4dp"
+         android:id="@+id/btnNuevaNota"
+         android:layout_gravity="bottom|end" />
+
+</androidx.coordinatorlayout.widget.CoordinatorLayout>
