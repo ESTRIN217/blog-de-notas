@@ -8,6 +8,8 @@ import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.TextView;
 import android.widget.Toast;
+import com.Jhon.myempty.blogdenotasjava.ChangelogActivity;
+import com.google.android.material.button.MaterialButton;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AppCompatDelegate;
@@ -15,6 +17,7 @@ import androidx.appcompat.app.AppCompatDelegate;
 import com.google.android.material.color.DynamicColors;
 import com.google.android.material.slider.Slider;
 import com.google.android.material.switchmaterial.SwitchMaterial;
+import android.content.Intent;
 
 public class SettingsActivity extends AppCompatActivity {
 
@@ -26,6 +29,7 @@ public class SettingsActivity extends AppCompatActivity {
     private Slider sliderTamano;
     private TextView txtMuestra;
     private RadioGroup radioGroupColores;
+    private MaterialButton novedades;
 
     // Preferencias
     private SharedPreferences prefs;
@@ -68,6 +72,7 @@ public class SettingsActivity extends AppCompatActivity {
         sliderTamano = findViewById(R.id.sliderTamano);
         txtMuestra = findViewById(R.id.txtMuestraTamano);
         radioGroupColores = findViewById(R.id.radioGroupColores);
+        novedades = findViewById(R.id.novedades);
     }
 
     private void cargarPreferencias() {
@@ -129,6 +134,9 @@ public class SettingsActivity extends AppCompatActivity {
             if (checkedId == R.id.rbPapel) mode = 1;
             else if (checkedId == R.id.rbNegro) mode = 2;
             prefs.edit().putInt("editor_bg_mode", mode).apply();
+        });
+        novedades.setOnClickListener(v -> {
+            startActivity(new Intent(this, ChangelogActivity.class));
         });
     }
 

@@ -2,16 +2,16 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
     <item
         android:id="@+id/action_share"
-        android:title="Compartir"
+        android:title="@string/compartir"
         android:icon="@drawable/share_24px" />
     
     <item
         android:id="@+id/action_floating"
-        android:title="Abrir Flotante"
+        android:title="@string/nota_flotante"
         android:icon="@drawable/open_in_new" />
 
     <item
         android:id="@+id/action_delete"
-        android:title="Eliminar"
+        android:title="@string/eliminar"
         android:icon="@drawable/delete_24px" />
 </menu>

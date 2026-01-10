@@ -1,7 +1,6 @@
 <resources>
     <string name="app_name">Blog de Notas</string>
     <string name="buscar_nota">Buscar en Blog de nota</string>
-    <string name="tus_notas_guardadas">Tus notas guardadas:</string>
     <string name="editor_de_notas">Editor de Notas</string>
     <string name="opciones_de_configuración">Configuración</string>
     <string name="material_you">Colores Dinámicos</string>
@@ -16,4 +15,18 @@
     <string name="papel">Papel (Crema suave)</string>
     <string name="alto_contraste">Alto Contraste (Negro puro)</string>
     <string name="texto_de_ejemplo">Texto de ejemplo (16sp)</string>
+    <string name="novedades">Novedades</string>
+    <string name="añadir_imagen">Añadir Imagen</string>
+    <string name="tomar_foto">Tomar foto</string>
+    <string name="grabar_audio">Grabar Audio</string>
+    <string name="dibujo">Dibujo</string>
+    <string name="insertar_hora">Insertar hora</string>
+    <string name="vaciar_nota">Vaciar nota</string>
+    <string name="nota_flotante">Nota flotante</string>
+    <string name="compartir">Compartir</string>
+    <string name="eliminar">Eliminar</string>
+    <string name="guardar">Guardar</string>
+    <string name="cancelar">Cancelar</string>
+    <string name="copiar">Copiar</string>
+    <string name="enviar">Enviar</string>
 </resources>

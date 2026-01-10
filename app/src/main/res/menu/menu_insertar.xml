@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/ins_foto"
+        android:title="@string/añadir_imagen"
+        android:icon="@drawable/outline_image" />
+    <item
+        android:id="@+id/ins_camara"
+        android:title="@string/tomar_foto"
+        android:icon="@drawable/outline_photo_camera" />
+    <item
+        android:id="@+id/ins_audio"
+        android:title="@string/grabar_audio"
+        android:icon="@drawable/round_mic" />
+    <item
+        android:id="@+id/ins_dibujo"
+        android:title="@string/dibujo"
+        android:icon="@drawable/outline_gesture" />
+</menu>

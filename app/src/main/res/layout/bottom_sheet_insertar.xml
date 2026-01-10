@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+     xmlns:android="http://schemas.android.com/apk/res/android"
+     xmlns:app="http://schemas.android.com/apk/res-auto"
+     android:layout_height="wrap_content"
+     android:layout_width="match_parent"
+     android:background="?attr/colorSurface"
+     android:padding="16dp"
+     android:orientation="vertical">
+
+    <View
+         android:layout_height="4dp"
+         android:layout_width="32dp"
+         android:layout_marginBottom="16dp"
+         android:background="?attr/colorOnSurfaceVariant"
+         android:alpha="0.3"
+         android:layout_gravity="center" />
+
+    <TextView
+         android:layout_height="wrap_content"
+         android:layout_width="match_parent"
+         android:layout_marginBottom="16dp"
+         android:textSize="16sp"
+         android:paddingStart="8dp"
+         android:text="Añadir a la nota"
+         android:textStyle="bold" />
+
+    <com.google.android.material.navigation.NavigationView
+         android:layout_height="wrap_content"
+         android:layout_width="match_parent"
+         app:itemTextColor="?attr/colorOnSurface"
+         android:background="@android:color/transparent"
+         app:menu="@menu/menu_insertar"
+         app:itemIconTint="?attr/colorPrimary"
+         android:id="@+id/navigationInsertar">
+
+    </com.google.android.material.navigation.NavigationView>
+
+</LinearLayout>

@@ -4,81 +4,67 @@
      xmlns:app="http://schemas.android.com/apk/res-auto"
      android:layout_height="match_parent"
      android:layout_width="match_parent"
-     android:background="?attr/android:colorBackground">
+     android:background="?attr/colorSurfaceContainer">
 
     <LinearLayout
          android:layout_height="match_parent"
          android:layout_width="match_parent"
+         android:padding="10dp"
          android:orientation="vertical"
-         android:fitsSystemWindows="true"
-         android:paddingHorizontal="16dp">
+         android:fitsSystemWindows="true">
 
-        <LinearLayout
-             android:layout_height="wrap_content"
-             android:layout_width="match_parent"
-             android:gravity="center_vertical"
-             android:orientation="horizontal"
-             android:layout_marginTop="16dp">
+<LinearLayout
+    android:layout_height="wrap_content"
+    android:layout_width="match_parent"
+    android:gravity="center_vertical"
+    android:orientation="horizontal"
+    android:layout_marginEnd="16dp"
+    android:paddingHorizontal="8dp"> <ImageView
+        android:id="@+id/modoVistaTargeta"
+        android:layout_height="48dp"
+        android:layout_width="48dp"
+        android:layout_marginEnd="8dp"
+        android:src="@drawable/outline_view_agenda"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:clickable="true"
+        android:padding="12dp"
+        android:focusable="true" />
 
-            <ImageView
-                 android:layout_height="48dp"
-                 android:layout_width="48dp"
-                 android:layout_marginEnd="8dp"
-                 android:src="@drawable/outline_view_agenda"
-                 android:background="?@attr/selectableItemBackgroundBorderless"
-                 android:clickable="true"
-                 android:padding="12dp"
-                 android:focusable="true"
-                 android:id="@+id/modoVistaTargeta" />
+    <com.google.android.material.textfield.TextInputLayout
+        android:layout_height="wrap_content"
+        android:layout_width="0dp"
+        android:layout_weight="1"
+        android:hint="@string/buscar_nota"
+        app:boxBackgroundColor="?attr/colorSurfaceVariant"
+        app:boxCornerRadiusBottomEnd="28dp"
+        app:boxCornerRadiusBottomStart="28dp"
+        app:boxCornerRadiusTopEnd="28dp"
+        app:boxCornerRadiusTopStart="28dp"
+        app:boxStrokeWidth="0dp"
+        app:boxStrokeWidthFocused="0dp"
+        app:startIconDrawable="@drawable/search_24px">
 
-            <com.google.android.material.textfield.TextInputLayout
-                 android:layout_height="wrap_content"
-                 android:layout_width="0dp"
-                 app:boxCornerRadiusTopEnd="28dp"
-                 android:hint="@string/buscar_nota"
-                 app:boxCornerRadiusBottomStart="28dp"
-                 app:boxStrokeWidthFocused="0dp"
-                 app:boxCornerRadiusBottomEnd="28dp"
-                 app:boxBackgroundColor="?attr/colorSurfaceVariant"
-                 app:startIconDrawable="@drawable/search_24px"
-                 app:boxCornerRadiusTopStart="28dp"
-                 android:layout_weight="1"
-                 app:boxStrokeWidth="0dp">
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/buscar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="text"
+            android:maxLines="1"
+            android:padding="0dp" />
+    </com.google.android.material.textfield.TextInputLayout>
 
-                <com.google.android.material.textfield.TextInputEditText
-                     android:layout_height="wrap_content"
-                     android:layout_width="match_parent"
-                     android:maxLines="1"
-                     android:inputType="text"
-                     android:id="@+id/buscar" />
+    <ImageView
+        android:id="@+id/btnSettings"
+        android:layout_height="48dp"
+        android:layout_width="48dp"
+        android:layout_marginStart="8dp"
+        android:src="@drawable/settings_24px"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:clickable="true"
+        android:padding="12dp"
+        android:focusable="true" />
 
-            </com.google.android.material.textfield.TextInputLayout>
-
-            <ImageView
-                 android:layout_height="48dp"
-                 android:layout_width="48dp"
-                 android:src="@drawable/settings_24px"
-                 android:background="?attr/selectableItemBackgroundBorderless"
-                 android:clickable="true"
-                 android:padding="12dp"
-                 app:tint="?attr/colorOnSurface"
-                 android:layout_marginStart="8dp"
-                 android:focusable="true"
-                 android:id="@+id/btnSettings" />
-
-        </LinearLayout>
-
-        <com.google.android.material.textview.MaterialTextView
-             android:layout_height="wrap_content"
-             android:layout_width="wrap_content"
-             android:layout_marginBottom="8dp"
-             android:textSize="14sp"
-             android:textColor="?attr/colorPrimary"
-             android:layout_marginTop="24dp"
-             android:letterSpacing="0.1"
-             android:text="@string/tus_notas_guardadas"
-             android:textStyle="bold" />
-
+</LinearLayout>
         <androidx.recyclerview.widget.RecyclerView
              android:layout_height="0dp"
              android:layout_width="match_parent"

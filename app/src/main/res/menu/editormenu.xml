@@ -1,16 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
-
+    <item
+        android:id="@+id/insertar_fecha"
+        android:title="@string/insertar_hora"
+        android:icon="@drawable/round_schedule" />
     <group android:id="@+id/group_edit_view">
         <item
             android:id="@+id/limpiar"
-            android:title="Limpiar nota"
+            android:title="@string/vaciar_nota"
             android:icon="@drawable/clear_all_24px"
             app:showAsAction="never" />
         <item
             android:id="@+id/pip"
-            android:title="Abrir en modo flotante"
+            android:title="@string/nota_flotante"
             android:icon="@drawable/open_in_new" 
             app:showAsAction="never" />
     </group>
@@ -18,7 +21,7 @@
     <group android:id="@+id/group_share">
         <item
             android:id="@+id/opcion_compartir"
-            android:title="Compartir nota"
+            android:title="@string/compartir"
             android:icon="@drawable/share_24px"
             app:showAsAction="never" />
     </group>
@@ -26,7 +29,7 @@
     <group android:id="@+id/group_destructive">
         <item
             android:id="@+id/opcion_borrar"
-            android:title="Eliminar nota"
+            android:title="@string/eliminar"
             android:icon="@drawable/delete_24px"
             app:showAsAction="never" />
     </group>

@@ -1,7 +1,6 @@
 <resources>
     <string name="app_name">Notebook</string>
     <string name="buscar_nota">Search in Blog post</string>
-    <string name="tus_notas_guardadas">Your saved notes:</string>
     <string name="editor_de_notas">Note Editor</string>
     <string name="opciones_de_configuración">Configuration Options</string>
     <string name="material_you">Material you </string>
@@ -16,4 +15,18 @@
     <string name="papel">Paper (Soft Cream)</string>
     <string name="alto_contraste">High Contrast (Pure Black)</string>
     <string name="texto_de_ejemplo">Example text (16sp)</string>
+    <string name="novedades">New features</string>
+    <string name="añadir_imagen">Add Image</string>
+    <string name="tomar_foto">Take a photo</string>
+    <string name="grabar_audio">Record Audio</string>
+    <string name="dibujo">Drawing</string>
+    <string name="insertar_hora">Insert time</string>
+    <string name="vaciar_nota">Empty note</string>
+    <string name="nota_flotante">Floating note</string>
+    <string name="compartir">Share</string>
+    <string name="eliminar">Eliminate</string>
+    <string name="guardar">Keep</string>
+    <string name="cancelar">Cancel</string>
+    <string name="copiar">Copy</string>
+    <string name="enviar">Send</string>
 </resources>
