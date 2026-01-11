@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Build;
+import android.util.Log;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.text.Editable;
@@ -91,6 +92,7 @@ public class EditorActivity extends AppCompatActivity {
     private Uri uriFotoActual;
     private ArrayList<String> listaRutasFotos = new ArrayList<>(); // Nueva lista para persistencia de fotos
     private ArrayList<String> listaRutasDibujos = new ArrayList<>(); // NEW: List for drawings
+    private DocumentFile archivoActualSAF; // Añade esta línea si no existe
 
 
     // --- Permiso para ventana flotante ---
@@ -110,11 +112,12 @@ public class EditorActivity extends AppCompatActivity {
         if (result.getResultCode() == RESULT_OK && result.getData() != null) {
             Uri uriDibujo = result.getData().getData();
             if (uriDibujo != null) {
-                insertarDibujoEnNota(uriDibujo); // Use the new method
+                // Añadimos a la lista para que guardarImagenesEnCarpetaNota la vea
+                listaRutasFotos.add(uriDibujo.toString());
+                agregarAdjuntoVisual(uriDibujo.toString(), "DIBUJO", "");
             }
         }
-    }
-    );
+    });
     // Chequear permisos
     private boolean chequearPermisosAudio() {
     int result = ContextCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.RECORD_AUDIO);
@@ -363,72 +366,57 @@ public class EditorActivity extends AppCompatActivity {
     }
 
     private void cargarNotaSAF() {
-        if (uriArchivoActual == null) return;
+    if (uriArchivoActual == null) return;
 
-        // Clear previous attachments and lists
-        contenedorAdjuntos.removeAllViews();
-        listaRutasAudios.clear();
-        listaRutasFotos.clear();
-        listaRutasDibujos.clear();
+    // 1. Inicializar referencia al archivo
+    archivoActualSAF = DocumentFile.fromSingleUri(this, uriArchivoActual);
 
-        StringBuilder rawContentBuilder = new StringBuilder(); // To hold original content
+    // 2. Limpieza de la interfaz
+    contenedorAdjuntos.removeAllViews();
+    listaRutasAudios.clear();
+    listaRutasFotos.clear();
+    listaRutasDibujos.clear();
+
+    StringBuilder contentBuilder = new StringBuilder();
+    try {
+        // 3. Leer texto
         try (InputStream is = getContentResolver().openInputStream(uriArchivoActual);
              BufferedReader br = new BufferedReader(new InputStreamReader(is))) {
             
             String line;
             while ((line = br.readLine()) != null) {
-                rawContentBuilder.append(line).append("\n");
+                contentBuilder.append(line).append("\n");
             }
-            
-            String content = rawContentBuilder.toString();
-            StringBuilder contentWithoutTags = new StringBuilder();
-
-            // Regex to find all attachment tags
-            Pattern pattern = Pattern.compile("\\[\\[(AUDIO|FOTO|DIBUJO):\\s*(.*?)\\]\\]");
-            Matcher matcher = pattern.matcher(content);
-
-            int lastIndex = 0;
-            while (matcher.find()) {
-                String fullTag = matcher.group(0); // The entire [[TYPE:path]] string
-                String type = matcher.group(1);
-                String path = matcher.group(2);
-
-                // Append text before this tag
-                contentWithoutTags.append(content.substring(lastIndex, matcher.start()));
-
-                // Add to respective list and display visual card
-                switch (type) {
-                    case "AUDIO":
-                        listaRutasAudios.add(path);
-                        agregarAdjuntoVisual(path, "AUDIO", fullTag);
-                        break;
-                    case "FOTO":
-                        listaRutasFotos.add(path);
-                        agregarAdjuntoVisual(path, "FOTO", fullTag);
-                        break;
-                    case "DIBUJO": // Handle drawings similarly
-                        listaRutasDibujos.add(path);
-                        agregarAdjuntoVisual(path, "DIBUJO", fullTag);
-                        break;
-                }
-                lastIndex = matcher.end();
-            }
-            // Append any remaining text after the last tag
-            contentWithoutTags.append(content.substring(lastIndex));
-
-            esCambioProgramatico = true;
-            txtNota.setText(contentWithoutTags.toString().trim());
-            esCambioProgramatico = false;
-            
-            DocumentFile docFile = DocumentFile.fromSingleUri(this, uriArchivoActual);
-            if (docFile != null && docFile.getName() != null) {
-                txtTitulo.setText(docFile.getName().replace(".txt", ""));
-            }
-            
-        } catch (Exception e) {
-            e.printStackTrace();
-            Toast.makeText(this, "Error al abrir la nota", Toast.LENGTH_SHORT).show();
         }
+        
+        // 4. Mostrar texto
+        esCambioProgramatico = true;
+        txtNota.setText(contentBuilder.toString().trim());
+        esCambioProgramatico = false;
+        
+        // 5. Configurar Título y Cargar Recursos
+        if (archivoActualSAF != null && archivoActualSAF.getName() != null) {
+            txtTitulo.setText(archivoActualSAF.getName().replace(".txt", ""));
+            
+            // --- CORRECCIÓN VITAL AQUÍ ---
+            // En lugar de getParentFile() (que da null), reconstruimos la carpeta padre
+            if (carpetaUriPadre != null) {
+                Uri rootUri = Uri.parse(carpetaUriPadre);
+                DocumentFile carpetaRaiz = DocumentFile.fromTreeUri(this, rootUri);
+                
+                if (carpetaRaiz != null) {
+                    // Ahora sí le pasamos la carpeta raíz válida
+                    cargarAdjuntosDesdeCarpeta(carpetaRaiz, archivoActualSAF.getName());
+                }
+            } else {
+                Toast.makeText(this, "Advertencia: No se encontró la carpeta raíz", Toast.LENGTH_SHORT).show();
+            }
+        }
+        
+    } catch (Exception e) {
+        e.printStackTrace();
+        Toast.makeText(this, "Error al abrir la nota", Toast.LENGTH_SHORT).show();
+    }
     }
 
     private void guardarNota() {
@@ -437,37 +425,69 @@ public class EditorActivity extends AppCompatActivity {
     }
 
     private void guardarNotaSilenciosamente() {
-        if (uriArchivoActual == null && txtTitulo.getText().toString().trim().isEmpty() && txtNota.getText().toString().trim().isEmpty()) {
-            return; // Don't save empty new notes
+    // Validaciones iniciales
+    if (uriArchivoActual == null && txtTitulo.getText().toString().trim().isEmpty() && txtNota.getText().toString().trim().isEmpty()) {
+        return;
+    }
+
+    String contenidoParaGuardar = txtNota.getText().toString();
+    String titulo = txtTitulo.getText().toString().trim();
+    if (titulo.isEmpty()) titulo = "Sin_titulo";
+
+    try {
+        // Obtenemos la referencia a la carpeta PADRE (El directorio principal)
+        DocumentFile rootDoc = null;
+        if (carpetaUriPadre != null) {
+            Uri rootUri = Uri.parse(carpetaUriPadre);
+            rootDoc = DocumentFile.fromTreeUri(this, rootUri);
         }
 
-        String contenidoParaGuardar = txtNota.getText().toString();
-        String titulo = txtTitulo.getText().toString().trim();
-
-        if (titulo.isEmpty()) titulo = "Sin_titulo";
-
-        try {
-            if (uriArchivoActual == null) {
-                if (carpetaUriPadre == null) {
-                    Toast.makeText(this, "Error: No hay carpeta seleccionada", Toast.LENGTH_SHORT).show();
-                    return;
-                }
-                Uri rootUri = Uri.parse(carpetaUriPadre);
-                DocumentFile rootDoc = DocumentFile.fromTreeUri(this, rootUri);
-                DocumentFile nuevoArchivo = rootDoc.createFile("text/plain", titulo + ".txt");
-                if (nuevoArchivo != null) {
-                    uriArchivoActual = nuevoArchivo.getUri();
-                }
+        // --- BLOQUE 1: CREACIÓN DE ARCHIVO Y CARPETA ---
+        if (uriArchivoActual == null) {
+            if (rootDoc == null) {
+                Toast.makeText(this, "Error: No hay carpeta definida", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            
+            // 1. Crear .txt
+            DocumentFile nuevoArchivo = rootDoc.createFile("text/plain", titulo + ".txt");
+            
+            // 2. Crear carpeta _resources AL INSTANTE
+            String nombreCarpeta = titulo + "_resources";
+            DocumentFile carpetaRecursos = rootDoc.findFile(nombreCarpeta);
+            if (carpetaRecursos == null) {
+                rootDoc.createDirectory(nombreCarpeta);
             }
 
+            if (nuevoArchivo != null) {
+                uriArchivoActual = nuevoArchivo.getUri();
+                archivoActualSAF = DocumentFile.fromSingleUri(this, uriArchivoActual);
+            }
+        }
+
+        // --- BLOQUE 2: GUARDAR TEXTO ---
+        if (uriArchivoActual != null) {
             try (OutputStream os = getContentResolver().openOutputStream(uriArchivoActual, "wt")) {
                 os.write(contenidoParaGuardar.getBytes());
             }
 
-        } catch (Exception e) {
-            e.printStackTrace();
-            Toast.makeText(this, "Error al autoguardar", Toast.LENGTH_LONG).show();
+            // Actualizar referencia
+            archivoActualSAF = DocumentFile.fromSingleUri(this, uriArchivoActual);
+
+            // --- BLOQUE 3: GUARDAR IMÁGENES ---
+            // CORRECCIÓN VITAL: No usamos archivoActualSAF.getParentFile() porque suele ser null.
+            // Usamos rootDoc que definimos al principio del método.
+            if (rootDoc != null && archivoActualSAF != null) {
+                 guardarImagenesEnCarpetaNota(rootDoc, archivoActualSAF.getName());
+            } else {
+                Log.e("GUARDADO", "No se pudo acceder a la carpeta padre para guardar imágenes");
+            }
         }
+
+    } catch (Exception e) {
+        e.printStackTrace();
+        Log.e("GUARDADO", "Error fatal: " + e.getMessage());
+    }
     }
 
     private void renombrarNota() {
@@ -758,26 +778,53 @@ public class EditorActivity extends AppCompatActivity {
     }
     
     // New unified method to add visual attachments
-    private void agregarAdjuntoVisual(String ruta, String tipo, String tagInText) {
-        contenedorAdjuntos.setVisibility(View.VISIBLE);
-        LayoutInflater inflater = getLayoutInflater();
-        View attachmentView = null;
+    private void agregarAdjuntoVisual(String ruta, String tipo, String tag) {
+    View vistaAdjunto = getLayoutInflater().inflate(R.layout.item_adjunto, null);
+    ImageView miniatura = vistaAdjunto.findViewById(R.id.miniatura);
+    ImageView btnEliminar = vistaAdjunto.findViewById(R.id.btnEliminar);
+    ImageView btnEditar = vistaAdjunto.findViewById(R.id.btnEditar); // NUEVO
 
-        switch (tipo) {
-            case "AUDIO":
-                attachmentView = inflater.inflate(R.layout.item_audio_adjunto, contenedorAdjuntos, false);
-                setupAudioAttachmentView(attachmentView, ruta, tagInText);
-                break;
-            case "FOTO":
-            case "DIBUJO": // Drawings will use the same layout as photos for now
-                attachmentView = inflater.inflate(R.layout.item_foto_adjunta, contenedorAdjuntos, false);
-                setupImageAttachmentView(attachmentView, ruta, tagInText);
-                break;
-        }
+    // Cargar miniatura (puedes usar Glide o tu método actual)
+    miniatura.setImageURI(Uri.parse(ruta));
 
-        if (attachmentView != null) {
-            contenedorAdjuntos.addView(attachmentView);
+    // Lógica del botón Editar
+    btnEditar.setOnClickListener(v -> {
+        if (tipo.equals("DIBUJO")) {
+            // Si es dibujo, lo mandamos a DibujoActivity pasándole la URI
+            Intent intent = new Intent(this, DibujoActivity.class);
+            intent.putExtra("uri_dibujo_editar", ruta);
+            dibujoLauncher.launch(intent);
+        } else if (tipo.equals("FOTO")) {
+            // Si es foto, podrías mandarla a un editor básico o al mismo de dibujo
+            Intent intent = new Intent(this, DibujoActivity.class);
+            intent.putExtra("uri_foto_editar", ruta); 
+            dibujoLauncher.launch(intent);
         }
+        // Al editar, eliminamos la versión vieja para que la nueva la reemplace
+        contenedorAdjuntos.removeView(vistaAdjunto);
+        listaRutasFotos.remove(ruta);
+    });
+
+    btnEliminar.setOnClickListener(v -> {
+        // 1. Quitar de la vista y de la lista temporal
+        contenedorAdjuntos.removeView(vistaAdjunto);
+        listaRutasFotos.remove(ruta);
+
+        // 2. ELIMINACIÓN FÍSICA: Intentar borrar el archivo real
+        try {
+            Uri uriABorrar = Uri.parse(ruta);
+            // Si la URI es de nuestro proveedor de archivos (SAF), intentamos borrarlo
+            DocumentFile archivo = DocumentFile.fromSingleUri(this, uriABorrar);
+            if (archivo != null && archivo.exists()) {
+                archivo.delete(); 
+                Toast.makeText(this, "Archivo eliminado", Toast.LENGTH_SHORT).show();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    });
+
+    contenedorAdjuntos.addView(vistaAdjunto);
     }
     
     // Helper for Audio attachment view setup
@@ -825,9 +872,6 @@ public class EditorActivity extends AppCompatActivity {
             if (contenedorAdjuntos.getChildCount() == 0) {
                 contenedorAdjuntos.setVisibility(View.GONE);
             }
-            // Remove tag from main text
-            removeTagFromText(tagInText);
-            // Also remove from internal list
             listaRutasAudios.remove(rutaAudio);
             // Optionally delete the physical file: new File(rutaAudio).delete(); 
         });
@@ -835,8 +879,8 @@ public class EditorActivity extends AppCompatActivity {
 
     // Helper for Image/Drawing attachment view setup
     private void setupImageAttachmentView(View viewImage, String rutaImagen, String tagInText) {
-        ImageView imgAdjunta = viewImage.findViewById(R.id.imgAdjunta);
-        ImageButton btnEliminarFoto = viewImage.findViewById(R.id.btnEliminarFoto);
+        ImageView imgAdjunta = viewImage.findViewById(R.id.miniatura);
+        ImageButton btnEliminarFoto = viewImage.findViewById(R.id.btnEliminar);
 
         try {
             Uri uri = Uri.parse(rutaImagen);
@@ -873,29 +917,9 @@ public class EditorActivity extends AppCompatActivity {
             if (contenedorAdjuntos.getChildCount() == 0) {
                 contenedorAdjuntos.setVisibility(View.GONE);
             }
-            // Remove tag from main text
-            removeTagFromText(tagInText);
-            // Also remove from internal list
-            if (tagInText.contains("[[FOTO:")) {
-                listaRutasFotos.remove(rutaImagen);
-            } else if (tagInText.contains("[[DIBUJO:")) {
-                listaRutasDibujos.remove(rutaImagen);
-            }
-            // Optionally delete the physical file: new File(rutaImagen).delete();
         });
     }
 
-    // Helper to remove a specific tag from the main EditText
-    private void removeTagFromText(String tag) {
-        String currentText = txtNota.getText().toString();
-        int startIndex = currentText.indexOf(tag);
-        if (startIndex != -1) {
-            int endIndex = startIndex + tag.length();
-            esCambioProgramatico = true;
-            txtNota.getText().delete(startIndex, endIndex);
-            esCambioProgramatico = false;
-        }
-    }
 
 
 // Método auxiliar para mover la barrita
@@ -917,33 +941,114 @@ public class EditorActivity extends AppCompatActivity {
     // The method that adds the audio to the editor after recording
     private void insertarAudioEnNota(String rutaAudio) {
         listaRutasAudios.add(rutaAudio); // Add to internal tracking list
-        String tag = "\n[[AUDIO:" + rutaAudio + "]]\n"; // Ensure tag format matches regex
-        insertarTextoEnCursor(tag);
-        agregarAdjuntoVisual(rutaAudio, "AUDIO", tag);
+        agregarAdjuntoVisual(rutaAudio, "AUDIO", "");
     }
     
     // The method that adds a photo to the editor after selection/capture
     private void insertarFotoEnNota(Uri uriFoto) {
-        String rutaFoto = uriFoto.toString();
-        listaRutasFotos.add(rutaFoto); // Add to internal tracking list
-        String tag = "\n[[FOTO:" + rutaFoto + "]]\n"; // Ensure tag format matches regex
-        insertarTextoEnCursor(tag);
-        agregarAdjuntoVisual(rutaFoto, "FOTO", tag);
+    String rutaFoto = uriFoto.toString();
+    listaRutasFotos.add(rutaFoto); 
+    // Ya no insertamos texto en txtNota
+    agregarAdjuntoVisual(rutaFoto, "FOTO", ""); 
     }
 
-    // The method that adds a drawing to the editor after creation
     private void insertarDibujoEnNota(Uri uriDibujo) {
-        String rutaDibujo = uriDibujo.toString();
-        listaRutasDibujos.add(rutaDibujo); // Add to internal tracking list
-        String tag = "\n[[DIBUJO:" + rutaDibujo + "]]\n"; // Ensure tag format matches regex
-        insertarTextoEnCursor(tag);
-        agregarAdjuntoVisual(rutaDibujo, "DIBUJO", tag);
+    String rutaDibujo = uriDibujo.toString();
+    listaRutasFotos.add(rutaDibujo); // Usamos la misma lista para facilitar el guardado
+    agregarAdjuntoVisual(rutaDibujo, "DIBUJO", "");
     }
     
-    // Helper to insert text at cursor position
-    private void insertarTextoEnCursor(String text) {
-        int start = Math.max(txtNota.getSelectionStart(), 0);
-        int end = Math.max(txtNota.getSelectionEnd(), 0);
-        txtNota.getText().replace(Math.min(start, end), Math.max(start, end), text, 0, text.length());
+    private void guardarImagenesEnCarpetaNota(DocumentFile carpetaPadre, String nombreNota) {
+    if (listaRutasFotos.isEmpty()) return; // Si no hay nada nuevo, salimos
+
+    // Construir nombre de carpeta
+    String nombreCarpeta = nombreNota.replace(".txt", "") + "_resources";
+
+    DocumentFile carpetaRecursos = carpetaPadre.findFile(nombreCarpeta);
+    // Si no existe (raro, porque la creamos arriba), la creamos
+    if (carpetaRecursos == null) {
+        carpetaRecursos = carpetaPadre.createDirectory(nombreCarpeta);
+    }
+
+    if (carpetaRecursos == null) {
+        Log.e("GUARDADO", "ERROR CRÍTICO: No existe la carpeta " + nombreCarpeta);
+        return; 
+    }
+
+    for (String ruta : listaRutasFotos) {
+        // Evitamos guardar lo que ya está en resources (por si acaso)
+        if (ruta.contains("_resources")) continue;
+
+        try {
+            Uri uriOrigen = Uri.parse(ruta);
+            String extension = "png"; // Por defecto
+            String mime = "image/png";
+            
+            // Detección simple para audio vs imagen
+            if (ruta.endsWith("3gp")) { 
+                extension = "3gp"; 
+                mime = "audio/3gpp"; 
+            }
+
+            String fileName = "FILE_" + System.currentTimeMillis() + "." + extension;
+            DocumentFile nuevoArchivo = carpetaRecursos.createFile(mime, fileName);
+
+            if (nuevoArchivo != null) {
+                try (InputStream in = getContentResolver().openInputStream(uriOrigen);
+                     OutputStream out = getContentResolver().openOutputStream(nuevoArchivo.getUri())) {
+                    
+                    byte[] buffer = new byte[4096]; // Buffer un poco más grande
+                    int read;
+                    while ((read = in.read(buffer)) != -1) {
+                        out.write(buffer, 0, read);
+                    }
+                    out.flush();
+                    Log.d("GUARDADO", "Archivo guardado: " + fileName);
+                }
+            }
+        } catch (Exception e) {
+            Log.e("GUARDADO", "Fallo al copiar: " + e.getMessage());
+        }
+    }
+    
+    // Solo limpiamos la lista después de intentar guardar todo
+    listaRutasFotos.clear(); 
+    }
+    
+    private void cargarAdjuntosDesdeCarpeta(DocumentFile carpetaPadre, String nombreNota) {
+    // Reconstruir el nombre de la carpeta de recursos
+    String nombreCarpeta = nombreNota.replace(".txt", "") + "_resources";
+    
+    // Buscar la carpeta dentro de la raíz
+    DocumentFile carpetaRecursos = carpetaPadre.findFile(nombreCarpeta);
+    
+    if (carpetaRecursos != null && carpetaRecursos.isDirectory()) {
+        // Listar todos los archivos dentro
+        for (DocumentFile archivo : carpetaRecursos.listFiles()) {
+            
+            // Filtro de seguridad: que el archivo exista y tenga tipo
+            if (archivo.exists() && archivo.getUri() != null) {
+                String tipoMime = archivo.getType();
+                String uriString = archivo.getUri().toString();
+
+                // Caso 1: Imágenes o Dibujos
+                if (tipoMime != null && tipoMime.startsWith("image/")) {
+                    runOnUiThread(() -> {
+                        listaRutasFotos.add(uriString); // Añadimos a la lista para no perder referencia
+                        agregarAdjuntoVisual(uriString, "FOTO", "");
+                    });
+                }
+                // Caso 2: Audios (opcional, por si quieres que carguen también)
+                else if (tipoMime != null && tipoMime.startsWith("audio/") || archivo.getName().endsWith(".3gp")) {
+                    runOnUiThread(() -> {
+                         listaRutasAudios.add(uriString);
+                         agregarAdjuntoVisual(uriString, "AUDIO", "");
+                    });
+                }
+            }
+        }
+    } else {
+        Log.d("CARGA", "No se encontró carpeta de recursos: " + nombreCarpeta);
+    }
     }
 }

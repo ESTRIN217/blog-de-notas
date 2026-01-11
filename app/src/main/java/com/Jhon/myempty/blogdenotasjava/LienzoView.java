@@ -173,12 +173,12 @@ public class LienzoView extends View {
         }
         invalidate(); // Solicita redibujar la vista con el nuevo bitmap
     }
-    // En LienzoView.java
-public float getGrosorActual() {
+    
+    public float getGrosorActual() {
     return mGrosorActual; // Esta es la variable float que definimos antes
-}
-    // En LienzoView.java
-public void setModo(String modo) {
+    }
+    
+    public void setModo(String modo) {
     switch (modo) {
         case "PEN":
             mColorActual = Color.BLACK;
@@ -193,6 +193,17 @@ public void setModo(String modo) {
             mGrosorActual = 60f;
             break;
     }
+    }
+    public void cargarFondo(Bitmap bitmap) {
+    // Esperamos a que el lienzo tenga tamaño
+    this.post(() -> {
+        if (mBitmap != null && mCanvas != null) {
+            // Creamos una copia escalada para que encaje perfecto
+            Bitmap escalado = Bitmap.createScaledBitmap(bitmap, getWidth(), getHeight(), true);
+            mCanvas.drawBitmap(escalado, 0, 0, null);
+            invalidate();
+        }
+    });
     }
 
 }

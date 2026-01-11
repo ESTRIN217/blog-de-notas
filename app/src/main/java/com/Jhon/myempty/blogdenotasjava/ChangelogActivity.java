@@ -23,6 +23,23 @@ public class ChangelogActivity extends AppCompatActivity {
         List<Cambio> listaCambios = new ArrayList<>();
         
         // AQUÍ AGREGAS TUS VERSIONES
+        listaCambios.add(new Cambio("1.5.0 Editor", "10 de enero de 2026","🛠️ Principales Problemas Solucionados.\n" + 
+        "•1. El Error de 'Variable no encontrada' Problema: El código no compilaba porque faltaban declarar variables globales (archivoActualSAF, listas de rutas) y faltaban imports (android.util.Log).\n" +
+        "Solución: Se declararon las variables a nivel de clase y se añadieron los imports necesarios.\n" +
+        "•2. La Lógica de 'Etiquetas de Texto' vs. 'Carpetas'\n" +
+        "Problema: Originalmente intentabas guardar la ruta de la imagen escrita dentro del archivo de texto ([[FOTO:ruta...]]). Esto era frágil y sucio.\n" +
+        "Solución: Cambiamos la arquitectura. Ahora, cada nota tiene una carpeta de recursos hermana.\n" +
+        "Archivo: MiNota.txt\n" +
+        "Carpeta: MiNota_resources/ (donde van las imágenes).\n" +
+        "•3. El Problema del Padre Nulo (getParentFile())\n" +
+        "Problema Crítico: Al usar DocumentFile.fromSingleUri, Android no permitía obtener la carpeta padre (getParentFile() devolvía null), por lo que no se podían guardar las fotos.\n" +
+        "Solución: Modificamos la lógica para usar carpetaUriPadre (la raíz que el usuario eligió al principio) para localizar y crear la carpeta de recursos.\n" +
+        "•4. Sincronización de Creación (Tu idea clave)\n" +
+        "Mejora: Implementamos la 'Creación Simultánea'.\n" +
+        "Resultado: Ahora, en el momento exacto en que se crea el archivo .txt, se crea inmediatamente la carpeta _resources. Esto evita errores si intentas guardar una foto milisegundos después de crear la nota.\n" +
+        "•5. Corrección de Carga (Lectura)\n" +
+        "Problema: Las imágenes se guardaban pero no aparecían al abrir la nota de nuevo.\n" +
+        "Solución: Reescribimos cargarNotaSAF. Ahora lee el texto y luego escanea automáticamente la carpeta _resources para mostrar las imágenes en la parte inferior, sin necesidad de leer códigos extraños dentro del texto."));
         listaCambios.add(new Cambio("1.4.0 Editor", "09 de enero de 2026", "•1. El Editor Inteligente (Visualización Real) Problema: Las imágenes se guardaban como texto [[FOTO: ...]] y no se veían en la nota. Solución: Implementamos un sistema de Spannables (ImageSpan). Ahora, el editor escanea el texto y reemplaza esas etiquetas por el dibujo real. Mejora: Las fotos y dibujos ahora se ven dentro del cuerpo del texto, justo donde los insertaste, no solo en un contenedor aparte.\n" +
         "•2. Interfaz Estilo 'Google Keep' Barra de Herramientas: Reemplazamos los botones clásicos por una barra inferior moderna con 5 iconos: Selección, Bolígrafo, Marcador, Borrador y Regla. Selector 'Bottom Sheet': Creamos esa ventana elegante que sube desde abajo para elegir el color y el grosor del pincel mediante un deslizador (Slider) y círculos de colores. Guardado Moderno: Movimos la función de guardar a un icono de 'Check' (Hecho) en la barra superior para limpiar el diseño de la pantalla.\n" +
         "•3. Funcionalidad del Lienzo (LienzoView) Deshacer y Rehacer: Implementamos un sistema de 'pilas' que recuerda cada trazo de forma independiente. Ya puedes corregir errores paso a paso. Modos Dinámicos: El lienzo ahora distingue entre el Bolígrafo (trazo sólido) y el Borrador (trazo grueso que limpia el lienzo). Corrección de Compresión: Cambiamos el formato de guardado de .jpg a .png para que los dibujos no pierdan calidad ni se vean borrosos.\n" +

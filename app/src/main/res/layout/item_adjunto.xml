@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.card.MaterialCardView
+     xmlns:android="http://schemas.android.com/apk/res/android"
+     xmlns:app="http://schemas.android.com/apk/res-auto"
+     android:layout_height="wrap_content"
+     android:layout_width="match_parent"
+     android:layout_marginVertical="8dp"
+     app:cardElevation="2dp"
+     app:cardCornerRadius="16dp">
+
+    <FrameLayout
+         android:layout_height="wrap_content"
+         android:layout_width="match_parent">
+
+        <ImageView
+             android:layout_height="wrap_content"
+             android:layout_width="match_parent"
+             android:scaleType="centerCrop"
+             android:id="@+id/miniatura" />
+
+        <LinearLayout
+             android:layout_height="wrap_content"
+             android:layout_width="wrap_content"
+             android:orientation="horizontal"
+             android:layout_gravity="top|end">
+
+            <ImageView
+                 android:layout_height="48dp"
+                 android:layout_width="48dp"
+                 android:src="@drawable/round_edit"
+                 android:background="?attr/selectableItemBackgroundBorderless"
+                 android:padding="12dp"
+                 android:id="@+id/btnEditar" />
+
+            <ImageView
+                 android:layout_height="48dp"
+                 android:layout_width="48dp"
+                 android:src="@drawable/delete_24px"
+                 android:background="?attr/selectableItemBackgroundBorderless"
+                 android:padding="12dp"
+                 android:id="@+id/btnEliminar" />
+
+        </LinearLayout>
+
+    </FrameLayout>
+
+</com.google.android.material.card.MaterialCardView>

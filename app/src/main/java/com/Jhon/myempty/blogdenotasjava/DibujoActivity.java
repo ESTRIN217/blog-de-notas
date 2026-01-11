@@ -19,7 +19,9 @@ import android.view.View;
 import android.widget.LinearLayout;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.slider.Slider;
+import android.graphics.BitmapFactory;
 
+import java.io.InputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 
@@ -31,6 +33,7 @@ public class DibujoActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.dialogo_dibujo); // Usamos tu XML nuevo
+        
 
         // 1. Vincular vistas
         lienzo = findViewById(R.id.lienzo);
@@ -38,6 +41,31 @@ public class DibujoActivity extends AppCompatActivity {
         ImageView btnUndo = findViewById(R.id.undo);
         ImageView btnRedo = findViewById(R.id.redo);
         ImageView btnMore = findViewById(R.id.more);
+        
+        if (getIntent().hasExtra("uri_dibujo_editar") || getIntent().hasExtra("uri_foto_editar")) {
+        String ruta = getIntent().getStringExtra("uri_dibujo_editar");
+        if (ruta == null) ruta = getIntent().getStringExtra("uri_foto_editar");
+        
+        if (ruta != null) {
+            // Usamos post para asegurar que el lienzo ya tenga dimensiones antes de cargar el fondo
+            String finalRuta = ruta;
+            lienzo.post(() -> {
+                try {
+                    Uri uri = Uri.parse(finalRuta);
+                    java.io.InputStream is = getContentResolver().openInputStream(uri);
+                    android.graphics.Bitmap bitmapExistente = android.graphics.BitmapFactory.decodeStream(is);
+                    if (is != null) is.close();
+                    
+                    if (bitmapExistente != null) {
+                        lienzo.cargarFondo(bitmapExistente);
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    Toast.makeText(this, "Error al cargar imagen para editar", Toast.LENGTH_SHORT).show();
+                }
+            });
+        }
+    }
 
         // 2. Configurar listeners básicos
         btnAtras.setOnClickListener(v -> finish());
@@ -54,6 +82,7 @@ public class DibujoActivity extends AppCompatActivity {
             lienzo.rehacer();
             Toast.makeText(this, "Rehecho", Toast.LENGTH_SHORT).show();
         });
+        
         ImageView btnPen = findViewById(R.id.btnPen);
 ImageView btnEraser = findViewById(R.id.btnEraser);
 
