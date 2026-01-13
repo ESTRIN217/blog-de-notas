@@ -155,7 +155,8 @@
          android:gravity="center_vertical"
          android:elevation="8dp"
          android:paddingVertical="4dp"
-         android:orientation="horizontal">
+         android:orientation="horizontal"
+         android:padding="10dp">
 
         <ImageView
              android:layout_height="48dp"
@@ -182,7 +183,7 @@
              android:background="?attr/selectableItemBackgroundBorderless"
              android:padding="12dp"
              app:tint="?attr/colorOnSurface"
-             android:id="@+id/formato_text" />
+             android:id="@+id/text_style" />
 
     </LinearLayout>
 

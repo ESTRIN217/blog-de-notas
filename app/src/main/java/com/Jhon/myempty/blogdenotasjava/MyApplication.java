@@ -9,6 +9,7 @@ public class MyApplication extends Application {
     public void onCreate() {
         super.onCreate();
         
+        
         // Cargamos las preferencias
         SharedPreferences prefs = getSharedPreferences("MisPreferencias", MODE_PRIVATE);
         

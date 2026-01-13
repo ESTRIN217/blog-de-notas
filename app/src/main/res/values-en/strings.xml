@@ -16,7 +16,7 @@
     <string name="alto_contraste">High Contrast (Pure Black)</string>
     <string name="texto_de_ejemplo">Example text (16sp)</string>
     <string name="novedades">New features</string>
-    <string name="añadir_imagen">Add Image</string>
+    <string name="añadir_imagen">Add Image </string>
     <string name="tomar_foto">Take a photo</string>
     <string name="grabar_audio">Record Audio</string>
     <string name="dibujo">Drawing</string>
@@ -29,4 +29,5 @@
     <string name="cancelar">Cancel</string>
     <string name="copiar">Copy</string>
     <string name="enviar">Send</string>
+    <string name="textura_imagen">Texture / Image</string>
 </resources>

@@ -13,7 +13,7 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.Toast;
 import android.view.View;
-
+import android.text.Html;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AppCompatDelegate;
@@ -215,13 +215,35 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private String obtenerResumenSAF(Uri fileUri) {
-        try (InputStream is = getContentResolver().openInputStream(fileUri);
-             BufferedReader br = new BufferedReader(new InputStreamReader(is))) {
-            String linea = br.readLine();
-            return (linea != null) ? linea : "Nota vacía";
-        } catch (Exception e) {
-            return "";
+    StringBuilder sb = new StringBuilder();
+    try (InputStream is = getContentResolver().openInputStream(fileUri);
+         BufferedReader br = new BufferedReader(new InputStreamReader(is))) {
+        
+        String linea;
+        int lineasContadas = 0;
+
+        // Leer hasta 6 líneas o hasta que se acabe el archivo
+        while ((linea = br.readLine()) != null && lineasContadas < 10) {
+            sb.append(linea).append("\n");
+            lineasContadas++;
         }
+
+        String contenidoBruto = sb.toString().trim();
+        if (contenidoBruto.isEmpty()) return "Nota vacía";
+
+        // VITAL: Convertir de HTML a texto plano para que el resumen no tenga etiquetas
+        String textoLimpio;
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
+            textoLimpio = Html.fromHtml(contenidoBruto, Html.FROM_HTML_MODE_LEGACY).toString();
+        } else {
+            textoLimpio = Html.fromHtml(contenidoBruto).toString();
+        }
+
+        return textoLimpio.trim();
+
+    } catch (Exception e) {
+        return "";
+    }
     }
 
     private void configurarBuscador() {

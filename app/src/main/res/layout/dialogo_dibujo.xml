@@ -3,7 +3,8 @@
      xmlns:android="http://schemas.android.com/apk/res/android"
      android:layout_height="match_parent"
      android:layout_width="match_parent"
-     android:padding="16dp"
+     android:background="?attr/colorSurfaceContainer"
+     android:fitsSystemWindows="true"
      android:orientation="vertical">
 
     <LinearLayout
@@ -70,15 +71,16 @@
          android:id="@+id/lienzo" />
 
     <LinearLayout
-         android:layout_height="48dp"
+         android:layout_height="wrap_content"
          android:layout_width="match_parent"
          android:gravity="center"
          android:background="?attr/colorSurfaceContainer"
          android:elevation="8dp"
-         android:orientation="horizontal">
+         android:orientation="horizontal"
+         android:padding="10dp">
 
         <ImageView
-             android:layout_height="match_parent"
+             android:layout_height="48dp"
              android:layout_width="48dp"
              android:src="@drawable/outline_gesture"
              android:layout_marginEnd="16dp"
@@ -87,7 +89,7 @@
              android:id="@+id/btnSelect" />
 
         <ImageView
-             android:layout_height="match_parent"
+             android:layout_height="48dp"
              android:layout_width="48dp"
              android:src="@drawable/round_edit"
              android:layout_marginEnd="16dp"
@@ -96,7 +98,7 @@
              android:id="@+id/btnPen" />
 
         <ImageView
-             android:layout_height="match_parent"
+             android:layout_height="48dp"
              android:layout_width="48dp"
              android:src="@drawable/round_brush"
              android:layout_marginEnd="16dp"
@@ -105,7 +107,7 @@
              android:id="@+id/btnMarker" />
 
         <ImageView
-             android:layout_height="match_parent"
+             android:layout_height="48dp"
              android:layout_width="48dp"
              android:src="@drawable/auto_fix_high"
              android:layout_marginEnd="16dp"
@@ -114,7 +116,7 @@
              android:id="@+id/btnEraser" />
 
         <ImageView
-             android:layout_height="match_parent"
+             android:layout_height="48dp"
              android:layout_width="48dp"
              android:src="@drawable/round_grid_on"
              android:background="?attr/selectableItemBackgroundBorderless"

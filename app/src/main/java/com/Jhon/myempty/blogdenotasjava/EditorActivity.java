@@ -16,6 +16,18 @@ import android.widget.PopupMenu;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.LinearLayout; // Ensure this is imported for contenedorAdjuntos
+import android.graphics.drawable.GradientDrawable;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
+import android.graphics.Color;
+import android.provider.MediaStore;
+
+import android.text.Html;
+import android.text.Spannable;
+import android.text.style.StyleSpan;
+import android.text.style.UnderlineSpan;
+import android.graphics.Typeface;
+import android.graphics.Color;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.EdgeToEdge;
@@ -64,7 +76,7 @@ public class EditorActivity extends AppCompatActivity {
 
     private EditText txtNota, txtTitulo;
     private TextView lblFecha;
-    private ImageView btnAtras, btnDeshacer, btnRehacer, btnGuardar, menu, añadir, paleta, textoFormato;
+    private ImageView btnAtras, btnDeshacer, btnRehacer, btnGuardar, menu, añadir, paleta, textoEstilo;
     private View background;
     private LinearLayout contenedorAdjuntos; // Changed to LinearLayout
 
@@ -93,6 +105,9 @@ public class EditorActivity extends AppCompatActivity {
     private ArrayList<String> listaRutasFotos = new ArrayList<>(); // Nueva lista para persistencia de fotos
     private ArrayList<String> listaRutasDibujos = new ArrayList<>(); // NEW: List for drawings
     private DocumentFile archivoActualSAF; // Añade esta línea si no existe
+    private boolean isBoldActive = false;
+    private boolean isItalicActive = false;
+    private boolean isUnderlineActive = false;
 
 
     // --- Permiso para ventana flotante ---
@@ -118,6 +133,28 @@ public class EditorActivity extends AppCompatActivity {
             }
         }
     });
+    // 1. Variable para manejar la selección del fondo
+    private final ActivityResultLauncher<String> seleccionarFondoLauncher = registerForActivityResult(
+    new ActivityResultContracts.GetContent(),
+    uri -> {
+        if (uri != null) {
+            try {
+                // Opción A: Poner la imagen en el EditText (si es transparente)
+                // Opción B: Ponerla en el Layout principal (Recomendado)
+                
+                // Carga simple usando Bitmap para ajustar al fondo
+                Bitmap bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), uri);
+                Drawable drawable = new BitmapDrawable(getResources(), bitmap);
+                
+                // Asumiendo que 'txtNota' o su padre es lo que quieres cambiar
+                // findViewById(R.id.main).setBackground(drawable); // Si tienes ID en el root
+                background.setBackground(drawable); 
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+    }
+    );
     // Chequear permisos
     private boolean chequearPermisosAudio() {
     int result = ContextCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.RECORD_AUDIO);
@@ -201,6 +238,11 @@ public class EditorActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         SharedPreferences prefs = getSharedPreferences("MisPreferencias", MODE_PRIVATE);
+        // Al seleccionar un color en la paleta:
+        String nombreNota = "nota1"; // El nombre de tu archivo
+        int colorSeleccionado = Color.parseColor("#FFAFA8");
+        prefs = getSharedPreferences("EstilosNotas", MODE_PRIVATE);
+        prefs.edit().putInt(nombreNota + "_fondo", colorSeleccionado).apply();
 
         // A. Aplicar Tema
         int temaGuardado = prefs.getInt("tema_elegido", AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM);
@@ -210,7 +252,8 @@ public class EditorActivity extends AppCompatActivity {
         if (prefs.getBoolean("material_theme_activado", false)) {
             DynamicColors.applyToActivityIfAvailable(this);
         }
-
+        
+        androidx.activity.EdgeToEdge.enable(this);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.editor); 
 
@@ -226,6 +269,8 @@ public class EditorActivity extends AppCompatActivity {
         } else {
             txtTitulo.setText("Nueva Nota");
         }
+        int colorFondo = prefs.getInt(nombreNota + "_fondo", Color.WHITE);
+        background.setBackgroundColor(colorFondo);
 
         // Inicializar historial para Deshacer/Rehacer
         if (historial.isEmpty()) {
@@ -277,7 +322,7 @@ public class EditorActivity extends AppCompatActivity {
         background = findViewById(R.id.background);
         añadir = findViewById(R.id.añadir);
         paleta = findViewById(R.id.paleta);
-        textoFormato = findViewById(R.id.formato_text);
+        textoEstilo = findViewById(R.id.text_style);
         contenedorAdjuntos = findViewById(R.id.contenedorAdjuntos);
     }
 
@@ -301,28 +346,53 @@ public class EditorActivity extends AppCompatActivity {
         menu.setOnClickListener(this::mostrarMenu);
 
         txtNota.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+    @Override
+    public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
 
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-            if (!esCambioProgramatico) {
-            // Cancelar el registro anterior si el usuario sigue escribiendo
+    @Override
+    public void onTextChanged(CharSequence s, int start, int before, int count) {
+        if (!esCambioProgramatico) {
+            // 1. LÓGICA DE HISTORIAL (Undo/Redo)
             handlerHistorial.removeCallbacks(runnableHistorial);
-            
-            // Programar el nuevo registro en 500ms
             runnableHistorial = () -> registrarCambio(s.toString());
             handlerHistorial.postDelayed(runnableHistorial, 500);
-            // NUEVO: Programar AUTOGUARDADO en 2 segundos
+
+            // 2. LÓGICA DE AUTOGUARDADO
             handlerHistorial.removeCallbacks(runnableAutoguardado);
             runnableAutoguardado = () -> guardarNotaSilenciosamente();
             handlerHistorial.postDelayed(runnableAutoguardado, 2000);
-                }
+        }
+    }
+
+    @Override
+    public void afterTextChanged(Editable s) {
+        if (esCambioProgramatico) return;
+
+        int start = txtNota.getSelectionStart();
+        int end = txtNota.getSelectionEnd();
+
+        // Si el usuario está escribiendo (no borrando)
+        if (start == end && start > 0) {
+            // Bloqueamos temporalmente para evitar que el setSpan dispare el Watcher otra vez
+            esCambioProgramatico = true;
+
+            // NEGRITA
+            if (isBoldActive) {
+                s.setSpan(new StyleSpan(Typeface.BOLD), start - 1, start, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+            }
+            // CURSIVA
+            if (isItalicActive) {
+                s.setSpan(new StyleSpan(Typeface.ITALIC), start - 1, start, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+            }
+            // SUBRAYADO
+            if (isUnderlineActive) {
+                s.setSpan(new UnderlineSpan(), start - 1, start, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
             }
 
-            @Override
-            public void afterTextChanged(Editable s) {}
-        });
+            esCambioProgramatico = false;
+        }
+    }
+    });
         
         txtTitulo.setOnFocusChangeListener((v, hasFocus) -> {
             if (!hasFocus) {
@@ -334,44 +404,197 @@ public class EditorActivity extends AppCompatActivity {
 // En configurarListeners añade esto:
     añadir.setOnClickListener(v -> {
     BottomSheetDialog bottomSheetInsertar = new BottomSheetDialog(this);
+    // 1. Inflamos la vista del menú
     View layout = getLayoutInflater().inflate(R.layout.bottom_sheet_insertar, null);
     bottomSheetInsertar.setContentView(layout);
-
-    com.google.android.material.navigation.NavigationView nav = layout.findViewById(R.id.navigationInsertar);
     
-    nav.setNavigationItemSelectedListener(item -> {
-        int id = item.getItemId();
-        bottomSheetInsertar.dismiss(); // Cerramos el panel al elegir una opción
+    // 2. Vinculamos las vistas USANDO 'layout.'
+    // Asumo que son View, LinearLayout o ImageView según tu XML
+    View btnFoto = layout.findViewById(R.id.ins_foto);
+    View btnCamara = layout.findViewById(R.id.ins_camara); // ID corregido
+    View btnAudio = layout.findViewById(R.id.ins_audio);
+    View btnDibujo = layout.findViewById(R.id.ins_dibujo); // ID corregido
 
-        if (id == R.id.ins_foto) {
-            seleccionarImagenLauncher.launch("image/*");
-        } else if (id == R.id.ins_camara) {
-            abrirCamara(); // This method already calls tomarFotoLauncher
-        } else if (id == R.id.ins_audio) {
-            if (chequearPermisosAudio()) {
-                mostrarGrabadoraVisual();
-            } else {
-                requestPermissionsAudio();
-            }
-        // ... dentro del listener del menú insertar ...
-        } else if (id == R.id.ins_dibujo) {
-            Intent intent = new Intent(this, DibujoActivity.class);
-            dibujoLauncher.launch(intent);
+    // 3. Configurar Listeners
+
+    // --- FOTO ---
+    btnFoto.setOnClickListener(view -> {
+        seleccionarImagenLauncher.launch("image/*");
+        bottomSheetInsertar.dismiss(); // Cerramos el menú al elegir
+    });
+
+    // --- CÁMARA ---
+    btnCamara.setOnClickListener(view -> {
+        abrirCamara();
+        bottomSheetInsertar.dismiss();
+    });
+
+    // --- AUDIO ---
+    btnAudio.setOnClickListener(view -> {
+        // Al tener un 'if', las llaves {} son obligatorias
+        if (chequearPermisosAudio()) {
+            mostrarGrabadoraVisual();
+        } else {
+            requestPermissionsAudio();
         }
-        return true;
+        bottomSheetInsertar.dismiss();
+    });
+
+    // --- DIBUJO ---
+    btnDibujo.setOnClickListener(view -> {
+        // Al declarar variables, las llaves {} son obligatorias
+        Intent intent = new Intent(this, DibujoActivity.class);
+        dibujoLauncher.launch(intent); // Corregido: .launch() en vez de .layout()
+        bottomSheetInsertar.dismiss();
     });
 
     bottomSheetInsertar.show();
+    });
+    paleta.setOnClickListener(v -> {
+    BottomSheetDialog bottomSheetPaleta = new BottomSheetDialog(this);
+    View layout = getLayoutInflater().inflate(R.layout.bottom_sheet_paleta, null); // Asegúrate que tu XML se llame así
+    bottomSheetPaleta.setContentView(layout);
+
+    // 1. Referencias a los contenedores del XML
+    LinearLayout contenedorColores = layout.findViewById(R.id.contenedorColoresFondo);
+    View btnDefault = layout.findViewById(R.id.color_default);
+    View btnGaleria = layout.findViewById(R.id.btnAbrirGaleriaFondo);
+    View btnPapel = layout.findViewById(R.id.fondo_papel);
+
+    // 2. Lógica del botón "Default" (Quitar fondo/color)
+    btnDefault.setOnClickListener(view -> {
+        background.setBackgroundColor(Color.TRANSPARENT); // O Color.WHITE
+        bottomSheetPaleta.dismiss();
+    });
+
+    // 3. Generar Círculos de Colores Programáticamente
+    // Lista de colores pastel (estilo notas)
+    String[] codigosColores = {
+            "#FFAFA8", // Rojo suave
+            "#F39F76", // Naranja
+            "#FFF8B8", // Amarillo
+            "#E2F6D3", // Verde
+            "#B4DDD3", // Verde azulado
+            "#D4E4ED", // Azul
+            "#AECCDC", // Azul oscuro
+            "#D3BFDB", // Morado
+            "#F6E2DD", // Marrón
+            "#E9E3D4"  // Gris
+    };
+
+    for (String codigo : codigosColores) {
+        // Crear una vista (el círculo)
+        View circulo = new View(this);
+        
+        // Definir tamaño (50dp x 50dp)
+        int size = (int) (50 * getResources().getDisplayMetrics().density);
+        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(size, size);
+        params.setMargins(10, 0, 10, 0); // Margen entre círculos
+        circulo.setLayoutParams(params);
+
+        // Crear la forma redonda (Drawable)
+        GradientDrawable shape = new GradientDrawable();
+        shape.setShape(GradientDrawable.OVAL);
+        shape.setColor(Color.parseColor(codigo));
+        shape.setStroke(2, Color.LTGRAY); // Borde finito
+        circulo.setBackground(shape);
+
+        // Acción al tocar el círculo
+        circulo.setOnClickListener(view -> {
+            background.setBackgroundColor(Color.parseColor(codigo));
+            // Opcional: Guardar preferencia de color aquí
+            bottomSheetPaleta.dismiss();
+        });
+
+        // Añadir al scroll horizontal
+        contenedorColores.addView(circulo);
+    }
+
+    // 4. Lógica de Galería (Imagen de fondo)
+    btnGaleria.setOnClickListener(view -> {
+        seleccionarFondoLauncher.launch("image/*");
+        bottomSheetPaleta.dismiss();
+    });
+
+    // 5. Lógica de Textura (Papel)
+    if (btnPapel != null) {
+        btnPapel.setOnClickListener(view -> {
+            // Asegúrate de tener un color o drawable para esto
+            background.setBackgroundColor(Color.parseColor("#FFF8E1")); // Ejemplo color papel viejo
+            bottomSheetPaleta.dismiss();
+        });
+    }
+
+    bottomSheetPaleta.show();
+    });
+    // Dentro de tu onCreate o donde configures los botones
+    textoEstilo.setOnClickListener(v -> {
+    BottomSheetDialog dialogTextStyle = new BottomSheetDialog(this);
+    View layout = getLayoutInflater().inflate(R.layout.bottom_sheet_textstyle, null);
+    dialogTextStyle.setContentView(layout);
+
+    // --- 1. REFERENCIAS DE TAMAÑO ---
+    View btnSmall = layout.findViewById(R.id.size_small);
+    View btnNormal = layout.findViewById(R.id.size_normal);
+    View btnLarge = layout.findViewById(R.id.size_large);
+
+    // --- 2. REFERENCIAS DE ESTILO ---
+    ImageView btnBold = layout.findViewById(R.id.format_bold);
+    ImageView btnItalic = layout.findViewById(R.id.format_italic);
+    ImageView btnUnderline = layout.findViewById(R.id.format_underlined);
+    ImageView btnClear = layout.findViewById(R.id.format_clear);
+    ImageView btnClose = layout.findViewById(R.id.closed);
+    
+    if (isBoldActive) btnBold.setColorFilter(Color.BLUE);
+    if (isItalicActive) btnItalic.setColorFilter(Color.BLUE);
+    if (isUnderlineActive) btnUnderline.setColorFilter(Color.BLUE);
+
+    // --- LÓGICA DE TAMAÑOS ---
+    btnSmall.setOnClickListener(view -> txtNota.setTextSize(14));
+    btnNormal.setOnClickListener(view -> txtNota.setTextSize(18));
+    btnLarge.setOnClickListener(view -> txtNota.setTextSize(24));
+
+    btnBold.setOnClickListener(view -> {
+    isBoldActive = !isBoldActive;
+    // Opcional: Cambiar color del botón para indicar que está activo
+    if (isBoldActive) {
+        btnBold.setColorFilter(Color.BLUE);
+    } else {
+        btnBold.clearColorFilter();
+    }
+    });
+
+// --- LÓGICA DE CURSIVA (Corregida) ---
+    btnItalic.setOnClickListener(view -> {
+    isItalicActive = !isItalicActive;
+    });
+
+    // --- LÓGICA DE SUBRAYADO ---
+    btnUnderline.setOnClickListener(view -> {
+        isUnderlineActive = !isUnderlineActive;
+    });
+
+    // --- LÓGICA DE LIMPIAR FORMATO ---
+    btnClear.setOnClickListener(view -> {
+        txtNota.setTypeface(null, android.graphics.Typeface.NORMAL);
+        txtNota.setTextSize(18); // Tamaño por defecto
+        txtNota.setPaintFlags(txtNota.getPaintFlags() & ~android.graphics.Paint.UNDERLINE_TEXT_FLAG);
+        Toast.makeText(this, "Formato restaurado", Toast.LENGTH_SHORT).show();
+    });
+
+    // --- CERRAR ---
+    btnClose.setOnClickListener(view -> dialogTextStyle.dismiss());
+
+    dialogTextStyle.show();
     });
     }
 
     private void cargarNotaSAF() {
     if (uriArchivoActual == null) return;
 
-    // 1. Inicializar referencia al archivo
     archivoActualSAF = DocumentFile.fromSingleUri(this, uriArchivoActual);
 
-    // 2. Limpieza de la interfaz
+    // 1. Limpieza de la interfaz
     contenedorAdjuntos.removeAllViews();
     listaRutasAudios.clear();
     listaRutasFotos.clear();
@@ -379,37 +602,44 @@ public class EditorActivity extends AppCompatActivity {
 
     StringBuilder contentBuilder = new StringBuilder();
     try {
-        // 3. Leer texto
+        // 2. Leer el archivo (que ahora contiene etiquetas HTML)
         try (InputStream is = getContentResolver().openInputStream(uriArchivoActual);
              BufferedReader br = new BufferedReader(new InputStreamReader(is))) {
             
             String line;
             while ((line = br.readLine()) != null) {
-                contentBuilder.append(line).append("\n");
+                contentBuilder.append(line); // No añadimos \n extra porque el HTML ya maneja saltos
             }
         }
         
-        // 4. Mostrar texto
+        // 3. Convertir HTML a texto con formato (Spannable)
         esCambioProgramatico = true;
-        txtNota.setText(contentBuilder.toString().trim());
+        String stringFinal = contentBuilder.toString();
+        
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            txtNota.setText(Html.fromHtml(stringFinal, Html.FROM_HTML_MODE_LEGACY));
+        } else {
+            txtNota.setText(Html.fromHtml(stringFinal));
+        }
         esCambioProgramatico = false;
         
-        // 5. Configurar Título y Cargar Recursos
+        // 4. PERSISTENCIA DE COLOR: Cargar el fondo de esta nota específica
         if (archivoActualSAF != null && archivoActualSAF.getName() != null) {
-            txtTitulo.setText(archivoActualSAF.getName().replace(".txt", ""));
+            String nombreNota = archivoActualSAF.getName();
+            txtTitulo.setText(nombreNota.replace(".txt", ""));
+
+            // Recuperar el color guardado para esta nota
+            SharedPreferences prefs = getSharedPreferences("EstilosNotas", MODE_PRIVATE);
+            int colorFondo = prefs.getInt(nombreNota + "_fondo", Color.WHITE); // Blanco por defecto
+            background.setBackgroundColor(colorFondo);
             
-            // --- CORRECCIÓN VITAL AQUÍ ---
-            // En lugar de getParentFile() (que da null), reconstruimos la carpeta padre
+            // 5. Cargar Recursos (Fotos, Audios)
             if (carpetaUriPadre != null) {
                 Uri rootUri = Uri.parse(carpetaUriPadre);
                 DocumentFile carpetaRaiz = DocumentFile.fromTreeUri(this, rootUri);
-                
                 if (carpetaRaiz != null) {
-                    // Ahora sí le pasamos la carpeta raíz válida
-                    cargarAdjuntosDesdeCarpeta(carpetaRaiz, archivoActualSAF.getName());
+                    cargarAdjuntosDesdeCarpeta(carpetaRaiz, nombreNota);
                 }
-            } else {
-                Toast.makeText(this, "Advertencia: No se encontró la carpeta raíz", Toast.LENGTH_SHORT).show();
             }
         }
         
@@ -430,12 +660,12 @@ public class EditorActivity extends AppCompatActivity {
         return;
     }
 
-    String contenidoParaGuardar = txtNota.getText().toString();
+    // 1. Convertir texto con formato a HTML
+    String contenidoHtml = Html.toHtml(txtNota.getText()); 
     String titulo = txtTitulo.getText().toString().trim();
     if (titulo.isEmpty()) titulo = "Sin_titulo";
 
     try {
-        // Obtenemos la referencia a la carpeta PADRE (El directorio principal)
         DocumentFile rootDoc = null;
         if (carpetaUriPadre != null) {
             Uri rootUri = Uri.parse(carpetaUriPadre);
@@ -444,48 +674,54 @@ public class EditorActivity extends AppCompatActivity {
 
         // --- BLOQUE 1: CREACIÓN DE ARCHIVO Y CARPETA ---
         if (uriArchivoActual == null) {
-            if (rootDoc == null) {
-                Toast.makeText(this, "Error: No hay carpeta definida", Toast.LENGTH_SHORT).show();
-                return;
-            }
+            if (rootDoc == null) return;
             
-            // 1. Crear .txt
+            // Crear .txt
             DocumentFile nuevoArchivo = rootDoc.createFile("text/plain", titulo + ".txt");
             
-            // 2. Crear carpeta _resources AL INSTANTE
+            // Crear carpeta _resources
             String nombreCarpeta = titulo + "_resources";
-            DocumentFile carpetaRecursos = rootDoc.findFile(nombreCarpeta);
-            if (carpetaRecursos == null) {
+            if (rootDoc.findFile(nombreCarpeta) == null) {
                 rootDoc.createDirectory(nombreCarpeta);
             }
 
             if (nuevoArchivo != null) {
                 uriArchivoActual = nuevoArchivo.getUri();
-                archivoActualSAF = DocumentFile.fromSingleUri(this, uriArchivoActual);
             }
         }
 
-        // --- BLOQUE 2: GUARDAR TEXTO ---
+        // --- BLOQUE 2: GUARDAR TEXTO (HTML) ---
         if (uriArchivoActual != null) {
             try (OutputStream os = getContentResolver().openOutputStream(uriArchivoActual, "wt")) {
-                os.write(contenidoParaGuardar.getBytes());
+                // USAMOS contenidoHtml AQUÍ
+                os.write(contenidoHtml.getBytes());
             }
 
-            // Actualizar referencia
             archivoActualSAF = DocumentFile.fromSingleUri(this, uriArchivoActual);
 
-            // --- BLOQUE 3: GUARDAR IMÁGENES ---
-            // CORRECCIÓN VITAL: No usamos archivoActualSAF.getParentFile() porque suele ser null.
-            // Usamos rootDoc que definimos al principio del método.
-            if (rootDoc != null && archivoActualSAF != null) {
-                 guardarImagenesEnCarpetaNota(rootDoc, archivoActualSAF.getName());
-            } else {
-                Log.e("GUARDADO", "No se pudo acceder a la carpeta padre para guardar imágenes");
+            // --- BLOQUE 3: PERSISTENCIA DE COLOR DE FONDO ---
+            if (archivoActualSAF != null) {
+                String nombreNota = archivoActualSAF.getName();
+                
+                // Guardamos el color de fondo actual en SharedPreferences usando el nombre del archivo
+                // Suponiendo que tienes una variable 'colorFondoActual' que se actualiza en la paleta
+                // Si no, podemos obtenerlo directamente del fondo del txtNota si es un ColorDrawable
+                int colorActual = Color.TRANSPARENT;
+                if (background.getBackground() instanceof android.graphics.drawable.ColorDrawable) {
+                    colorActual = ((android.graphics.drawable.ColorDrawable) background.getBackground()).getColor();
+                }
+
+                SharedPreferences prefs = getSharedPreferences("EstilosNotas", MODE_PRIVATE);
+                prefs.edit().putInt(nombreNota + "_fondo", colorActual).apply();
+
+                // --- BLOQUE 4: GUARDAR IMÁGENES ---
+                if (rootDoc != null) {
+                     guardarImagenesEnCarpetaNota(rootDoc, nombreNota);
+                }
             }
         }
 
     } catch (Exception e) {
-        e.printStackTrace();
         Log.e("GUARDADO", "Error fatal: " + e.getMessage());
     }
     }

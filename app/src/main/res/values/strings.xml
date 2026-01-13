@@ -10,14 +10,14 @@
     <string name="usar_configuración_del_sistema">Seguir sistema</string>
     <string name="editor_de_texto">Editor de Texto</string>
     <string name="tamaño_de_letra">Tamaño de letra</string>
-    <string name="color_de_fondo">Color de fondo</string>
+    <string name="color_de_fondo">Color de Fondo</string>
     <string name="sistema">Sistema / Por defecto</string>
     <string name="papel">Papel (Crema suave)</string>
     <string name="alto_contraste">Alto Contraste (Negro puro)</string>
     <string name="texto_de_ejemplo">Texto de ejemplo (16sp)</string>
     <string name="novedades">Novedades</string>
-    <string name="añadir_imagen">Añadir Imagen</string>
-    <string name="tomar_foto">Tomar foto</string>
+    <string name="añadir_imagen">Agregar Imagen</string>
+    <string name="tomar_foto">Tomar una foto</string>
     <string name="grabar_audio">Grabar Audio</string>
     <string name="dibujo">Dibujo</string>
     <string name="insertar_hora">Insertar hora</string>
@@ -29,4 +29,5 @@
     <string name="cancelar">Cancelar</string>
     <string name="copiar">Copiar</string>
     <string name="enviar">Enviar</string>
+    <string name="textura_imagen">Textura / Imagen</string>
 </resources>

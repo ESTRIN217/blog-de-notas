@@ -4,7 +4,7 @@
      xmlns:app="http://schemas.android.com/apk/res-auto"
      android:layout_height="wrap_content"
      android:layout_width="match_parent"
-     android:background="?attr/colorSurface"
+     android:background="?attr/colorSurfaceContainer"
      android:padding="16dp"
      android:orientation="vertical">
 
@@ -16,24 +16,92 @@
          android:alpha="0.3"
          android:layout_gravity="center" />
 
-    <TextView
-         android:layout_height="wrap_content"
+    <LinearLayout
+         android:layout_height="48dp"
          android:layout_width="match_parent"
-         android:layout_marginBottom="16dp"
-         android:textSize="16sp"
-         android:paddingStart="8dp"
-         android:text="Añadir a la nota"
-         android:textStyle="bold" />
+         android:gravity="center_vertical"
+         android:orientation="horizontal"
+         android:id="@+id/ins_foto">
 
-    <com.google.android.material.navigation.NavigationView
-         android:layout_height="wrap_content"
+        <ImageView
+             android:layout_height="48dp"
+             android:layout_width="48dp"
+             android:src="@drawable/outline_image"
+             android:padding="12dp" />
+
+        <com.google.android.material.textview.MaterialTextView
+             android:layout_height="wrap_content"
+             android:layout_width="wrap_content"
+             android:textColor="?attr/colorOnSurface"
+             android:paddingLeft="10dp"
+             android:text="@string/añadir_imagen" />
+
+    </LinearLayout>
+
+    <LinearLayout
+         android:layout_height="48dp"
          android:layout_width="match_parent"
-         app:itemTextColor="?attr/colorOnSurface"
-         android:background="@android:color/transparent"
-         app:menu="@menu/menu_insertar"
-         app:itemIconTint="?attr/colorPrimary"
-         android:id="@+id/navigationInsertar">
+         android:gravity="center_vertical"
+         android:orientation="horizontal"
+         android:id="@+id/ins_camara">
 
-    </com.google.android.material.navigation.NavigationView>
+        <ImageView
+             android:layout_height="48dp"
+             android:layout_width="48dp"
+             android:src="@drawable/outline_photo_camera"
+             android:padding="12dp" />
+
+        <com.google.android.material.textview.MaterialTextView
+             android:layout_height="wrap_content"
+             android:layout_width="wrap_content"
+             android:textColor="?attr/colorOnSurface"
+             android:paddingLeft="10dp"
+             android:text="@string/tomar_foto" />
+
+    </LinearLayout>
+
+    <LinearLayout
+         android:layout_height="48dp"
+         android:layout_width="match_parent"
+         android:gravity="center_vertical"
+         android:orientation="horizontal"
+         android:id="@+id/ins_audio">
+
+        <ImageView
+             android:layout_height="48dp"
+             android:layout_width="48dp"
+             android:src="@drawable/round_mic"
+             android:padding="12dp" />
+
+        <com.google.android.material.textview.MaterialTextView
+             android:layout_height="wrap_content"
+             android:layout_width="wrap_content"
+             android:textColor="?attr/colorOnSurface"
+             android:paddingLeft="10dp"
+             android:text="@string/grabar_audio" />
+
+    </LinearLayout>
+
+    <LinearLayout
+         android:layout_height="48dp"
+         android:layout_width="match_parent"
+         android:gravity="center_vertical"
+         android:orientation="horizontal"
+         android:id="@+id/ins_dibujo">
+
+        <ImageView
+             android:layout_height="48dp"
+             android:layout_width="48dp"
+             android:src="@drawable/outline_gesture"
+             android:padding="12dp" />
+
+        <com.google.android.material.textview.MaterialTextView
+             android:layout_height="wrap_content"
+             android:layout_width="wrap_content"
+             android:textColor="?attr/colorOnSurface"
+             android:paddingLeft="10dp"
+             android:text="@string/dibujo" />
+
+    </LinearLayout>
 
 </LinearLayout>

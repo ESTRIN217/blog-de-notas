@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+     xmlns:android="http://schemas.android.com/apk/res/android"
+     xmlns:app="http://schemas.android.com/apk/res-auto"
+     android:layout_height="wrap_content"
+     android:layout_width="match_parent"
+     android:gravity="center_vertical"
+     android:background="?attr/colorSurfaceContainer"
+     android:padding="8dp"
+     android:orientation="horizontal">
+
+    <HorizontalScrollView
+         android:layout_height="wrap_content"
+         android:layout_width="0dp"
+         android:scrollbars="none"
+         android:layout_weight="1">
+
+        <LinearLayout
+             android:layout_height="wrap_content"
+             android:layout_width="wrap_content"
+             android:gravity="center_vertical"
+             android:orientation="horizontal">
+
+            <ImageView
+                 android:layout_height="48dp"
+                 android:layout_width="48dp"
+                 android:src="@drawable/format_size"
+                 android:background="?attr/selectableItemBackgroundBorderless"
+                 android:scaleX="0.8"
+                 android:padding="12dp"
+                 android:scaleY="0.8"
+                 android:id="@+id/size_small" />
+
+            <ImageView
+                 android:layout_height="48dp"
+                 android:layout_width="48dp"
+                 android:src="@drawable/text_fields"
+                 android:background="?attr/selectableItemBackgroundBorderless"
+                 android:padding="10dp"
+                 android:id="@+id/size_normal" />
+
+            <ImageView
+                 android:layout_height="48dp"
+                 android:layout_width="48dp"
+                 android:src="@drawable/format_size"
+                 android:background="?attr/selectableItemBackgroundBorderless"
+                 android:padding="8dp"
+                 android:id="@+id/size_large" />
+
+            <View
+                 android:layout_height="32dp"
+                 android:layout_width="4dp"
+                 android:background="?attr/colorOnSurfaceVariant"
+                 android:alpha="0.3"
+                 android:layout_marginHorizontal="8dp" />
+
+            <ImageView
+                 android:layout_height="48dp"
+                 android:layout_width="48dp"
+                 android:src="@drawable/format_bold"
+                 android:background="?attr/selectableItemBackgroundBorderless"
+                 android:padding="10dp"
+                 android:id="@+id/format_bold" />
+
+            <ImageView
+                 android:layout_height="48dp"
+                 android:layout_width="48dp"
+                 android:src="@drawable/format_italic"
+                 android:background="?attr/selectableItemBackgroundBorderless"
+                 android:padding="10dp"
+                 android:id="@+id/format_italic" />
+
+            <ImageView
+                 android:layout_height="48dp"
+                 android:layout_width="48dp"
+                 android:src="@drawable/format_underlined"
+                 android:background="?attr/selectableItemBackgroundBorderless"
+                 android:padding="10dp"
+                 android:id="@+id/format_underlined" />
+
+            <ImageView
+                 android:layout_height="48dp"
+                 android:layout_width="48dp"
+                 android:src="@drawable/format_clear"
+                 android:background="?attr/selectableItemBackgroundBorderless"
+                 android:padding="10dp"
+                 android:id="@+id/format_clear" />
+
+        </LinearLayout>
+
+    </HorizontalScrollView>
+
+    <ImageView
+         android:layout_height="48dp"
+         android:layout_width="48dp"
+         android:src="@drawable/close_24px"
+         android:background="?attr/selectableItemBackgroundBorderless"
+         android:padding="10dp"
+         android:layout_marginStart="8dp"
+         android:id="@+id/closed" />
+
+</LinearLayout>

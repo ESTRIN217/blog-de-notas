@@ -5,6 +5,8 @@ import android.os.Build;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.appcompat.app.AppCompatActivity;
 import android.widget.ImageView;
+import androidx.activity.EdgeToEdge;
+import com.Jhon.myempty.blogdenotasjava.Cambio;
 import java.util.List;
 import java.util.ArrayList;
 
@@ -14,6 +16,7 @@ public class ChangelogActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        androidx.activity.EdgeToEdge.enable(this);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_changelog);
 
@@ -23,6 +26,30 @@ public class ChangelogActivity extends AppCompatActivity {
         List<Cambio> listaCambios = new ArrayList<>();
         
         // AQUÍ AGREGAS TUS VERSIONES
+        listaCambios.add(new Cambio("1.6.0 Editor", "12 de enero de 2026", "Mejoras en la UI.\n" + 
+        "Mejoras en el menú de Añadir.\n" + 
+        "Añadido el menú para seleccionar color / imagen de fondo.\n" + 
+        "Añadido el menu para cambiar el tamaño y el estilo de letra.\n" + 
+        "Ahora todas las actividades son EdgeToEdge.\n" +
+        "Mejoradas las tarjetas de resumen ahora muestran 10 lineas.\n" + 
+        "1. Evolución al Formato Enriquecido (HTML)\n" +
+        "Guardado Inteligente: Cambiamos la lógica de guardado para que ahora convierta el texto con formato (negritas, cursivas, subrayados) a HTML mediante Html.toHtml() antes de escribir el archivo .txt.\n" +
+        "Lectura con Estilo: Actualizamos cargarNotaSAF para interpretar esas etiquetas HTML al abrir la nota, devolviendo el formato visual al usuario mediante Html.fromHtml().\n" +
+        
+        "Resumen de Lista: Optimizamos el método obtenerResumenSAF para leer hasta 10 líneas, limpiando las etiquetas HTML para que en la lista principal solo se vea texto limpio y profesional.\n" +
+
+        "2. Persistencia de Estilos y Configuración\n" +
+        "Memoria de Color: Implementamos un sistema usando SharedPreferences para que cada nota 'recuerde' su propio color de fondo individualmente, vinculándolo al nombre del archivo.\n" +
+        
+        "Modo de Escritura Activo: Creamos un TextWatcher con banderas booleanas (isBoldActive, etc.) que aplican estilos automáticamente mientras el usuario escribe, permitiendo que la negrita o cursiva se mantenga 'encendida'.\n" +
+        
+        "3. Corrección de Arquitectura y Errores\n" +
+        "Edge-to-Edge: Corregimos la implementación de la interfaz inmersiva. Se eliminó el código erróneo de la clase Application y se centralizó en las Activities (SettingsActivity, etc.) para que la app se vea correctamente detrás de las barras de sistema.\n" +
+        
+        "Limpieza de Código: Solucionamos errores de compilación por falta de imports (como StyleSpan, Typeface, Html) y eliminamos duplicidad de variables en SettingsActivity tras la limpieza del código antiguo.\n" +
+        
+        "4. Interfaz de Ajustes (Settings)\n" +
+        "Sincronización: Refinamos el archivo settings.xml para que sea compatible con Material You (Colores Dinámicos) y configuramos los listeners para que el cambio de tema (Claro/Oscuro/Sistema) sea instantáneo mediante recreate()."));
         listaCambios.add(new Cambio("1.5.0 Editor", "10 de enero de 2026","🛠️ Principales Problemas Solucionados.\n" + 
         "•1. El Error de 'Variable no encontrada' Problema: El código no compilaba porque faltaban declarar variables globales (archivoActualSAF, listas de rutas) y faltaban imports (android.util.Log).\n" +
         "Solución: Se declararon las variables a nivel de clase y se añadieron los imports necesarios.\n" +

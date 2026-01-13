@@ -84,6 +84,7 @@
                      android:layout_width="match_parent"
                      android:textColor="?attr/colorOnSurface"
                      android:id="@+id/rbClaro"
+                     android:paddingVertical="12dp"
                      android:text="@string/claro" />
 
                 <RadioButton
@@ -91,6 +92,7 @@
                      android:layout_width="match_parent"
                      android:textColor="?attr/colorOnSurface"
                      android:id="@+id/rbOscuro"
+                     android:paddingVertical="12dp"
                      android:text="@string/oscuro" />
 
                 <RadioButton
@@ -98,87 +100,8 @@
                      android:layout_width="match_parent"
                      android:textColor="?attr/colorOnSurface"
                      android:id="@+id/rbSistema"
+                     android:paddingVertical="12dp"
                      android:text="@string/usar_configuración_del_sistema" />
-
-            </RadioGroup>
-
-            <View
-                 android:layout_height="1dp"
-                 android:layout_width="match_parent"
-                 android:layout_marginVertical="24dp"
-                 android:background="?attr/colorOutlineVariant" />
-
-            <com.google.android.material.textview.MaterialTextView
-                 android:layout_height="wrap_content"
-                 android:layout_width="wrap_content"
-                 android:layout_marginBottom="16dp"
-                 android:textSize="20sp"
-                 android:textColor="?attr/colorOnSurface"
-                 android:text="@string/editor_de_texto"
-                 android:textStyle="bold" />
-
-            <com.google.android.material.textview.MaterialTextView
-                 android:layout_height="wrap_content"
-                 android:layout_width="wrap_content"
-                 android:textColor="?attr/colorPrimary"
-                 android:text="@string/tamaño_de_letra"
-                 android:textStyle="bold" />
-
-            <TextView
-                 android:layout_height="wrap_content"
-                 android:layout_width="match_parent"
-                 android:layout_marginVertical="8dp"
-                 android:gravity="center"
-                 android:background="?attr/colorSurfaceVariant"
-                 android:padding="16dp"
-                 android:textColor="?attr/colorOnSurfaceVariant"
-                 android:id="@+id/txtMuestraTamano"
-                 android:text="@string/texto_de_ejemplo" />
-
-            <com.google.android.material.slider.Slider
-                 android:layout_height="wrap_content"
-                 android:layout_width="match_parent"
-                 android:valueTo="32.0"
-                 android:value="16.0"
-                 android:valueFrom="12.0"
-                 android:stepSize="2.0"
-                 android:id="@+id/sliderTamano" />
-
-            <com.google.android.material.textview.MaterialTextView
-                 android:layout_height="wrap_content"
-                 android:layout_width="wrap_content"
-                 android:layout_marginBottom="8dp"
-                 android:textColor="?attr/colorPrimary"
-                 android:layout_marginTop="16dp"
-                 android:text="@string/color_de_fondo"
-                 android:textStyle="bold" />
-
-            <RadioGroup
-                 android:layout_height="wrap_content"
-                 android:layout_width="match_parent"
-                 android:orientation="vertical"
-                 android:id="@+id/radioGroupColores">
-
-                <RadioButton
-                     android:layout_height="wrap_content"
-                     android:layout_width="match_parent"
-                     android:textColor="?attr/colorOnSurface"
-                     android:id="@+id/rbBlanco"
-                     android:text="@string/sistema" />
-
-                <RadioButton
-                     android:layout_height="wrap_content"
-                     android:layout_width="match_parent"
-                     android:textColor="?attr/colorOnSurface"
-                     android:id="@+id/rbPapel"
-                     android:text="@string/papel" />
-
-                <RadioButton
-                     android:layout_height="wrap_content"
-                     android:layout_width="match_parent"
-                     android:textColor="?attr/colorOnSurface"
-                     android:id="@+id/rbNegro"
-                     android:text="@string/alto_contraste" />
 
             </RadioGroup>
 

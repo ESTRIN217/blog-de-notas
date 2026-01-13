@@ -20,6 +20,7 @@ import android.widget.LinearLayout;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.slider.Slider;
 import android.graphics.BitmapFactory;
+import androidx.activity.EdgeToEdge;
 
 import java.io.InputStream;
 import java.io.File;
@@ -31,6 +32,7 @@ public class DibujoActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        androidx.activity.EdgeToEdge.enable(this);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.dialogo_dibujo); // Usamos tu XML nuevo
         
