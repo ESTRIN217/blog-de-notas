@@ -36,6 +36,7 @@ public class LienzoView extends View {
     private int handleTocado = -1; 
     private float lastTouchX;
     private float lastTouchY;
+    private boolean mMostrarCuadricula = false;
 
     public LienzoView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -121,7 +122,28 @@ public class LienzoView extends View {
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
+
+        // 1. Dibujar el fondo (bitmap)
         if (mBitmap != null) canvas.drawBitmap(mBitmap, 0, 0, null);
+
+    // --- NUEVO: DIBUJAR CUADRÍCULA ---
+    if (mMostrarCuadricula) {
+        Paint pGrid = new Paint();
+        pGrid.setColor(Color.LTGRAY); // Gris claro
+        pGrid.setStrokeWidth(2f);
+        pGrid.setAlpha(100); // Semitransparente
+
+        int paso = 100; // Tamaño de cada cuadro (píxeles)
+
+        // Líneas Verticales
+        for (int i = 0; i < getWidth(); i += paso) {
+            canvas.drawLine(i, 0, i, getHeight(), pGrid);
+        }
+        // Líneas Horizontales
+        for (int j = 0; j < getHeight(); j += paso) {
+            canvas.drawLine(0, j, getWidth(), j, pGrid);
+        }
+    }
         if (mCurrentPath != null && mCurrentPaint != null) canvas.drawPath(mCurrentPath, mCurrentPaint);
 
         if (objetoSeleccionado != null) {
@@ -280,12 +302,34 @@ public class LienzoView extends View {
         return p;
     }
 
+    // En LienzoView.java
+
     public void setModo(String modo) {
-        if (this.herramientaActual.equals("SELECTION") && !modo.equals("SELECTION")) {
-            objetoSeleccionado = null;
-            redrawAllPaths();
-        }
-        this.herramientaActual = modo;
+    // Si salimos de SELECTION, limpiamos la selección visual
+    if (this.herramientaActual.equals("SELECTION") && !modo.equals("SELECTION")) {
+        objetoSeleccionado = null;
+        redrawAllPaths(); 
+    }
+    
+    this.herramientaActual = modo;
+
+    // --- CORRECCIÓN: Asignar grosores predeterminados al cambiar herramienta ---
+    switch (modo) {
+        case "PEN": 
+            mGrosorActual = 10f; 
+            break;
+        case "MARKER": 
+            mGrosorActual = 25f; // Más grueso
+            break;
+        case "RESALTADOR": 
+            mGrosorActual = 50f; // Muy grueso
+            break;
+        case "ERASER": 
+            mGrosorActual = 60f; 
+            break;
+        case "SELECTION":
+            break;
+    }
     }
 
     private float dist(float x1, float y1, float x2, float y2) {
@@ -310,5 +354,10 @@ public class LienzoView extends View {
             pathTransformado.transform(matrix);
             pathTransformado.computeBounds(bounds, true);
         }
+    }
+    public boolean toggleCuadricula() {
+    mMostrarCuadricula = !mMostrarCuadricula;
+    invalidate(); // Redibujar
+    return mMostrarCuadricula;
     }
 }

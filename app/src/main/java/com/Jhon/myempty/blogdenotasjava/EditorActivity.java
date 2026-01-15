@@ -76,7 +76,7 @@ import java.util.regex.Pattern;
 public class EditorActivity extends AppCompatActivity {
 
     private EditText txtNota, txtTitulo;
-    private TextView lblFecha;
+    private TextView lblFecha, lblContador;
     private ImageView btnAtras, btnDeshacer, btnRehacer, btnGuardar, menu, añadir, paleta, textoEstilo;
     private View background;
     private LinearLayout contenedorAdjuntos; // Changed to LinearLayout
@@ -299,13 +299,46 @@ public class EditorActivity extends AppCompatActivity {
     }
 
     private void manejarIntent() {
-        String dataRecibida = getIntent().getStringExtra("nombre_archivo");
-        SharedPreferences prefs = getSharedPreferences("MisPreferencias", MODE_PRIVATE);
-        carpetaUriPadre = prefs.getString("carpeta_uri", null);
+    Intent intent = getIntent();
+    // Buscamos la URI con ambas llaves por seguridad
+    String dataRecibida = intent.getStringExtra("uri_archivo");
+    if (dataRecibida == null) {
+        dataRecibida = intent.getStringExtra("nombre_archivo");
+    }
 
-        if (dataRecibida != null && !dataRecibida.isEmpty()) {
-            uriArchivoActual = Uri.parse(dataRecibida);
+    SharedPreferences prefs = getSharedPreferences("MisPreferencias", MODE_PRIVATE);
+    carpetaUriPadre = prefs.getString("carpeta_uri", null);
+
+    if (dataRecibida != null && !dataRecibida.isEmpty()) {
+        uriArchivoActual = Uri.parse(dataRecibida);
+        
+        // 1. Leer el archivo físico
+        String contenidoCargado = leerArchivo(uriArchivoActual);
+        
+        // 2. Extraer el color que guardó la burbuja y aplicarlo al fondo
+        int color = extraerColorDeHtml(contenidoCargado);
+        aplicarColorFondoDinamico(color);
+        
+        // 3. Limpiar el HTML (quitar el <div>) y poner el texto en el editor
+        String textoLimpio = contenidoCargado.replaceAll("<div[^>]*>", "").replace("</div>", "");
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            txtNota.setText(Html.fromHtml(textoLimpio, Html.FROM_HTML_MODE_LEGACY));
+        } else {
+            txtNota.setText(Html.fromHtml(textoLimpio));
         }
+        
+        // 4. Poner el nombre del archivo en el título
+        DocumentFile df = DocumentFile.fromSingleUri(this, uriArchivoActual);
+        if (df != null && df.getName() != null) {
+            txtTitulo.setText(df.getName().replace(".txt", ""));
+        }
+    }
+    }
+    @Override
+    protected void onNewIntent(Intent intent) {
+    super.onNewIntent(intent);
+    setIntent(intent); // Actualizamos el intent de la actividad
+    manejarIntent();   // Volvemos a procesar la información
     }
 
     private void inicializarVistas() {
@@ -322,6 +355,7 @@ public class EditorActivity extends AppCompatActivity {
         paleta = findViewById(R.id.paleta);
         textoEstilo = findViewById(R.id.text_style);
         contenedorAdjuntos = findViewById(R.id.contenedorAdjuntos);
+        lblContador = findViewById(R.id.lblContador);
     }
 
     private void establecerFecha() {
@@ -360,6 +394,7 @@ public class EditorActivity extends AppCompatActivity {
             runnableAutoguardado = () -> guardarNotaSilenciosamente();
             handlerHistorial.postDelayed(runnableAutoguardado, 2000);
         }
+        actualizarContador(s.toString());
     }
 
     @Override
@@ -450,77 +485,64 @@ public class EditorActivity extends AppCompatActivity {
     });
     paleta.setOnClickListener(v -> {
     BottomSheetDialog bottomSheetPaleta = new BottomSheetDialog(this);
-    View layout = getLayoutInflater().inflate(R.layout.bottom_sheet_paleta, null); // Asegúrate que tu XML se llame así
+    View layout = getLayoutInflater().inflate(R.layout.bottom_sheet_paleta, null);
     bottomSheetPaleta.setContentView(layout);
 
-    // 1. Referencias a los contenedores del XML
     LinearLayout contenedorColores = layout.findViewById(R.id.contenedorColoresFondo);
     View btnDefault = layout.findViewById(R.id.color_default);
     View btnGaleria = layout.findViewById(R.id.btnAbrirGaleriaFondo);
     View btnPapel = layout.findViewById(R.id.fondo_papel);
 
-    // 2. Lógica del botón "Default" ( fondo predeterminado/color)
+    // 1. Botón "Default" usando el contenedor estándar de Material 3
     btnDefault.setOnClickListener(view -> {
-    int colorSistema = Color.WHITE;
-    
-    aplicarColorFondoDinamico(colorSistema);
-    bottomSheetPaleta.dismiss();
-    });
-
-    // 3. Generar Círculos de Colores Programáticamente
-    // Lista de colores pastel (estilo notas)
-    String[] codigosColores = {
-            "#FFAFA8", // Rojo suave
-            "#F39F76", // Naranja
-            "#FFF8B8", // Amarillo
-            "#E2F6D3", // Verde
-            "#B4DDD3", // Verde azulado
-            "#D4E4ED", // Azul
-            "#AECCDC", // Azul oscuro
-            "#D3BFDB", // Morado
-            "#F6E2DD", // Marrón
-            "#E9E3D4"  // Gris
-    };
-
-    for (String codigo : codigosColores) {
-        // Crear una vista (el círculo)
-        View circulo = new View(this);
-        
-        // Definir tamaño (50dp x 50dp)
-        int size = (int) (50 * getResources().getDisplayMetrics().density);
-        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(size, size);
-        params.setMargins(10, 0, 10, 0); // Margen entre círculos
-        circulo.setLayoutParams(params);
-
-        // Crear la forma redonda (Drawable)
-        GradientDrawable shape = new GradientDrawable();
-        shape.setShape(GradientDrawable.OVAL);
-        shape.setColor(Color.parseColor(codigo));
-        shape.setStroke(2, Color.LTGRAY); // Borde finito
-        circulo.setBackground(shape);
-
-        // Acción al tocar el círculo
-        circulo.setOnClickListener(view -> {
-            background.setBackgroundColor(Color.parseColor(codigo));
-            // Opcional: Guardar preferencia de color aquí
-            bottomSheetPaleta.dismiss();
-        });
-
-        // Añadir al scroll horizontal
-        contenedorColores.addView(circulo);
-    }
-
-    // 4. Lógica de Galería (Imagen de fondo)
-    btnGaleria.setOnClickListener(view -> {
-        seleccionarFondoLauncher.launch("image/*");
+        int colorSistema = MaterialColors.getColor(view, com.google.android.material.R.attr.colorSurfaceContainer);
+        aplicarColorFondoDinamico(colorSistema);
         bottomSheetPaleta.dismiss();
     });
 
-    // 5. Lógica de Textura (Papel)
+    // 2. Lista de Atributos Material 3 (Pasteles automáticos que cambian en modo oscuro)
+    int[] atributosMaterial = {
+        com.google.android.material.R.attr.colorErrorContainer,      // Rojo/Rosa
+        com.google.android.material.R.attr.colorPrimaryContainer,    // Azul
+        com.google.android.material.R.attr.colorSecondaryContainer,  // Turquesa/Grisáceo
+        com.google.android.material.R.attr.colorTertiaryContainer,   // Verde/Amarillo
+        com.google.android.material.R.attr.colorSurfaceVariant,      // Gris Neutro
+        com.google.android.material.R.attr.colorSurfaceInverse,    // Contraste alto
+        com.google.android.material.R.attr.colorSurfaceContainerHighest // Gris oscuro
+    };
+
+    for (int attr : atributosMaterial) {
+        // Obtenemos el color real del tema
+        int colorResuelto = MaterialColors.getColor(this, attr, Color.LTGRAY);
+
+        View circulo = new View(this);
+        int size = (int) (50 * getResources().getDisplayMetrics().density);
+        int margin = (int) (8 * getResources().getDisplayMetrics().density);
+        
+        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(size, size);
+        params.setMargins(margin, 0, margin, 0);
+        circulo.setLayoutParams(params);
+
+        GradientDrawable shape = new GradientDrawable();
+        shape.setShape(GradientDrawable.OVAL);
+        shape.setColor(colorResuelto);
+        shape.setStroke(3, Color.parseColor("#40000000")); // Borde sutil
+        circulo.setBackground(shape);
+
+        // USAR aplicarColorFondoDinamico es fundamental aquí
+        circulo.setOnClickListener(view -> {
+            aplicarColorFondoDinamico(colorResuelto); 
+            bottomSheetPaleta.dismiss();
+        });
+
+        contenedorColores.addView(circulo);
+    }
+
+    // 3. Fondo de Papel (usando un color crema cálido)
     if (btnPapel != null) {
         btnPapel.setOnClickListener(view -> {
-            // Asegúrate de tener un color o drawable para esto
-            background.setBackgroundColor(Color.parseColor("#FFF8E1")); // Ejemplo color papel viejo
+            int colorPapel = Color.parseColor("#FFF8E1");
+            aplicarColorFondoDinamico(colorPapel);
             bottomSheetPaleta.dismiss();
         });
     }
@@ -643,6 +665,7 @@ public class EditorActivity extends AppCompatActivity {
         } else {
             txtNota.setText(Html.fromHtml(stringFinal));
         }
+        actualizarContador(txtNota.getText().toString());
         esCambioProgramatico = false;
         
         // 5. Configurar Título y Adjuntos
@@ -893,6 +916,20 @@ public class EditorActivity extends AppCompatActivity {
             txtNota.setSelection(txtNota.getText().length());
         } catch (Exception ignored) {}
         esCambioProgramatico = false;
+    }
+    private String leerArchivo(Uri uri) {
+    StringBuilder contentBuilder = new StringBuilder();
+    try (InputStream is = getContentResolver().openInputStream(uri);
+         BufferedReader br = new BufferedReader(new InputStreamReader(is))) {
+        String line;
+        while ((line = br.readLine()) != null) {
+            contentBuilder.append(line);
+        }
+    } catch (Exception e) {
+        e.printStackTrace();
+        return ""; // Devuelve vacío si falla
+    }
+    return contentBuilder.toString();
     }
     
     private void insertarFechaHoraEnCursor() {
@@ -1259,9 +1296,8 @@ public class EditorActivity extends AppCompatActivity {
     private void aplicarColorFondoDinamico(int color) {
     // 1. CORRECCIÓN: Si el color recibido es transparente (0), asignamos blanco (o el del tema)
     if (color == Color.TRANSPARENT) {
-        color = Color.WHITE; 
         // Opción PRO para Material You: 
-        // color = com.google.android.material.color.MaterialColors.getColor(txtNota, com.google.android.material.R.attr.colorSurfaceContainer);
+        color = com.google.android.material.color.MaterialColors.getColor(txtNota, com.google.android.material.R.attr.colorSurfaceContainer);
     }
 
     // 2. Aplicar el color al layout principal
@@ -1274,6 +1310,7 @@ public class EditorActivity extends AppCompatActivity {
     // Si el fondo es claro (> 0.5), texto oscuro (#1C1B1F es "Black" suave de Material)
     // Si el fondo es oscuro (< 0.5), texto blanco
     int colorInterfaz = (luminancia > 0.5) ? Color.parseColor("#1C1B1F") : Color.WHITE;
+    if (lblContador != null) lblContador.setTextColor(colorInterfaz);
 
     // 5. Aplicar a todos los elementos de texto
     txtNota.setTextColor(colorInterfaz);
@@ -1292,5 +1329,18 @@ public class EditorActivity extends AppCompatActivity {
     // Nota: El alpha en el texto principal puede dificultar la lectura bajo el sol.
     // Yo recomendaría dejarlo en 1.0f (opaco) o 0.9f como máximo.
     txtNota.setAlpha(1.0f); 
+    }
+    private void actualizarContador(String texto) {
+    // 1. Contar caracteres (incluyendo espacios)
+    int caracteres = texto.length();
+
+    // 2. Contar palabras
+    // trim() quita espacios al inicio/final. 
+    // split("\\s+") divide por cualquier tipo de espacio (espacio, tab, enter).
+    String[] palabras = texto.trim().split("\\s+");
+    int numPalabras = texto.trim().isEmpty() ? 0 : palabras.length;
+
+    // 3. Mostrar en el TextView
+    lblContador.setText(numPalabras + " palabras | " + caracteres + " caracteres");
     }
 }

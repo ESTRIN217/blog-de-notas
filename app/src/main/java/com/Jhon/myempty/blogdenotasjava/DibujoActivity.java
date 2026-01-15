@@ -21,6 +21,7 @@ import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.slider.Slider;
 import android.graphics.BitmapFactory;
 import androidx.activity.EdgeToEdge;
+import android.content.Context;
 
 import java.io.InputStream;
 import java.io.File;
@@ -96,38 +97,45 @@ public class DibujoActivity extends AppCompatActivity {
         });
 
     // --- LÓGICA DE HERRAMIENTAS ---
+    // --- LÓGICA DE HERRAMIENTAS ACTUALIZADA ---
 
-    // 1. Botón SELECCIONAR (Mano)
+    // 1. Botón SELECCIONAR (Mano) - Este no necesita menú de pincel
     btnSelect.setOnClickListener(v -> {
-    lienzo.setModo("SELECTION");
-    actualizarEstiloBotones(btnSelect);
-    Toast.makeText(this, "Modo Selección", Toast.LENGTH_SHORT).show();
+        lienzo.setModo("SELECTION");
+        actualizarEstiloBotones(btnSelect);
+        Toast.makeText(this, "Modo Selección", Toast.LENGTH_SHORT).show();
     });
 
-    // 2. Botón MARKER (Marcador / Rotulador grueso)
+    // 2. Botón MARKER (Marcador) - AHORA CON SELECTOR
     btnMaker.setOnClickListener(v -> {
-    lienzo.setColor(Color.BLACK); // Opcional: forzar negro o dejar el actual
-    lienzo.setModo("MARKER");
-    actualizarEstiloBotones(btnMaker);
+        if (v.isSelected()) {
+            abrirSelectorPincel(); // Si ya estaba activo, abre menú
+        } else {
+            lienzo.setColor(Color.BLACK); // Color por defecto al elegirlo
+            lienzo.setModo("MARKER");
+            actualizarEstiloBotones(btnMaker);
+        }
     });
 
-    // 3. Botón RESALTADOR (Transparente)
+    // 3. Botón RESALTADOR - AHORA CON SELECTOR
     btnResaltador.setOnClickListener(v -> {
-    // Para resaltador, solemos querer amarillo por defecto, 
-    // pero puedes dejar que el usuario elija color.
-    lienzo.setColor(Color.YELLOW); 
-    lienzo.setModo("RESALTADOR");
-    actualizarEstiloBotones(btnResaltador);
+        if (v.isSelected()) {
+            abrirSelectorPincel(); // Si ya estaba activo, abre menú
+        } else {
+            lienzo.setColor(Color.YELLOW); // Color por defecto al elegirlo
+            lienzo.setModo("RESALTADOR");
+            actualizarEstiloBotones(btnResaltador);
+        }
     });
 
-    // 4. Actualizar también el listener del btnPen existente para usar la nueva lógica visual
+    // 4. Botón PEN (Ya estaba bien, lo dejamos igual)
     btnPen.setOnClickListener(v -> {
-    if (v.isSelected()) {
-        abrirSelectorPincel(); // Si ya estaba activo, abre menú
-    } else {
-        lienzo.setModo("PEN");
-        actualizarEstiloBotones(btnPen);
-    }
+        if (v.isSelected()) {
+            abrirSelectorPincel();
+        } else {
+            lienzo.setModo("PEN");
+            actualizarEstiloBotones(btnPen);
+        }
     });
 
     // 5. Actualizar el Borrador
@@ -136,48 +144,52 @@ public class DibujoActivity extends AppCompatActivity {
     actualizarEstiloBotones(btnEraser);
     });
 
-    btnMore.setOnClickListener(
-        v -> {
-          PopupMenu popup = new PopupMenu(this, v);
-          popup.getMenuInflater().inflate(R.menu.dibujomenu, popup.getMenu());
+    btnMore.setOnClickListener(v -> {
+    PopupMenu popup = new PopupMenu(this, v);
+    popup.getMenuInflater().inflate(R.menu.dibujomenu, popup.getMenu());
 
-          // Forzar que se vean los iconos (Opcional, truco para Android moderno)
-          try {
-            java.lang.reflect.Field field = popup.getClass().getDeclaredField("mPopup");
-            field.setAccessible(true);
-            Object menuPopupHelper = field.get(popup);
-            Class<?> classPopupHelper = Class.forName(menuPopupHelper.getClass().getName());
-            java.lang.reflect.Method setForceShowIcon =
-                classPopupHelper.getMethod("setForceShowIcon", boolean.class);
-            setForceShowIcon.invoke(menuPopupHelper, true);
-          } catch (Exception e) {
-            e.printStackTrace();
-          }
+    // Truco para forzar iconos (El que ya tenías)
+    try {
+        java.lang.reflect.Field field = popup.getClass().getDeclaredField("mPopup");
+        field.setAccessible(true);
+        Object menuPopupHelper = field.get(popup);
+        Class<?> classPopupHelper = Class.forName(menuPopupHelper.getClass().getName());
+        java.lang.reflect.Method setForceShowIcon = classPopupHelper.getMethod("setForceShowIcon", boolean.class);
+        setForceShowIcon.invoke(menuPopupHelper, true);
+    } catch (Exception e) {
+        e.printStackTrace();
+    }
 
-          popup.setOnMenuItemClickListener(
-              item -> {
-                int itemId = item.getItemId();
-                if (itemId == R.id.borrar) { // El ID original del menú
-                  lienzo.nuevoDibujo();
-                  Toast.makeText(this, "Lienzo borrado", Toast.LENGTH_SHORT).show();
-                  return true;
-                } else if (itemId == R.id.copiar) {
-                  // Implementar lógica para copiar dibujo
-                  Toast.makeText(
-                          this, "Funcionalidad de copiar aún no implementada", Toast.LENGTH_SHORT)
-                      .show();
-                  return true;
-                } else if (itemId == R.id.enviar) {
-                  // Implementar lógica para enviar dibujo
-                  Toast.makeText(
-                          this, "Funcionalidad de enviar aún no implementada", Toast.LENGTH_SHORT)
-                      .show();
-                  return true;
-                }
-                return false;
-              });
-          popup.show();
-        });
+    popup.setOnMenuItemClickListener(item -> {
+        int itemId = item.getItemId();
+
+        if (itemId == R.id.mostrar_cuadricula) {
+            // 1. Alternar Cuadrícula
+            boolean estado = lienzo.toggleCuadricula();
+            Toast.makeText(this, estado ? "Cuadrícula Activada" : "Cuadrícula Desactivada", Toast.LENGTH_SHORT).show();
+            // (Opcional) Podrías cambiar el icono del item aquí si el menú no se cerrara
+            return true;
+
+        } else if (itemId == R.id.borrar) {
+            // 2. Borrar
+            lienzo.nuevoDibujo();
+            Toast.makeText(this, "Lienzo borrado", Toast.LENGTH_SHORT).show();
+            return true;
+
+        } else if (itemId == R.id.copiar) {
+            // 3. Copiar
+            copiarAlPortapapeles();
+            return true;
+
+        } else if (itemId == R.id.enviar) {
+            // 4. Enviar
+            compartirImagen();
+            return true;
+        }
+        return false;
+    });
+    popup.show();
+    });
     }
 
   private void guardarYSalir() {
@@ -274,6 +286,58 @@ public class DibujoActivity extends AppCompatActivity {
                 ((ImageView) btn).clearColorFilter();
             }
         }
+    }
+    }
+    // Método auxiliar para guardar el dibujo en caché y obtener su URI
+    private Uri obtenerUriTemporal() {
+    try {
+        Bitmap bitmap = lienzo.getDibujo();
+        if (bitmap == null) return null;
+
+        // Guardar en la carpeta de caché (no se queda basura permanente)
+        java.io.File cachePath = new java.io.File(getCacheDir(), "images");
+        cachePath.mkdirs(); // Crear carpeta si no existe
+        
+        // Sobreescribimos siempre el mismo archivo temporal
+        java.io.File newFile = new java.io.File(cachePath, "dibujo_temp.png");
+        java.io.FileOutputStream stream = new java.io.FileOutputStream(newFile);
+        bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream);
+        stream.close();
+
+        // Obtener URI con FileProvider
+        return FileProvider.getUriForFile(this, getPackageName() + ".fileprovider", newFile);
+        
+    } catch (Exception e) {
+        e.printStackTrace();
+        return null;
+    }
+    }
+
+    private void compartirImagen() {
+    Uri contentUri = obtenerUriTemporal();
+    if (contentUri != null) {
+        Intent shareIntent = new Intent();
+        shareIntent.setAction(Intent.ACTION_SEND);
+        shareIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION); // Permiso temporal
+        shareIntent.setDataAndType(contentUri, getContentResolver().getType(contentUri));
+        shareIntent.putExtra(Intent.EXTRA_STREAM, contentUri);
+        shareIntent.setType("image/png");
+        startActivity(Intent.createChooser(shareIntent, "Compartir dibujo con..."));
+    } else {
+        Toast.makeText(this, "Error al procesar la imagen", Toast.LENGTH_SHORT).show();
+    }
+    }
+
+    private void copiarAlPortapapeles() {
+    Uri contentUri = obtenerUriTemporal();
+    if (contentUri != null) {
+        android.content.ClipboardManager clipboard = (android.content.ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
+        // Creamos un ClipData que contiene la URI de la imagen
+        android.content.ClipData clip = android.content.ClipData.newUri(getContentResolver(), "Dibujo", contentUri);
+        clipboard.setPrimaryClip(clip);
+        Toast.makeText(this, "Imagen copiada al portapapeles", Toast.LENGTH_SHORT).show();
+    } else {
+        Toast.makeText(this, "No se pudo copiar", Toast.LENGTH_SHORT).show();
     }
     }
 }

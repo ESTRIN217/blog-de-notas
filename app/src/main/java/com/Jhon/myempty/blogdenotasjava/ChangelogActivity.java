@@ -29,6 +29,24 @@ public class ChangelogActivity extends AppCompatActivity {
         List<Cambio> listaCambios = new ArrayList<>();
         
         // AQUÍ AGREGAS TUS VERSIONES
+        listaCambios.add(new Cambio("1.8.0 Editor", "15 de enero de 2026", "1. Sincronización Editor ↔ FloatingService\n" +
+        "Corrección de Llaves: Estandarizamos el uso de 'uri_archivo' para que ambos componentes compartan la misma referencia.\n" +
+        
+        "Ciclo de Vida: Implementamos onNewIntent en EditorActivity. Esto permite que, si el editor ya está abierto, la nota se refresque automáticamente al regresar de la burbuja sin crear ventanas duplicadas.\n" +
+        
+        "Carga Automática: Ajustamos manejarIntent para que ejecute cargarNotaSAF() inmediatamente al recibir datos nuevos.\n" +
+        
+        "2. Interfaz Dinámica y Material 3\n" +
+        "Colores Oficiales: Sustituimos los colores hexadecimales fijos por Atributos de Material 3 (como colorSurfaceContainer y colorPrimaryContainer). Esto permite que tu app soporte Modo Oscuro y colores dinámicos del sistema automáticamente.\n" +
+        
+        "Lógica de Contraste: Aseguramos que el método aplicarColorFondoDinamico sea el encargado de cambiar el color del fondo. Así, el texto cambiará entre blanco y negro dependiendo de qué tan claro u oscuro sea el color elegido.\n" +
+        
+        "Compatibilidad: Corregimos errores de compilación reemplazando atributos modernos (colorInverseOnSurface) por otros más compatibles (colorSurfaceInverse).\n" +
+        
+        "3. Ajustes de Layout y Teclado\n" +
+        "Barra de Iconos Elevada: Configuramos el AndroidManifest.xml con windowSoftInputMode='adjustResize'.\n" +
+        
+        "Estructura XML: Organizamos el editor.xml para que el NestedScrollView use layout_weight="1". Esto garantiza que los iconos de la paleta y estilo se mantengan siempre visibles, pegados justo encima del teclado cuando este aparece."));
         listaCambios.add(new Cambio("1.7.0 Editor", "14 de enero de 2026", "1. Evolución del Motor de Dibujo\n" +
         "Hemos migrado de un sistema simple de 'pintar y olvidar' a un Sistema Basado en Objetos (DibujoObjeto).\n" +
         "Independencia: Cada trazo ahora es un objeto con su propia Matrix, Path original y Paint.\n" +

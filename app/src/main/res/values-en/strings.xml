@@ -30,4 +30,5 @@
     <string name="copiar">Copy</string>
     <string name="enviar">Send</string>
     <string name="textura_imagen">Texture / Image</string>
+    <string name="mostrar_cuadricula">Show grid</string>
 </resources>

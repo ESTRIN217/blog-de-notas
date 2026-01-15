@@ -37,7 +37,7 @@ public class FloatingService extends Service {
     private WindowManager.LayoutParams params;
 
     private EditText floatingTxtNota;
-    private TextView floatingTitleText;
+    private TextView floatingTitleText, lblContadorFlotante;
     private ImageView btnClose, btnModify;
     private View headerView, resizeHandle;
 
@@ -73,9 +73,6 @@ public class FloatingService extends Service {
 
         inicializarVistas();
         
-        // --- CORRECCIÓN: Llamar aquí para aplicar tamaño y colores al crear la vista ---
-        aplicarPreferenciasVisuales(); 
-        
         configurarParametrosVentana(metrics);
         configurarListeners();
     }
@@ -107,6 +104,7 @@ public class FloatingService extends Service {
         btnModify = mFloatingView.findViewById(R.id.modify);
         headerView = mFloatingView.findViewById(R.id.floating_header);
         resizeHandle = mFloatingView.findViewById(R.id.resize_handle);
+        lblContadorFlotante = mFloatingView.findViewById(R.id.lbl_contador_floating);
     }
 
     private void configurarParametrosVentana(DisplayMetrics metrics) {
@@ -129,34 +127,50 @@ public class FloatingService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        if (intent != null) {
-            String contenido = intent.getStringExtra("contenido_nota");
-            String uriString = intent.getStringExtra("uri_archivo");
+    if (intent != null) {
+        String contenidoRaw = intent.getStringExtra("contenido_nota");
+        String uriString = intent.getStringExtra("uri_archivo");
 
-            if (uriString != null && !uriString.isEmpty()) {
-                uriArchivoActual = Uri.parse(uriString);
-                DocumentFile df = DocumentFile.fromSingleUri(this, uriArchivoActual);
-                if (df != null && df.getName() != null) {
-                    floatingTitleText.setText(df.getName().replace(".txt", ""));
-                }
-            }
-
-            if (floatingTxtNota != null && contenido != null) {
-                floatingTxtNota.setText(contenido);
-                // --- MEJORA: Re-aplicar preferencias por si se cambiaron mientras el servicio corría ---
-                aplicarPreferenciasVisuales(); 
-                
-                try {
-                    floatingTxtNota.setSelection(floatingTxtNota.getText().length());
-                } catch (Exception ignored) {}
+        if (uriString != null && !uriString.isEmpty()) {
+            uriArchivoActual = Uri.parse(uriString);
+            DocumentFile df = DocumentFile.fromSingleUri(this, uriArchivoActual);
+            if (df != null && df.getName() != null) {
+                floatingTitleText.setText(df.getName().replace(".txt", ""));
             }
         }
-        return START_STICKY;
+
+        if (floatingTxtNota != null && contenidoRaw != null) {
+            // --- NUEVA LÓGICA DE PROCESAMIENTO ---
+            
+            // 1. Extraer y aplicar el color de fondo
+            int colorNota = extraerColorDeHtml(contenidoRaw);
+            floatingTxtNota.setBackgroundColor(colorNota);
+
+            // 2. Limpiar el HTML para mostrar solo el texto limpio al usuario
+            // Quitamos el DIV envolvente para que no se vea el código
+            String textoLimpio = contenidoRaw.replaceAll("<div[^>]*>", "").replace("</div>", "");
+            
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                floatingTxtNota.setText(android.text.Html.fromHtml(textoLimpio, android.text.Html.FROM_HTML_MODE_LEGACY));
+            } else {
+                floatingTxtNota.setText(android.text.Html.fromHtml(textoLimpio));
+            }
+            
+            try {
+                floatingTxtNota.setSelection(floatingTxtNota.getText().length());
+            } catch (Exception ignored) {}
+            String inicial = floatingTxtNota.getText().toString().trim();
+    int p = inicial.isEmpty() ? 0 : inicial.split("\\s+").length;
+    lblContadorFlotante.setText(p + "p | " + floatingTxtNota.getText().length() + "c");
+        }
+    }
+    return START_STICKY;
     }
 
     private void configurarListeners() {
         // 1. Habilitar teclado al tocar el texto
         floatingTxtNota.setOnTouchListener((v, event) -> {
+            
             if (event.getAction() == MotionEvent.ACTION_DOWN) {
                 params.flags = WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL | WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH;
                 mWindowManager.updateViewLayout(mFloatingView, params);
@@ -164,6 +178,18 @@ public class FloatingService extends Service {
                 floatingTxtNota.requestFocus();
             }
             return false;
+        });
+        floatingTxtNota.addTextChangedListener(new android.text.TextWatcher() {
+    @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+    @Override public void onTextChanged(CharSequence s, int start, int before, int count) {
+        String texto = s.toString().trim();
+        int p = texto.isEmpty() ? 0 : texto.split("\\s+").length;
+        int c = s.length();
+        if (lblContadorFlotante != null) {
+            lblContadorFlotante.setText(p + "p | " + c + "c");
+        }
+    }
+    @Override public void afterTextChanged(android.text.Editable s) {}
         });
 
         // 2. Guardar y quitar teclado al tocar fuera de la ventana
@@ -230,25 +256,58 @@ public class FloatingService extends Service {
             }
         });
 
-        // 5. Botones
-        btnClose.setOnClickListener(v -> stopSelf());
-        btnModify.setOnClickListener(v -> {
-            guardarNotaFlotante();
-            Intent intent = new Intent(this, EditorActivity.class);
-            intent.putExtra("nombre_archivo", uriArchivoActual != null ? uriArchivoActual.toString() : "");
-            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            startActivity(intent);
-            stopSelf();
+        // 5. Botones en FloatingService
+        btnClose.setOnClickListener(v -> {
+    guardarNotaFlotante(); // Guardamos antes de cerrar
+    stopSelf();
         });
+
+        // 5. Botón para volver al Editor completo
+        btnModify.setOnClickListener(v -> {
+    guardarNotaFlotante(); // Guardar cambios actuales
+    
+    Intent intent = new Intent(this, EditorActivity.class);
+    // Aseguramos que la llave sea "uri_archivo"
+    intent.putExtra("uri_archivo", uriArchivoActual != null ? uriArchivoActual.toString() : "");
+    
+    // IMPORTANTE: Añadir Flags para que no cree una instancia nueva si ya existe
+    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+    
+    startActivity(intent);
+    stopSelf(); // Cerrar la burbuja
+    });
     }
 
     private void guardarNotaFlotante() {
-        if (uriArchivoActual == null) return;
-        try (OutputStream os = getContentResolver().openOutputStream(uriArchivoActual, "wt")) {
-            if (os != null) {
-                os.write(floatingTxtNota.getText().toString().getBytes());
-            }
-        } catch (Exception e) { e.printStackTrace(); }
+    if (uriArchivoActual == null) return;
+
+    // 1. Convertir el texto que ves en la ventana flotante a HTML
+    // Esto preserva negritas, cursivas, etc. si las hubiera.
+    String contenidoHtml = android.text.Html.toHtml(floatingTxtNota.getText());
+
+    // 2. Obtener el color de fondo actual de la vista flotante
+    // IMPORTANTE: Asumo que al abrir la ventana flotante, le pusiste el color al floatingTxtNota.
+    // Si el color está en otro layout padre, cambia 'floatingTxtNota' por esa vista.
+    int colorActual = android.graphics.Color.WHITE; // Color por defecto de seguridad
+    if (floatingTxtNota.getBackground() instanceof android.graphics.drawable.ColorDrawable) {
+        colorActual = ((android.graphics.drawable.ColorDrawable) floatingTxtNota.getBackground()).getColor();
+    }
+
+    // 3. Convertir el color a formato Hexadecimal (#RRGGBB)
+    String hexColor = String.format("#%06X", (0xFFFFFF & colorActual));
+
+    // 4. Envolver todo en la etiqueta DIV con el estilo de fondo
+    // Esto mantiene la compatibilidad con tu EditorActivity
+    String htmlParaGuardar = "<div style='background-color:" + hexColor + ";'>" + contenidoHtml + "</div>";
+
+    // 5. Escribir en el archivo
+    try (java.io.OutputStream os = getContentResolver().openOutputStream(uriArchivoActual, "wt")) {
+        if (os != null) {
+            os.write(htmlParaGuardar.getBytes());
+        }
+    } catch (Exception e) {
+        e.printStackTrace();
+    }
     }
 
     @Override
@@ -263,41 +322,17 @@ public class FloatingService extends Service {
         }
         super.onDestroy();
     }
-    // Agrega este método dentro de FloatingService
-    private void aplicarPreferenciasVisuales() {
-        SharedPreferences prefs = getSharedPreferences("MisPreferencias", MODE_PRIVATE);
-        
-        // 1. Tamaño de Fuente
-        float fontSize = prefs.getFloat("editor_font_size", 16f);
-        if (floatingTxtNota != null) {
-            floatingTxtNota.setTextSize(fontSize);
+    private int extraerColorDeHtml(String html) {
+    try {
+        if (html != null && html.contains("background-color:")) {
+            int inicio = html.indexOf("background-color:") + 17;
+            int fin = html.indexOf(";", inicio);
+            String hexColor = html.substring(inicio, fin).trim();
+            return Color.parseColor(hexColor);
         }
-
-        // 2. Color de Fondo
-        int bgMode = prefs.getInt("editor_bg_mode", 0);
-        
-        // Usamos Integer en lugar de int para manejar el nulo si es modo "Sistema"
-        Integer colorFondo = null;
-        Integer colorTexto = null;
-
-        switch (bgMode) {
-            case 1: // Papel
-                colorFondo = 0xFFFFF8E1;
-                colorTexto = 0xFF3E2723;
-                break;
-            case 2: // Negro
-                colorFondo = 0xFF000000;
-                colorTexto = 0xFFFFFFFF;
-                break;
-        }
-
-        if (floatingTxtNota != null && colorFondo != null) {
-            floatingTxtNota.setBackgroundColor(colorFondo);
-            floatingTxtNota.setTextColor(colorTexto);
-        } else if (floatingTxtNota != null) {
-            // Si es modo sistema (0), quitamos colores forzados para que use el XML
-            floatingTxtNota.setBackgroundColor(Color.TRANSPARENT); 
-            // Aquí podrías poner el color por defecto de tu tema si fuera necesario
-        }
+    } catch (Exception e) {
+        e.printStackTrace();
+    }
+    return Color.WHITE; // Color por defecto si falla
     }
 }

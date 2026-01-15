@@ -30,4 +30,5 @@
     <string name="copiar">Copiar</string>
     <string name="enviar">Enviar</string>
     <string name="textura_imagen">Textura / Imagen</string>
+    <string name="mostrar_cuadricula">Mostrar cuadrícula</string>
 </resources>
