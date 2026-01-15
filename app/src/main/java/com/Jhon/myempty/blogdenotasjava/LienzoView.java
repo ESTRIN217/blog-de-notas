@@ -6,27 +6,36 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Path;
+import android.graphics.RectF;
+import android.graphics.Matrix;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
-
 import java.util.ArrayList;
 
 public class LienzoView extends View {
-    private Bitmap mBitmap; // Bitmap donde se dibuja de forma persistente
-    private Canvas mCanvas; // Canvas asociado al mBitmap
+    private Bitmap mBitmap;
+    private Canvas mCanvas;
 
-    private Path mCurrentPath; // El trazo actual que el usuario está haciendo
-    private Paint mCurrentPaint; // El pincel para el trazo actual
+    private Path mCurrentPath;
+    private Paint mCurrentPaint;
 
-    private ArrayList<Path> mPaths = new ArrayList<>(); // Lista de todos los trazos completados
-    private ArrayList<Paint> mPaints = new ArrayList<>(); // Lista de pinceles correspondientes a mPaths
+    // --- SISTEMA DE OBJETOS ---
+    private ArrayList<DibujoObjeto> mObjetos = new ArrayList<>();
+    private DibujoObjeto objetoSeleccionado = null;
 
-    private ArrayList<Path> mUndonePaths = new ArrayList<>(); // Trazos deshechos
-    private ArrayList<Paint> mUndonePaints = new ArrayList<>(); // Pinceles de trazos deshechos
+    // --- HISTORIAL (Undo/Redo) ---
+    private ArrayList<DibujoObjeto> mUndoneObjetos = new ArrayList<>();
 
     private int mColorActual = Color.BLACK;
     private float mGrosorActual = 10f;
+    private String herramientaActual = "PEN";
+
+    // --- VARIABLES DE INTERACCIÓN ---
+    private static final int HANDLE_RADIUS = 25;
+    private int handleTocado = -1; 
+    private float lastTouchX;
+    private float lastTouchY;
 
     public LienzoView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -47,30 +56,93 @@ public class LienzoView extends View {
     @Override
     protected void onSizeChanged(int w, int h, int oldw, int oldh) {
         super.onSizeChanged(w, h, oldw, oldh);
-        if (mBitmap == null) { // Solo crear el bitmap la primera vez
+        if (mBitmap == null) {
             mBitmap = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888);
             mCanvas = new Canvas(mBitmap);
-            mCanvas.drawColor(Color.WHITE); // Fondo inicial blanco
-        } else {
-            // Si el tamaño cambia y ya hay un bitmap, escalarlo o recrearlo
-            Bitmap newBitmap = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888);
-            Canvas newCanvas = new Canvas(newBitmap);
-            newCanvas.drawColor(Color.WHITE);
-            newCanvas.drawBitmap(mBitmap, 0, 0, null); // Dibuja el viejo bitmap en el nuevo
-            mBitmap = newBitmap;
-            mCanvas = newCanvas;
-            redrawAllPaths(); // Redibujar todo si el bitmap se recrea
+            mCanvas.drawColor(Color.WHITE);
         }
     }
+
+    // --- MÉTODOS REQUERIDOS POR DIBUJOACTIVITY ---
+
+    public void setColor(int nuevoColor) {
+        this.mColorActual = nuevoColor;
+    }
+
+    public void setGrosor(float nuevoGrosor) {
+        this.mGrosorActual = nuevoGrosor;
+    }
+
+    public float getGrosorActual() {
+        return mGrosorActual;
+    }
+
+    public Bitmap getDibujo() {
+        return mBitmap;
+    }
+
+    public void nuevoDibujo() {
+        mObjetos.clear();
+        mUndoneObjetos.clear();
+        objetoSeleccionado = null;
+        if (mCanvas != null) {
+            mCanvas.drawColor(Color.WHITE);
+        }
+        invalidate();
+    }
+
+    public void deshacer() {
+        if (!mObjetos.isEmpty()) {
+            mUndoneObjetos.add(mObjetos.remove(mObjetos.size() - 1));
+            objetoSeleccionado = null;
+            redrawAllPaths();
+        }
+    }
+
+    public void rehacer() {
+        if (!mUndoneObjetos.isEmpty()) {
+            mObjetos.add(mUndoneObjetos.remove(mUndoneObjetos.size() - 1));
+            redrawAllPaths();
+        }
+    }
+
+    public void cargarFondo(Bitmap bitmap) {
+        this.post(() -> {
+            if (mBitmap != null && mCanvas != null) {
+                Bitmap escalado = Bitmap.createScaledBitmap(bitmap, getWidth(), getHeight(), true);
+                mCanvas.drawBitmap(escalado, 0, 0, null);
+                invalidate();
+            }
+        });
+    }
+
+    // --- LÓGICA DE DIBUJO Y SELECCIÓN ---
 
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
-        canvas.drawBitmap(mBitmap, 0, 0, null); // Dibuja el bitmap persistente
+        if (mBitmap != null) canvas.drawBitmap(mBitmap, 0, 0, null);
+        if (mCurrentPath != null && mCurrentPaint != null) canvas.drawPath(mCurrentPath, mCurrentPaint);
 
-        // Dibuja el trazo actual que el usuario está haciendo (si existe)
-        if (mCurrentPath != null && mCurrentPaint != null) {
-            canvas.drawPath(mCurrentPath, mCurrentPaint);
+        if (objetoSeleccionado != null) {
+            objetoSeleccionado.actualizarBounds();
+            RectF r = objetoSeleccionado.bounds;
+            Paint pCuadro = new Paint();
+            pCuadro.setColor(Color.parseColor("#4285F4"));
+            pCuadro.setStyle(Paint.Style.STROKE);
+            pCuadro.setStrokeWidth(4f);
+            canvas.drawRect(r, pCuadro);
+            
+            pCuadro.setStyle(Paint.Style.FILL);
+            canvas.drawCircle(r.left, r.top, HANDLE_RADIUS, pCuadro);
+            canvas.drawCircle(r.right, r.top, HANDLE_RADIUS, pCuadro);
+            canvas.drawCircle(r.left, r.bottom, HANDLE_RADIUS, pCuadro);
+            canvas.drawCircle(r.right, r.bottom, HANDLE_RADIUS, pCuadro);
+
+            pCuadro.setStyle(Paint.Style.STROKE);
+            canvas.drawLine(r.centerX(), r.top, r.centerX(), r.top - 60, pCuadro);
+            pCuadro.setStyle(Paint.Style.FILL);
+            canvas.drawCircle(r.centerX(), r.top - 60, HANDLE_RADIUS, pCuadro);
         }
     }
 
@@ -79,131 +151,164 @@ public class LienzoView extends View {
         float x = event.getX();
         float y = event.getY();
 
-        switch (event.getAction()) {
-            case MotionEvent.ACTION_DOWN:
-                mCurrentPath = new Path();
-                mCurrentPaint = new Paint(setupCurrentPaint()); // Crear un nuevo Paint con la configuración actual
-                mCurrentPath.moveTo(x, y);
-                // Si se empieza un nuevo trazo, se borra el historial de "deshechos"
-                mUndonePaths.clear();
-                mUndonePaints.clear();
-                break;
-            case MotionEvent.ACTION_MOVE:
-                if (mCurrentPath != null) {
-                    mCurrentPath.lineTo(x, y);
-                }
-                break;
-            case MotionEvent.ACTION_UP:
-                if (mCurrentPath != null && mCurrentPaint != null) {
-                    mPaths.add(mCurrentPath);
-                    mPaints.add(mCurrentPaint);
-                    mCanvas.drawPath(mCurrentPath, mCurrentPaint); // Dibuja el trazo en el bitmap persistente
-                    mCurrentPath = null; // Reiniciar el trazo actual
-                    mCurrentPaint = null;
-                }
-                break;
-            default:
-                return false;
+        if (herramientaActual.equals("SELECTION")) {
+            handleSelectionMode(event, x, y);
+        } else {
+            handleDrawingMode(event, x, y);
         }
-        invalidate(); // Solicita un redibujo de la vista
+
+        invalidate();
         return true;
     }
 
-    // Configura un nuevo Paint con los valores actuales (color y grosor)
-    private Paint setupCurrentPaint() {
-        Paint paint = new Paint();
-        paint.setAntiAlias(true);
-        paint.setDither(true);
-        paint.setColor(mColorActual);
-        paint.setStyle(Paint.Style.STROKE);
-        paint.setStrokeJoin(Paint.Join.ROUND);
-        paint.setStrokeCap(Paint.Cap.ROUND);
-        paint.setStrokeWidth(mGrosorActual);
-        return paint;
-    }
-
-    public Bitmap getDibujo() {
-        return mBitmap;
-    }
-
-    public void deshacer() {
-        if (mPaths.size() > 0) {
-            mUndonePaths.add(mPaths.remove(mPaths.size() - 1));
-            mUndonePaints.add(mPaints.remove(mPaints.size() - 1));
-            redrawAllPaths();
+    private void handleDrawingMode(MotionEvent event, float x, float y) {
+        switch (event.getAction()) {
+            case MotionEvent.ACTION_DOWN:
+                mCurrentPath = new Path();
+                mCurrentPaint = new Paint(setupCurrentPaint());
+                mCurrentPath.moveTo(x, y);
+                mUndoneObjetos.clear();
+                break;
+            case MotionEvent.ACTION_MOVE:
+                mCurrentPath.lineTo(x, y);
+                break;
+            case MotionEvent.ACTION_UP:
+                DibujoObjeto nuevoObj = new DibujoObjeto(mCurrentPath, mCurrentPaint);
+                mObjetos.add(nuevoObj);
+                mCanvas.drawPath(nuevoObj.pathTransformado, nuevoObj.paint);
+                mCurrentPath = null;
+                break;
         }
     }
 
-    public void rehacer() {
-        if (mUndonePaths.size() > 0) {
-            mPaths.add(mUndonePaths.remove(mUndonePaths.size() - 1));
-            mPaints.add(mUndonePaints.remove(mUndonePaints.size() - 1));
-            redrawAllPaths();
+    private void handleSelectionMode(MotionEvent event, float x, float y) {
+        switch (event.getAction()) {
+            case MotionEvent.ACTION_DOWN:
+                lastTouchX = x;
+                lastTouchY = y;
+                handleTocado = detectarHandle(x, y);
+                if (handleTocado == -1) {
+                    detectarSeleccion(x, y);
+                    if (objetoSeleccionado != null) handleTocado = 9;
+                }
+                break;
+            case MotionEvent.ACTION_MOVE:
+                if (objetoSeleccionado != null && handleTocado != -1) {
+                    aplicarTransformacion(x, y);
+                    redrawAllPaths(); 
+                }
+                break;
+            case MotionEvent.ACTION_UP:
+                handleTocado = -1;
+                break;
         }
     }
 
-    public void nuevoDibujo() {
-        mPaths.clear();
-        mPaints.clear();
-        mUndonePaths.clear();
-        mUndonePaints.clear();
-        if (mCanvas != null) {
-            mCanvas.drawColor(Color.WHITE); // Limpiar el bitmap a blanco
+    private int detectarHandle(float x, float y) {
+        if (objetoSeleccionado == null) return -1;
+        RectF r = objetoSeleccionado.bounds;
+        float tol = 50;
+        if (dist(x, y, r.centerX(), r.top - 60) < tol) return 8;
+        if (dist(x, y, r.left, r.top) < tol) return 0;
+        if (dist(x, y, r.right, r.top) < tol) return 1;
+        if (dist(x, y, r.left, r.bottom) < tol) return 2;
+        if (dist(x, y, r.right, r.bottom) < tol) return 3;
+        if (r.contains(x, y)) return 9;
+        return -1;
+    }
+
+    private void detectarSeleccion(float x, float y) {
+        objetoSeleccionado = null;
+        for (int i = mObjetos.size() - 1; i >= 0; i--) {
+            DibujoObjeto obj = mObjetos.get(i);
+            if (obj.bounds.contains(x, y)) {
+                objetoSeleccionado = obj;
+                break;
+            }
+        }
+    }
+
+    private void aplicarTransformacion(float x, float y) {
+        float dx = x - lastTouchX;
+        float dy = y - lastTouchY;
+        RectF r = objetoSeleccionado.bounds;
+        float cx = r.centerX();
+        float cy = r.centerY();
+
+        if (handleTocado == 9) {
+            objetoSeleccionado.matrix.postTranslate(dx, dy);
+        } else if (handleTocado == 8) {
+            float anguloActual = (float) Math.toDegrees(Math.atan2(y - cy, x - cx));
+            float anguloAnt = (float) Math.toDegrees(Math.atan2(lastTouchY - cy, lastTouchX - cx));
+            objetoSeleccionado.matrix.postRotate(anguloActual - anguloAnt, cx, cy);
+        } else if (handleTocado >= 0 && handleTocado <= 3) {
+            float s = dist(x, y, cx, cy) / dist(lastTouchX, lastTouchY, cx, cy);
+            if (dist(x, y, cx, cy) > 30) {
+                objetoSeleccionado.matrix.postScale(s, s, cx, cy);
+            }
+        }
+        lastTouchX = x;
+        lastTouchY = y;
+    }
+
+    private void redrawAllPaths() {
+        if (mBitmap != null && mCanvas != null) {
+            mBitmap.eraseColor(Color.WHITE);
+            for (DibujoObjeto obj : mObjetos) {
+                obj.actualizarBounds();
+                mCanvas.drawPath(obj.pathTransformado, obj.paint);
+            }
         }
         invalidate();
     }
 
-    public void setColor(int nuevoColor) {
-        this.mColorActual = nuevoColor;
-        // No es necesario recrear mCurrentPaint aquí, se hará en ACTION_DOWN
-    }
+    private Paint setupCurrentPaint() {
+        Paint p = new Paint();
+        p.setAntiAlias(true);
+        p.setColor(mColorActual);
+        p.setStyle(Paint.Style.STROKE);
+        p.setStrokeWidth(mGrosorActual);
+        p.setStrokeCap(Paint.Cap.ROUND);
+        p.setStrokeJoin(Paint.Join.ROUND);
 
-    public void setGrosor(float nuevoGrosor) {
-        this.mGrosorActual = nuevoGrosor;
-        // No es necesario recrear mCurrentPaint aquí, se hará en ACTION_DOWN
-    }
-
-    // Método para redibujar todos los trazos en el bitmap persistente
-    private void redrawAllPaths() {
-        if (mBitmap != null && mCanvas != null) {
-            mBitmap.eraseColor(Color.WHITE); // Limpiar completamente el bitmap
-            for (int i = 0; i < mPaths.size(); i++) {
-                mCanvas.drawPath(mPaths.get(i), mPaints.get(i));
-            }
+        if (herramientaActual.equals("RESALTADOR")) {
+            p.setAlpha(80);
+            p.setStrokeCap(Paint.Cap.SQUARE);
+        } else if (herramientaActual.equals("ERASER")) {
+            p.setColor(Color.WHITE);
         }
-        invalidate(); // Solicita redibujar la vista con el nuevo bitmap
+        return p;
     }
-    
-    public float getGrosorActual() {
-    return mGrosorActual; // Esta es la variable float que definimos antes
-    }
-    
+
     public void setModo(String modo) {
-    switch (modo) {
-        case "PEN":
-            mColorActual = Color.BLACK;
-            mGrosorActual = 10f;
-            break;
-        case "MARKER":
-            mColorActual = Color.parseColor("#40FFFF00"); // Amarillo transparente
-            mGrosorActual = 40f;
-            break;
-        case "ERASER":
-            mColorActual = Color.WHITE;
-            mGrosorActual = 60f;
-            break;
-    }
-    }
-    public void cargarFondo(Bitmap bitmap) {
-    // Esperamos a que el lienzo tenga tamaño
-    this.post(() -> {
-        if (mBitmap != null && mCanvas != null) {
-            // Creamos una copia escalada para que encaje perfecto
-            Bitmap escalado = Bitmap.createScaledBitmap(bitmap, getWidth(), getHeight(), true);
-            mCanvas.drawBitmap(escalado, 0, 0, null);
-            invalidate();
+        if (this.herramientaActual.equals("SELECTION") && !modo.equals("SELECTION")) {
+            objetoSeleccionado = null;
+            redrawAllPaths();
         }
-    });
+        this.herramientaActual = modo;
     }
 
+    private float dist(float x1, float y1, float x2, float y2) {
+        return (float) Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
+    }
+
+    private class DibujoObjeto {
+        Path pathOriginal, pathTransformado;
+        Paint paint;
+        Matrix matrix = new Matrix();
+        RectF bounds = new RectF();
+
+        DibujoObjeto(Path p, Paint pt) {
+            this.pathOriginal = new Path(p);
+            this.pathTransformado = new Path(p);
+            this.paint = new Paint(pt);
+            actualizarBounds();
+        }
+
+        void actualizarBounds() {
+            pathTransformado.set(pathOriginal);
+            pathTransformado.transform(matrix);
+            pathTransformado.computeBounds(bounds, true);
+        }
+    }
 }

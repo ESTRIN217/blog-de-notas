@@ -155,35 +155,38 @@
          android:gravity="center_vertical"
          android:elevation="8dp"
          android:paddingVertical="4dp"
-         android:orientation="horizontal"
-         android:padding="10dp">
+         android:padding="10dp"
+         android:orientation="horizontal">
 
         <ImageView
              android:layout_height="48dp"
              android:layout_width="48dp"
              android:src="@drawable/outline_add_box"
-             android:background="?attr/selectableItemBackgroundBorderless"
+             android:background="@drawable/borde_bottom"
              android:padding="12dp"
              app:tint="?attr/colorOnSurface"
-             android:id="@+id/añadir" />
+             android:id="@+id/añadir"
+             android:foreground="?attr/selectableItemBackgroundBorderless" />
 
         <ImageView
              android:layout_height="48dp"
              android:layout_width="48dp"
              android:src="@drawable/outline_palette"
-             android:background="?attr/selectableItemBackgroundBorderless"
+             android:background="@drawable/borde_bottom"
              android:padding="12dp"
              app:tint="?attr/colorOnSurface"
-             android:id="@+id/paleta" />
+             android:id="@+id/paleta"
+             android:foreground="?attr/selectableItemBackgroundBorderless" />
 
         <ImageView
              android:layout_height="48dp"
              android:layout_width="48dp"
              android:src="@drawable/text_format"
-             android:background="?attr/selectableItemBackgroundBorderless"
+             android:background="@drawable/borde_bottom"
              android:padding="12dp"
              app:tint="?attr/colorOnSurface"
-             android:id="@+id/text_style" />
+             android:id="@+id/text_style"
+             android:foreground="?attr/selectableItemBackgroundBorderless" />
 
     </LinearLayout>
 

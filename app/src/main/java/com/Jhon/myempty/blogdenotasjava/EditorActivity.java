@@ -37,6 +37,7 @@ import androidx.appcompat.app.AppCompatDelegate;
 import androidx.documentfile.provider.DocumentFile;
 
 import com.google.android.material.color.DynamicColors;
+import com.google.android.material.color.MaterialColors;
 import android.media.MediaRecorder;
 import android.Manifest;
 import android.content.pm.PackageManager;
@@ -237,66 +238,63 @@ public class EditorActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        SharedPreferences prefs = getSharedPreferences("MisPreferencias", MODE_PRIVATE);
-        // Al seleccionar un color en la paleta:
-        String nombreNota = "nota1"; // El nombre de tu archivo
-        int colorSeleccionado = Color.parseColor("#FFAFA8");
-        prefs = getSharedPreferences("EstilosNotas", MODE_PRIVATE);
-        prefs.edit().putInt(nombreNota + "_fondo", colorSeleccionado).apply();
+    // 1. Cargar Preferencias GENERALES (Solo para Tema y Material You)
+    SharedPreferences prefs = getSharedPreferences("MisPreferencias", MODE_PRIVATE);
 
-        // A. Aplicar Tema
-        int temaGuardado = prefs.getInt("tema_elegido", AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM);
-        AppCompatDelegate.setDefaultNightMode(temaGuardado);
+    // A. Aplicar Tema
+    int temaGuardado = prefs.getInt("tema_elegido", AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM);
+    AppCompatDelegate.setDefaultNightMode(temaGuardado);
 
-        // B. Aplicar Colores Dinámicos
-        if (prefs.getBoolean("material_theme_activado", false)) {
-            DynamicColors.applyToActivityIfAvailable(this);
-        }
-        
-        androidx.activity.EdgeToEdge.enable(this);
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.editor); 
+    // B. Aplicar Colores Dinámicos
+    if (prefs.getBoolean("material_theme_activado", false)) {
+        DynamicColors.applyToActivityIfAvailable(this);
+    }
+    
+    // 2. Configuración de UI
+    androidx.activity.EdgeToEdge.enable(this);
+    super.onCreate(savedInstanceState);
+    setContentView(R.layout.editor); 
 
-        inicializarVistas(); // Initialize views before handling intent
-        manejarIntent(); 
-        
-        establecerFecha();
-        configurarBotones();
+    inicializarVistas(); 
+    manejarIntent(); 
+    
+    establecerFecha();
+    configurarBotones();
 
-        // Cargar nota si la URI existe, sino es una nota nueva
-        if (uriArchivoActual != null) {
-            cargarNotaSAF();
-        } else {
-            txtTitulo.setText("Nueva Nota");
-        }
-        int colorFondo = prefs.getInt(nombreNota + "_fondo", Color.WHITE);
-        background.setBackgroundColor(colorFondo);
+    // 3. Lógica de carga
+    // NOTA: Ya no configuramos el color aquí. 'cargarNotaSAF()' se encarga de
+    // leer el HTML y pintar el fondo automáticamente.
+    if (uriArchivoActual != null) {
+        cargarNotaSAF();
+    } else {
+        txtTitulo.setText("Nueva Nota");
+    }
 
-        // Inicializar historial para Deshacer/Rehacer
-        if (historial.isEmpty()) {
-            historial.add(txtNota.getText().toString());
-            posicionHistorial = 0;
-        }
-        aplicarPreferenciasVisuales();
-        // 2. Inicializar en onCreate
-        seleccionarImagenLauncher = registerForActivityResult(
-            new ActivityResultContracts.GetContent(),
-            uri -> {
-                if (uri != null) {
-                    insertarFotoEnNota(uri); // Use the new method
-                    Toast.makeText(this, "Imagen seleccionada: " + uri.getLastPathSegment(), Toast.LENGTH_SHORT).show();
-                    }
+    // 4. Inicializar historial
+    if (historial.isEmpty()) {
+        historial.add(txtNota.getText().toString());
+        posicionHistorial = 0;
+    }
+    
+    // 5. Launchers de Imágenes
+    seleccionarImagenLauncher = registerForActivityResult(
+        new ActivityResultContracts.GetContent(),
+        uri -> {
+            if (uri != null) {
+                insertarFotoEnNota(uri);
+                Toast.makeText(this, "Imagen seleccionada", Toast.LENGTH_SHORT).show();
             }
-        );
+        }
+    );
 
-        tomarFotoLauncher = registerForActivityResult(
+    tomarFotoLauncher = registerForActivityResult(
         new ActivityResultContracts.TakePicture(),
         success -> {
-        if (success && uriFotoActual != null) {
-            insertarFotoEnNota(uriFotoActual); // Use the new method
-            Toast.makeText(this, "Foto añadida", Toast.LENGTH_SHORT).show();
+            if (success && uriFotoActual != null) {
+                insertarFotoEnNota(uriFotoActual);
+                Toast.makeText(this, "Foto añadida", Toast.LENGTH_SHORT).show();
+            }
         }
-    }
     );
     }
 
@@ -461,10 +459,12 @@ public class EditorActivity extends AppCompatActivity {
     View btnGaleria = layout.findViewById(R.id.btnAbrirGaleriaFondo);
     View btnPapel = layout.findViewById(R.id.fondo_papel);
 
-    // 2. Lógica del botón "Default" (Quitar fondo/color)
+    // 2. Lógica del botón "Default" ( fondo predeterminado/color)
     btnDefault.setOnClickListener(view -> {
-        background.setBackgroundColor(Color.TRANSPARENT); // O Color.WHITE
-        bottomSheetPaleta.dismiss();
+    int colorSistema = Color.WHITE;
+    
+    aplicarColorFondoDinamico(colorSistema);
+    bottomSheetPaleta.dismiss();
     });
 
     // 3. Generar Círculos de Colores Programáticamente
@@ -588,6 +588,23 @@ public class EditorActivity extends AppCompatActivity {
     dialogTextStyle.show();
     });
     }
+    // Método para extraer el color hexadecimal del HTML
+    private int extraerColorDeHtml(String htmlContent) {
+    try {
+        // Buscamos el patrón: background-color: #XXXXXX;
+        java.util.regex.Pattern pattern = java.util.regex.Pattern.compile("background-color:\\s*(#[0-9A-Fa-f]{6,8})");
+        java.util.regex.Matcher matcher = pattern.matcher(htmlContent);
+
+        if (matcher.find()) {
+            // Si encontramos el color, lo convertimos a entero
+            return android.graphics.Color.parseColor(matcher.group(1));
+        }
+    } catch (Exception e) {
+        e.printStackTrace();
+    }
+    // Si no se encuentra color o falla, devolvemos TRANSPARENT o WHITE
+    return android.graphics.Color.TRANSPARENT; 
+    }
 
     private void cargarNotaSAF() {
     if (uriArchivoActual == null) return;
@@ -602,20 +619,25 @@ public class EditorActivity extends AppCompatActivity {
 
     StringBuilder contentBuilder = new StringBuilder();
     try {
-        // 2. Leer el archivo (que ahora contiene etiquetas HTML)
+        // 2. Leer el archivo (HTML)
         try (InputStream is = getContentResolver().openInputStream(uriArchivoActual);
              BufferedReader br = new BufferedReader(new InputStreamReader(is))) {
             
             String line;
             while ((line = br.readLine()) != null) {
-                contentBuilder.append(line); // No añadimos \n extra porque el HTML ya maneja saltos
+                contentBuilder.append(line);
             }
         }
         
-        // 3. Convertir HTML a texto con formato (Spannable)
-        esCambioProgramatico = true;
         String stringFinal = contentBuilder.toString();
         
+        // 3. LÓGICA DE FONDO DINÁMICO
+        // Extraemos el color y dejamos que 'aplicarColorFondoDinamico' decida el contraste
+        int colorDetectado = extraerColorDeHtml(stringFinal);
+        aplicarColorFondoDinamico(colorDetectado);
+
+        // 4. Convertir HTML a texto visual
+        esCambioProgramatico = true;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
             txtNota.setText(Html.fromHtml(stringFinal, Html.FROM_HTML_MODE_LEGACY));
         } else {
@@ -623,17 +645,11 @@ public class EditorActivity extends AppCompatActivity {
         }
         esCambioProgramatico = false;
         
-        // 4. PERSISTENCIA DE COLOR: Cargar el fondo de esta nota específica
+        // 5. Configurar Título y Adjuntos
         if (archivoActualSAF != null && archivoActualSAF.getName() != null) {
             String nombreNota = archivoActualSAF.getName();
             txtTitulo.setText(nombreNota.replace(".txt", ""));
 
-            // Recuperar el color guardado para esta nota
-            SharedPreferences prefs = getSharedPreferences("EstilosNotas", MODE_PRIVATE);
-            int colorFondo = prefs.getInt(nombreNota + "_fondo", Color.WHITE); // Blanco por defecto
-            background.setBackgroundColor(colorFondo);
-            
-            // 5. Cargar Recursos (Fotos, Audios)
             if (carpetaUriPadre != null) {
                 Uri rootUri = Uri.parse(carpetaUriPadre);
                 DocumentFile carpetaRaiz = DocumentFile.fromTreeUri(this, rootUri);
@@ -660,10 +676,26 @@ public class EditorActivity extends AppCompatActivity {
         return;
     }
 
-    // 1. Convertir texto con formato a HTML
-    String contenidoHtml = Html.toHtml(txtNota.getText()); 
+    // 1. Obtener HTML del texto
+    String contenidoHtml = Html.toHtml(txtNota.getText());
     String titulo = txtTitulo.getText().toString().trim();
     if (titulo.isEmpty()) titulo = "Sin_titulo";
+
+    // --- NUEVA LÓGICA: COLOR DENTRO DEL HTML ---
+    // a) Obtener el color actual del 'background'
+    int colorActual = android.graphics.Color.TRANSPARENT;
+    if (background.getBackground() instanceof android.graphics.drawable.ColorDrawable) {
+        colorActual = ((android.graphics.drawable.ColorDrawable) background.getBackground()).getColor();
+    }
+
+    // b) Convertir color a Hexadecimal (ej: #FFAFA8)
+    // El 0xFFFFFF & colorActual asegura que el formato sea correcto
+    String hexColor = String.format("#%06X", (0xFFFFFF & colorActual));
+
+    // c) Envolver el contenido en un DIV con el estilo background-color
+    // Este string es lo que realmente se escribirá en el archivo
+    String htmlParaGuardar = "<div style='background-color:" + hexColor + ";'>" + contenidoHtml + "</div>";
+
 
     try {
         DocumentFile rootDoc = null;
@@ -690,34 +722,18 @@ public class EditorActivity extends AppCompatActivity {
             }
         }
 
-        // --- BLOQUE 2: GUARDAR TEXTO (HTML) ---
+        // --- BLOQUE 2: GUARDAR EL HTML COMPLETO ---
         if (uriArchivoActual != null) {
             try (OutputStream os = getContentResolver().openOutputStream(uriArchivoActual, "wt")) {
-                // USAMOS contenidoHtml AQUÍ
-                os.write(contenidoHtml.getBytes());
+                // AQUÍ USAMOS LA VERSIÓN CON EL COLOR INCRUSTADO
+                os.write(htmlParaGuardar.getBytes());
             }
 
             archivoActualSAF = DocumentFile.fromSingleUri(this, uriArchivoActual);
 
-            // --- BLOQUE 3: PERSISTENCIA DE COLOR DE FONDO ---
-            if (archivoActualSAF != null) {
-                String nombreNota = archivoActualSAF.getName();
-                
-                // Guardamos el color de fondo actual en SharedPreferences usando el nombre del archivo
-                // Suponiendo que tienes una variable 'colorFondoActual' que se actualiza en la paleta
-                // Si no, podemos obtenerlo directamente del fondo del txtNota si es un ColorDrawable
-                int colorActual = Color.TRANSPARENT;
-                if (background.getBackground() instanceof android.graphics.drawable.ColorDrawable) {
-                    colorActual = ((android.graphics.drawable.ColorDrawable) background.getBackground()).getColor();
-                }
-
-                SharedPreferences prefs = getSharedPreferences("EstilosNotas", MODE_PRIVATE);
-                prefs.edit().putInt(nombreNota + "_fondo", colorActual).apply();
-
-                // --- BLOQUE 4: GUARDAR IMÁGENES ---
-                if (rootDoc != null) {
-                     guardarImagenesEnCarpetaNota(rootDoc, nombreNota);
-                }
+            // --- BLOQUE 3: GUARDAR IMÁGENES (SharedPreferences ELIMINADO) ---
+            if (archivoActualSAF != null && rootDoc != null) {
+                 guardarImagenesEnCarpetaNota(rootDoc, archivoActualSAF.getName());
             }
         }
 
@@ -878,54 +894,7 @@ public class EditorActivity extends AppCompatActivity {
         } catch (Exception ignored) {}
         esCambioProgramatico = false;
     }
-    private void aplicarPreferenciasVisuales() {
-    SharedPreferences prefs = getSharedPreferences("MisPreferencias", MODE_PRIVATE);
     
-    // 1. Aplicar Tamaño de Fuente al cuerpo de la nota
-    float fontSize = prefs.getFloat("editor_font_size", 16f);
-    if (txtNota != null) {
-        txtNota.setTextSize(fontSize);
-    }
-
-    // 2. Configurar colores según el modo
-    int bgMode = prefs.getInt("editor_bg_mode", 0);
-    int colorFondo;
-    int colorTexto;
-
-    switch (bgMode) {
-        case 1: // Modo Papel (Crema)
-            colorFondo = 0xFFFFF8E1; 
-            colorTexto = 0xFF3E2723; // Marrón oscuro para mejor lectura
-            break;
-        case 2: // Modo Negro Puro (OLED)
-            colorFondo = 0xFF000000;
-            colorTexto = 0xFFFFFFFF; // Blanco puro
-            break;
-        default: 
-            // Si es modo sistema, no forzamos colores y salimos
-            return; 
-    }
-
-    // 3. Aplicar a los componentes (Validando que no sean nulos)
-    if (background != null) {
-        background.setBackgroundColor(colorFondo);
-    }
-    
-    if (txtNota != null) {
-        txtNota.setTextColor(colorTexto);
-        // Quitamos el fondo propio del EditText para que sea transparente
-        txtNota.setBackgroundColor(android.graphics.Color.TRANSPARENT);
-    }
-
-    // NUEVO: Ajustar también Título y Fecha para que no se pierdan con el fondo
-    if (txtTitulo != null) {
-        txtTitulo.setTextColor(colorTexto);
-        txtTitulo.setBackgroundColor(android.graphics.Color.TRANSPARENT);
-    }
-    if (lblFecha != null) {
-        lblFecha.setTextColor(colorTexto);
-    }
-    }
     private void insertarFechaHoraEnCursor() {
     // 1. Obtener fecha y hora actual con el formato deseado
     String fechaHora = new SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault()).format(new Date());
@@ -1286,5 +1255,42 @@ public class EditorActivity extends AppCompatActivity {
     } else {
         Log.d("CARGA", "No se encontró carpeta de recursos: " + nombreCarpeta);
     }
+    }
+    private void aplicarColorFondoDinamico(int color) {
+    // 1. CORRECCIÓN: Si el color recibido es transparente (0), asignamos blanco (o el del tema)
+    if (color == Color.TRANSPARENT) {
+        color = Color.WHITE; 
+        // Opción PRO para Material You: 
+        // color = com.google.android.material.color.MaterialColors.getColor(txtNota, com.google.android.material.R.attr.colorSurfaceContainer);
+    }
+
+    // 2. Aplicar el color al layout principal
+    background.setBackgroundColor(color);
+
+    // 3. Calcular luminancia (0.0 es negro puro, 1.0 es blanco puro)
+    double luminancia = androidx.core.graphics.ColorUtils.calculateLuminance(color);
+
+    // 4. Determinar color de contraste
+    // Si el fondo es claro (> 0.5), texto oscuro (#1C1B1F es "Black" suave de Material)
+    // Si el fondo es oscuro (< 0.5), texto blanco
+    int colorInterfaz = (luminancia > 0.5) ? Color.parseColor("#1C1B1F") : Color.WHITE;
+
+    // 5. Aplicar a todos los elementos de texto
+    txtNota.setTextColor(colorInterfaz);
+    txtTitulo.setTextColor(colorInterfaz);
+    
+    // Verificamos nulos por seguridad
+    if (lblFecha != null) lblFecha.setTextColor(colorInterfaz);
+    
+    // 6. Aplicar a los iconos (importante para que no desaparezcan)
+    if (btnAtras != null) btnAtras.setColorFilter(colorInterfaz);
+    if (menu != null) menu.setColorFilter(colorInterfaz);
+    
+    // 7. Estética final
+    txtNota.setHintTextColor(colorInterfaz);
+    
+    // Nota: El alpha en el texto principal puede dificultar la lectura bajo el sol.
+    // Yo recomendaría dejarlo en 1.0f (opaco) o 0.9f como máximo.
+    txtNota.setAlpha(1.0f); 
     }
 }

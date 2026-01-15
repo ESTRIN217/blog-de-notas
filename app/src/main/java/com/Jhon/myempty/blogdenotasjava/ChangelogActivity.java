@@ -6,6 +6,9 @@ import androidx.recyclerview.widget.RecyclerView;
 import androidx.appcompat.app.AppCompatActivity;
 import android.widget.ImageView;
 import androidx.activity.EdgeToEdge;
+import com.google.android.material.textview.MaterialTextView;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import com.Jhon.myempty.blogdenotasjava.Cambio;
 import java.util.List;
 import java.util.ArrayList;
@@ -26,6 +29,21 @@ public class ChangelogActivity extends AppCompatActivity {
         List<Cambio> listaCambios = new ArrayList<>();
         
         // AQUÍ AGREGAS TUS VERSIONES
+        listaCambios.add(new Cambio("1.7.0 Editor", "14 de enero de 2026", "1. Evolución del Motor de Dibujo\n" +
+        "Hemos migrado de un sistema simple de 'pintar y olvidar' a un Sistema Basado en Objetos (DibujoObjeto).\n" +
+        "Independencia: Cada trazo ahora es un objeto con su propia Matrix, Path original y Paint.\n" +
+        "Transformaciones No Destructivas: Al usar matrices, podemos rotar y escalar los dibujos sin que pierdan calidad ni se deforme el trazo original.\n" +
+        "2. Implementación del Modo Selección\n" +
+        "Se ha creado una lógica de interacción avanzada que reconoce 10 puntos de contacto distintos:\n" +
+        "4 Esquinas: Para escalado proporcional.\n" +
+        "1 Punto Superior: Para rotación libre.\n" +
+        "1 Centro del Objeto: Para desplazamiento (traslación) por el lienzo.\n" +
+        "Detección por Colisión: El sistema ahora detecta cuál es el último objeto que tocaste mediante el método detectarSeleccion.\n" +
+        "3. Resolución de Errores Críticos\n" +
+        "Corregimos los 10 errores de compilación que surgieron en DibujoActivity. Estos errores se debían a la falta de métodos públicos en la nueva versión de LienzoView. Restauramos y adaptamos:\n" +
+        "setColor() y setGrosor() para el control de pinceles.\n" +
+        "Sistema de Deshacer/Rehacer compatible con la nueva lista de objetos.\n" +
+        "Método cargarFondo() para la edición de imágenes externas."));
         listaCambios.add(new Cambio("1.6.0 Editor", "12 de enero de 2026", "Mejoras en la UI.\n" + 
         "Mejoras en el menú de Añadir.\n" + 
         "Añadido el menú para seleccionar color / imagen de fondo.\n" + 
@@ -107,5 +125,17 @@ public class ChangelogActivity extends AppCompatActivity {
         btnAtras.setOnClickListener(v -> {
             finish();
         });
+        // 1. Referenciar el TextView
+        MaterialTextView txtVersion = findViewById(R.id.txtVersionActualInfo);
+        try {
+            // 2. Obtener la información del paquete
+            String nombreVersion = getPackageManager()
+            .getPackageInfo(getPackageName(), 0).versionName;
+            // 3. Mostrarla en el TextView
+            txtVersion.setText("Versión actual: " + nombreVersion);
+        } catch (Exception e) {
+            e.printStackTrace();
+            txtVersion.setText("Versión: 1.0.0"); // Valor por defecto si algo falla
+            }
     }
 }
