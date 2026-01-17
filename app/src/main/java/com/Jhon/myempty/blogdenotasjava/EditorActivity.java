@@ -1321,7 +1321,6 @@ public class EditorActivity extends AppCompatActivity {
     
     // 6. Aplicar a los iconos (importante para que no desaparezcan)
     if (btnAtras != null) btnAtras.setColorFilter(colorInterfaz);
-    if (menu != null) menu.setColorFilter(colorInterfaz);
     
     // 7. Estética final
     txtNota.setHintTextColor(colorInterfaz);

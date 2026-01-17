@@ -46,7 +46,7 @@ public class ChangelogActivity extends AppCompatActivity {
         "3. Ajustes de Layout y Teclado\n" +
         "Barra de Iconos Elevada: Configuramos el AndroidManifest.xml con windowSoftInputMode='adjustResize'.\n" +
         
-        "Estructura XML: Organizamos el editor.xml para que el NestedScrollView use layout_weight="1". Esto garantiza que los iconos de la paleta y estilo se mantengan siempre visibles, pegados justo encima del teclado cuando este aparece."));
+        "Estructura XML: Organizamos el editor.xml para que el NestedScrollView use layout_weight='1'. Esto garantiza que los iconos de la paleta y estilo se mantengan siempre visibles, pegados justo encima del teclado cuando este aparece."));
         listaCambios.add(new Cambio("1.7.0 Editor", "14 de enero de 2026", "1. Evolución del Motor de Dibujo\n" +
         "Hemos migrado de un sistema simple de 'pintar y olvidar' a un Sistema Basado en Objetos (DibujoObjeto).\n" +
         "Independencia: Cada trazo ahora es un objeto con su propia Matrix, Path original y Paint.\n" +
