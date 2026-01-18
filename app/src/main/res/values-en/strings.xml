@@ -5,9 +5,9 @@
     <string name="opciones_de_configuración">Configuration Options</string>
     <string name="material_you">Material you </string>
     <string name="opciones_de_apariencia">Appearance options:</string>
-    <string name="claro">Theme clear</string>
-    <string name="oscuro">Theme dark</string>
-    <string name="usar_configuración_del_sistema">Use system settings</string>
+    <string name="claro">Off</string>
+    <string name="oscuro">On</string>
+    <string name="usar_configuración_del_sistema">Follow system</string>
     <string name="editor_de_texto">Text Editor</string>
     <string name="tamaño_de_letra">Font size</string>
     <string name="color_de_fondo">Background color</string>

@@ -5,8 +5,8 @@
     <string name="opciones_de_configuración">Configuración</string>
     <string name="material_you">Activar tema dinamico</string>
     <string name="opciones_de_apariencia">Apariencia:</string>
-    <string name="claro">Tema claro</string>
-    <string name="oscuro">Tema oscuro</string>
+    <string name="claro">Apagado</string>
+    <string name="oscuro">Encendido</string>
     <string name="usar_configuración_del_sistema">Seguir sistema</string>
     <string name="editor_de_texto">Editor de Texto</string>
     <string name="tamaño_de_letra">Tamaño de letra</string>

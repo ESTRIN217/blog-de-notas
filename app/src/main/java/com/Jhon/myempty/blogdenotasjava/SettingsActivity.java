@@ -32,23 +32,34 @@ public class SettingsActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
+    prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
 
-        // 1. Configuración Previa (Tema y Colores)
-        int temaGuardado = prefs.getInt(KEY_THEME, AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM);
-        AppCompatDelegate.setDefaultNightMode(temaGuardado);
+    // 1. Configuración Previa (Tema y Colores) - DEBE ir antes de super.onCreate
+    int temaGuardado = prefs.getInt(KEY_THEME, AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM);
+    AppCompatDelegate.setDefaultNightMode(temaGuardado);
 
-        if (prefs.getBoolean(KEY_MATERIAL_SWITCH, false)) {
-            DynamicColors.applyToActivityIfAvailable(this);
-        }
-        androidx.activity.EdgeToEdge.enable(this);
+    if (prefs.getBoolean(KEY_MATERIAL_SWITCH, false)) {
+        DynamicColors.applyToActivityIfAvailable(this);
+    }
+    
+    // Habilitar EdgeToEdge también se recomienda antes de super o justo después
+    androidx.activity.EdgeToEdge.enable(this);
 
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.settings); 
+    super.onCreate(savedInstanceState);
+    setContentView(R.layout.settings); 
 
-        inicializarVistas();
-        cargarPreferencias();
-        configurarListeners();
+    // 2. Inicializar las vistas primero - AHORA las variables ya no son null
+    inicializarVistas(); 
+
+    // 3. Configurar el estado del Switch después de inicializarlo
+    boolean isMaterial = prefs.getBoolean(KEY_MATERIAL_SWITCH, false);
+    if (switchMaterialTheme != null) { // Verificación de seguridad
+        switchMaterialTheme.setChecked(isMaterial);
+        switchMaterialTheme.setThumbIconResource(isMaterial ? R.drawable.round_check : R.drawable.close_24px);
+    }
+
+    cargarPreferencias();
+    configurarListeners();
     }
 
     private void inicializarVistas() {
@@ -87,9 +98,21 @@ public class SettingsActivity extends AppCompatActivity {
         });
 
         switchMaterialTheme.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            prefs.edit().putBoolean(KEY_MATERIAL_SWITCH, isChecked).apply();
-            Toast.makeText(this, isChecked ? "Colores dinámicos activados" : "Desactivados", Toast.LENGTH_SHORT).show();
-            recreate();
+    // 1. Verificar si el valor es realmente diferente al guardado
+    // Esto evita que recreate() se dispare cuando el onCreate inicializa el switch
+    boolean valorActual = prefs.getBoolean(KEY_MATERIAL_SWITCH, false);
+    if (isChecked == valorActual) return; 
+
+    // 2. Guardar preferencia
+    prefs.edit().putBoolean(KEY_MATERIAL_SWITCH, isChecked).apply();
+
+    // 3. Actualizar el icono visualmente
+    switchMaterialTheme.setThumbIconResource(isChecked ? R.drawable.round_check : R.drawable.close_24px);
+
+    Toast.makeText(this, isChecked ? "Colores dinámicos activados" : "Desactivados", Toast.LENGTH_SHORT).show();
+
+    // 4. Recrear con un ligero delay para que se vea la animación del switch
+    new android.os.Handler().postDelayed(this::recreate, 250);
         });
 
         novedades.setOnClickListener(v -> {
