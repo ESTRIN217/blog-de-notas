@@ -19,8 +19,8 @@
          android:id="@+id/barraSuperior">
 
         <ImageView
-             android:layout_height="48dp"
-             android:layout_width="48dp"
+             android:layout_height="40dp"
+             android:layout_width="40dp"
              android:contentDescription="Volver atrás"
              android:src="@drawable/arrow_back_24px"
              android:background="?attr/selectableItemBackgroundBorderless"
@@ -33,35 +33,35 @@
              android:layout_weight="1" />
 
         <ImageView
-             android:layout_height="48dp"
-             android:layout_width="48dp"
+             android:layout_height="40dp"
+             android:layout_width="40dp"
              android:src="@drawable/undo_24px"
-             android:layout_marginEnd="10dp"
+             android:layout_marginEnd="5dp"
              android:background="@drawable/bottom_background"
              android:padding="12dp"
              android:id="@+id/btnDeshacer" />
 
         <ImageView
-             android:layout_height="48dp"
-             android:layout_width="48dp"
+             android:layout_height="40dp"
+             android:layout_width="40dp"
              android:src="@drawable/redo_24px"
-             android:layout_marginEnd="10dp"
+             android:layout_marginEnd="5dp"
              android:background="@drawable/bottom_background"
              android:padding="12dp"
              android:id="@+id/btnRehacer" />
 
         <ImageView
-             android:layout_height="48dp"
-             android:layout_width="48dp"
+             android:layout_height="40dp"
+             android:layout_width="40dp"
              android:src="@drawable/save_24px"
-             android:layout_marginEnd="10dp"
+             android:layout_marginEnd="5dp"
              android:background="@drawable/bottom_background"
              android:padding="12dp"
              app:tint="?attr/colorPrimary"
              android:id="@+id/btnGuardar" />
 
         <ImageView
-             android:layout_height="48dp"
+             android:layout_height="40dp"
              android:layout_width="38dp"
              android:src="@drawable/more_vert"
              android:background="@drawable/bottom_background"
@@ -160,26 +160,26 @@
          android:orientation="horizontal">
 
         <ImageView
-             android:layout_height="48dp"
-             android:layout_width="48dp"
-             android:layout_marginEnd="10dp"
+             android:layout_height="40dp"
+             android:layout_width="40dp"
+             android:layout_marginEnd="5dp"
              android:src="@drawable/outline_add_box"
              android:background="@drawable/bottom_background_circle"
              android:padding="12dp"
              android:id="@+id/añadir" />
 
         <ImageView
-             android:layout_height="48dp"
-             android:layout_width="48dp"
-             android:layout_marginEnd="10dp"
+             android:layout_height="40dp"
+             android:layout_width="40dp"
+             android:layout_marginEnd="5dp"
              android:src="@drawable/outline_palette"
              android:background="@drawable/bottom_background_circle"
              android:padding="12dp"
              android:id="@+id/paleta" />
 
         <ImageView
-             android:layout_height="48dp"
-             android:layout_width="48dp"
+             android:layout_height="40dp"
+             android:layout_width="40dp"
              android:src="@drawable/text_format"
              android:background="@drawable/bottom_background_circle"
              android:padding="12dp"
