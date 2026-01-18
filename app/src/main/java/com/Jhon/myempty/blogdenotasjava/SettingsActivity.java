@@ -13,7 +13,7 @@ import androidx.appcompat.app.AppCompatDelegate;
 
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.color.DynamicColors;
-import com.google.android.material.switchmaterial.SwitchMaterial;
+import com.google.android.material.materialswitch.MaterialSwitch;
 
 public class SettingsActivity extends AppCompatActivity {
 
@@ -21,7 +21,7 @@ public class SettingsActivity extends AppCompatActivity {
     private ImageView btnAtras;
     private RadioGroup grupoTema;
     private RadioButton rbClaro, rbOscuro, rbSistema;
-    private SwitchMaterial switchMaterialTheme;
+    private MaterialSwitch switchMaterialTheme;
     private MaterialButton novedades;
 
     // Preferencias

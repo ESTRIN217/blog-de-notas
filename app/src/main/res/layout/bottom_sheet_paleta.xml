@@ -80,7 +80,7 @@
                      android:background="@drawable/borde_redondeado"
                      android:padding="12dp" />
 
-                <TextView
+                <com.google.android.material.textview.MaterialTextView
                      android:layout_height="wrap_content"
                      android:layout_width="wrap_content"
                      android:textSize="10sp"
