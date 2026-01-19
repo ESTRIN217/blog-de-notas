@@ -24,7 +24,7 @@
              android:contentDescription="Volver atrás"
              android:src="@drawable/arrow_back_24px"
              android:background="?attr/selectableItemBackgroundBorderless"
-             android:padding="12dp"
+             android:padding="8dp"
              android:id="@+id/btnAtras" />
 
         <Space
@@ -32,40 +32,40 @@
              android:layout_width="wrap_content"
              android:layout_weight="1" />
 
-        <ImageView
+        <Button
              android:layout_height="40dp"
              android:layout_width="40dp"
-             android:src="@drawable/undo_24px"
+             app:icon="@drawable/undo_24px"
              android:layout_marginEnd="5dp"
-             android:background="@drawable/bottom_background"
-             android:padding="12dp"
+             app:materialSizeOverlay="@style/SizeOverlay.Material3Expressive.Button.IconButton.{Small}.Square"
+             style="?attr/materialIconButtonFilledStyle"
              android:id="@+id/btnDeshacer" />
 
-        <ImageView
+        <Button
              android:layout_height="40dp"
              android:layout_width="40dp"
-             android:src="@drawable/redo_24px"
+             app:icon="@drawable/redo_24px"
              android:layout_marginEnd="5dp"
-             android:background="@drawable/bottom_background"
-             android:padding="12dp"
+             app:materialSizeOverlay="@style/SizeOverlay.Material3Expressive.Button.IconButton.{Small}.Square"
+             style="?attr/materialIconButtonFilledStyle"
              android:id="@+id/btnRehacer" />
 
-        <ImageView
+        <Button
              android:layout_height="40dp"
              android:layout_width="40dp"
-             android:src="@drawable/save_24px"
+             app:icon="@drawable/save_24px"
              android:layout_marginEnd="5dp"
-             android:background="@drawable/bottom_background"
-             android:padding="12dp"
+             app:materialSizeOverlay="@style/SizeOverlay.Material3Expressive.Button.IconButton.{Small}.Square"
              app:tint="?attr/colorPrimary"
+             style="?attr/materialIconButtonFilledStyle"
              android:id="@+id/btnGuardar" />
 
-        <ImageView
+        <Button
              android:layout_height="40dp"
              android:layout_width="38dp"
-             android:src="@drawable/more_vert"
-             android:background="@drawable/bottom_background"
-             android:padding="8dp"
+             app:icon="@drawable/more_vert"
+             app:materialSizeOverlay="@style/SizeOverlay.Material3Expressive.Button.IconButton.{Small}.Square"
+             style="?attr/materialIconButtonFilledStyle"
              android:id="@+id/menu" />
 
     </LinearLayout>
@@ -159,30 +159,28 @@
          android:padding="10dp"
          android:orientation="horizontal">
 
-        <ImageView
+        <Button
              android:layout_height="40dp"
              android:layout_width="40dp"
+             app:icon="@drawable/outline_add_box"
              android:layout_marginEnd="5dp"
-             android:src="@drawable/outline_add_box"
-             android:background="@drawable/bottom_background_circle"
-             android:padding="12dp"
+             style="?attr/materialIconButtonFilledStyle"
              android:id="@+id/añadir" />
 
-        <ImageView
+        <Button
              android:layout_height="40dp"
              android:layout_width="40dp"
+             app:icon="@drawable/outline_palette"
              android:layout_marginEnd="5dp"
-             android:src="@drawable/outline_palette"
-             android:background="@drawable/bottom_background_circle"
-             android:padding="12dp"
+             style="?attr/materialIconButtonFilledStyle"
              android:id="@+id/paleta" />
 
-        <ImageView
+        <Button
              android:layout_height="40dp"
              android:layout_width="40dp"
-             android:src="@drawable/text_format"
-             android:background="@drawable/bottom_background_circle"
-             android:padding="12dp"
+             app:icon="@drawable/text_format"
+             android:layout_marginEnd="5dp"
+             style="?attr/materialIconButtonFilledStyle"
              android:id="@+id/text_style" />
 
     </LinearLayout>

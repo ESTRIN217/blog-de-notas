@@ -4,7 +4,7 @@
     <string name="editor_de_notas">Editor de Notas</string>
     <string name="opciones_de_configuración">Configuración</string>
     <string name="material_you">Activar tema dinamico</string>
-    <string name="opciones_de_apariencia">Apariencia:</string>
+    <string name="opciones_de_apariencia">Apariencia</string>
     <string name="claro">Apagado</string>
     <string name="oscuro">Encendido</string>
     <string name="usar_configuración_del_sistema">Seguir sistema</string>
@@ -31,4 +31,5 @@
     <string name="enviar">Enviar</string>
     <string name="textura_imagen">Textura / Imagen</string>
     <string name="mostrar_cuadricula">Mostrar cuadrícula</string>
+    <string name="m3_expressive_primary_fab_content_description">Nueva Nota</string>
 </resources>
