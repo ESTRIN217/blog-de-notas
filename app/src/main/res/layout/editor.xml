@@ -18,13 +18,12 @@
          android:paddingHorizontal="8dp"
          android:id="@+id/barraSuperior">
 
-        <ImageView
-             android:layout_height="40dp"
-             android:layout_width="40dp"
+        <Button
+             android:layout_height="wrap_content"
+             android:layout_width="wrap_content"
              android:contentDescription="Volver atrás"
-             android:src="@drawable/arrow_back_24px"
-             android:background="?attr/selectableItemBackgroundBorderless"
-             android:padding="8dp"
+             app:icon="@drawable/arrow_back_24px"
+             style="?attr/materialIconButtonStyle"
              android:id="@+id/btnAtras" />
 
         <Space

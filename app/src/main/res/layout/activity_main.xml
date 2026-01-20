@@ -21,15 +21,13 @@
              android:orientation="horizontal"
              android:paddingHorizontal="8dp">
 
-            <ImageView
-                 android:layout_height="40dp"
-                 android:layout_width="40dp"
+            <Button
+                 android:layout_height="wrap_content"
+                 android:layout_width="wrap_content"
+                 app:icon="@drawable/outline_view_agenda"
+                 android:contentDescription="@string/modoVistaTargeta"
                  android:layout_marginEnd="8dp"
-                 android:src="@drawable/outline_view_agenda"
-                 android:background="?attr/selectableItemBackgroundBorderless"
-                 android:clickable="true"
-                 android:padding="8dp"
-                 android:focusable="true"
+                 style="?attr/materialIconButtonStyle"
                  android:id="@+id/modoVistaTargeta" />
 
             <com.google.android.material.textfield.TextInputLayout
@@ -54,15 +52,13 @@
 
             </com.google.android.material.textfield.TextInputLayout>
 
-            <ImageView
-                 android:layout_height="40dp"
-                 android:layout_width="40dp"
-                 android:src="@drawable/settings_24px"
-                 android:background="?attr/selectableItemBackgroundBorderless"
-                 android:clickable="true"
-                 android:padding="8dp"
+            <Button
+                 android:layout_height="wrap_content"
+                 android:layout_width="wrap_content"
+                 app:icon="@drawable/settings_24px"
+                 android:contentDescription="Volver atrás"
+                 style="?attr/materialIconButtonStyle"
                  android:layout_marginStart="8dp"
-                 android:focusable="true"
                  android:id="@+id/btnSettings" />
 
         </LinearLayout>

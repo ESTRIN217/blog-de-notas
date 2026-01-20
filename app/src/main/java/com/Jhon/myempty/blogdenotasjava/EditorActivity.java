@@ -78,8 +78,7 @@ public class EditorActivity extends AppCompatActivity {
 
     private EditText txtNota, txtTitulo;
     private TextView lblFecha, lblContador;
-    private Button  btnDeshacer, btnRehacer, btnGuardar, menu, añadir, paleta, textoEstilo;
-    private ImageView btnAtras;
+    private Button btnAtras, btnDeshacer, btnRehacer, btnGuardar, menu, añadir, paleta, textoEstilo;
     private View background;
     private LinearLayout contenedorAdjuntos; // Changed to LinearLayout
 
@@ -1322,7 +1321,6 @@ public class EditorActivity extends AppCompatActivity {
     if (lblFecha != null) lblFecha.setTextColor(colorInterfaz);
     
     // 6. Aplicar a los iconos (importante para que no desaparezcan)
-    if (btnAtras != null) btnAtras.setColorFilter(colorInterfaz);
     
     // 7. Estética final
     txtNota.setHintTextColor(colorInterfaz);

@@ -18,11 +18,10 @@ import com.google.android.material.materialswitch.MaterialSwitch;
 public class SettingsActivity extends AppCompatActivity {
 
     // Vistas
-    private ImageView btnAtras;
     private RadioGroup grupoTema;
     private RadioButton rbClaro, rbOscuro, rbSistema;
     private MaterialSwitch switchMaterialTheme;
-    private MaterialButton novedades;
+    private MaterialButton novedades, btnAtras;
 
     // Preferencias
     private SharedPreferences prefs;

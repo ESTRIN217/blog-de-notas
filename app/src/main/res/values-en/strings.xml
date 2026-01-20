@@ -31,5 +31,6 @@
     <string name="enviar">Send</string>
     <string name="textura_imagen">Texture / Image</string>
     <string name="mostrar_cuadricula">Show grid</string>
-        <string name="m3_expressive_primary_fab_content_description">New Note</string>
+    <string name="m3_expressive_primary_fab_content_description">New Note</string>
+    <string name="modoVistaTargeta">Modo de vista de la targeta</string>
 </resources>

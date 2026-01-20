@@ -9,7 +9,7 @@ import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.widget.EditText;
-import android.widget.ImageView;
+import android.widget.Button;
 import android.widget.ListView;
 import android.widget.Toast;
 import android.view.View;
@@ -40,7 +40,7 @@ public class MainActivity extends AppCompatActivity {
     private RecyclerView recyclerNotas;
     private FloatingActionButton btnNuevaNota;
     private EditText buscar;
-    private ImageView btnSettings, modoVistaTargeta;
+    private Button btnSettings, modoVistaTargeta;
 
     private List<Nota> listaDeNotasCompleta;
     private NotaAdapter adaptador;
@@ -371,7 +371,7 @@ public class MainActivity extends AppCompatActivity {
         recyclerNotas.setLayoutManager(new androidx.recyclerview.widget.StaggeredGridLayoutManager(2, androidx.recyclerview.widget.StaggeredGridLayoutManager.VERTICAL));
         
         // CAMBIAR ICONO: Si estoy en cuadrícula, muestro el icono de "Lista" para volver
-        modoVistaTargeta.setImageResource(R.drawable.outline_view_agenda); 
+        modoVistaTargeta.setCompoundDrawablesWithIntrinsicBounds(R.drawable.outline_view_agenda, 0, 0, 0); 
         
     } else {
         // MODO LISTA (1 columna)
@@ -379,7 +379,7 @@ public class MainActivity extends AppCompatActivity {
         
         // CAMBIAR ICONO: Si estoy en lista, muestro el icono de "Cuadrícula" para cambiar
         // Asegúrate de tener este icono creado, por ejemplo: ic_grid_view
-        modoVistaTargeta.setImageResource(R.drawable.grid_view); 
+        modoVistaTargeta.setCompoundDrawablesWithIntrinsicBounds(R.drawable.grid_view, 0, 0, 0); 
     }
     
     // Importante: Si ya hay datos, recargamos el adaptador para que se reacomoden
