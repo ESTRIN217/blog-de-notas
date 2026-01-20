@@ -4,7 +4,7 @@
      xmlns:app="http://schemas.android.com/apk/res-auto"
      android:layout_height="wrap_content"
      android:layout_width="match_parent"
-     android:background="?attr/colorSurfaceContainer"
+     android:background="@drawable/background"
      android:padding="16dp"
      android:orientation="vertical">
 
@@ -104,11 +104,25 @@
 
     </LinearLayout>
 
-    <Button
+    <LinearLayout
          android:layout_height="wrap_content"
          android:layout_width="match_parent"
-         app:icon="@drawable/round_check_box"
-         android:id="@+id/check_box"
-         android:text="@string/casilla_de_verificacion" />
+         android:gravity="center_vertical"
+         android:orientation="horizontal"
+         android:id="@+id/check_box">
+
+        <ImageView
+             android:layout_height="48dp"
+             android:layout_width="48dp"
+             android:layout_marginEnd="10dp"
+             android:src="@drawable/round_check_box"
+             android:padding="12dp" />
+
+        <TextView
+             android:layout_height="wrap_content"
+             android:layout_width="wrap_content"
+             android:text="@string/casilla_de_verificacion" />
+
+    </LinearLayout>
 
 </LinearLayout>
