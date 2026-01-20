@@ -12,6 +12,7 @@ import android.text.TextWatcher;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.PopupMenu;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -77,7 +78,8 @@ public class EditorActivity extends AppCompatActivity {
 
     private EditText txtNota, txtTitulo;
     private TextView lblFecha, lblContador;
-    private Button btnAtras, btnDeshacer, btnRehacer, btnGuardar, menu, añadir, paleta, textoEstilo;
+    private Button  btnDeshacer, btnRehacer, btnGuardar, menu, añadir, paleta, textoEstilo;
+    private ImageView btnAtras;
     private View background;
     private LinearLayout contenedorAdjuntos; // Changed to LinearLayout
 

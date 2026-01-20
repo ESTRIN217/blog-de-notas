@@ -33,38 +33,33 @@
              android:layout_weight="1" />
 
         <Button
-             android:layout_height="40dp"
-             android:layout_width="40dp"
+             android:layout_height="wrap_content"
+             android:layout_width="wrap_content"
              app:icon="@drawable/undo_24px"
              android:layout_marginEnd="5dp"
-             app:materialSizeOverlay="@style/SizeOverlay.Material3Expressive.Button.IconButton.{Small}.Square"
              style="?attr/materialIconButtonFilledStyle"
              android:id="@+id/btnDeshacer" />
 
         <Button
-             android:layout_height="40dp"
-             android:layout_width="40dp"
+             android:layout_height="wrap_content"
+             android:layout_width="wrap_content"
              app:icon="@drawable/redo_24px"
              android:layout_marginEnd="5dp"
-             app:materialSizeOverlay="@style/SizeOverlay.Material3Expressive.Button.IconButton.{Small}.Square"
              style="?attr/materialIconButtonFilledStyle"
              android:id="@+id/btnRehacer" />
 
         <Button
-             android:layout_height="40dp"
-             android:layout_width="40dp"
+             android:layout_height="wrap_content"
+             android:layout_width="wrap_content"
              app:icon="@drawable/save_24px"
              android:layout_marginEnd="5dp"
-             app:materialSizeOverlay="@style/SizeOverlay.Material3Expressive.Button.IconButton.{Small}.Square"
-             app:tint="?attr/colorPrimary"
              style="?attr/materialIconButtonFilledStyle"
              android:id="@+id/btnGuardar" />
 
         <Button
-             android:layout_height="40dp"
-             android:layout_width="38dp"
+             android:layout_height="wrap_content"
+             android:layout_width="wrap_content"
              app:icon="@drawable/more_vert"
-             app:materialSizeOverlay="@style/SizeOverlay.Material3Expressive.Button.IconButton.{Small}.Square"
              style="?attr/materialIconButtonFilledStyle"
              android:id="@+id/menu" />
 
@@ -160,24 +155,24 @@
          android:orientation="horizontal">
 
         <Button
-             android:layout_height="40dp"
-             android:layout_width="40dp"
+             android:layout_height="wrap_content"
+             android:layout_width="wrap_content"
              app:icon="@drawable/outline_add_box"
              android:layout_marginEnd="5dp"
              style="?attr/materialIconButtonFilledStyle"
              android:id="@+id/añadir" />
 
         <Button
-             android:layout_height="40dp"
-             android:layout_width="40dp"
+             android:layout_height="wrap_content"
+             android:layout_width="wrap_content"
              app:icon="@drawable/outline_palette"
              android:layout_marginEnd="5dp"
              style="?attr/materialIconButtonFilledStyle"
              android:id="@+id/paleta" />
 
         <Button
-             android:layout_height="40dp"
-             android:layout_width="40dp"
+             android:layout_height="wrap_content"
+             android:layout_width="wrap_content"
              app:icon="@drawable/text_format"
              android:layout_marginEnd="5dp"
              style="?attr/materialIconButtonFilledStyle"

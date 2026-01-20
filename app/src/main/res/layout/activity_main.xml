@@ -83,7 +83,6 @@
          android:layout_width="wrap_content"
          android:contentDescription="@string/m3_expressive_primary_fab_content_description"
          android:layout_margin="16dp"
-         app:materialThemeOverlay="@style/ThemeOverlay.Material3Expressive.FloatingActionButton.Primary"
          app:srcCompat="@drawable/add_24px"
          android:id="@+id/btnNuevaNota"
          android:layout_gravity="bottom|end" />
