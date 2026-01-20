@@ -35,7 +35,6 @@
              android:layout_height="wrap_content"
              android:layout_width="wrap_content"
              app:icon="@drawable/undo_24px"
-             android:layout_marginEnd="5dp"
              style="?attr/materialIconButtonFilledStyle"
              android:id="@+id/btnDeshacer" />
 
@@ -43,7 +42,6 @@
              android:layout_height="wrap_content"
              android:layout_width="wrap_content"
              app:icon="@drawable/redo_24px"
-             android:layout_marginEnd="5dp"
              style="?attr/materialIconButtonFilledStyle"
              android:id="@+id/btnRehacer" />
 
@@ -51,7 +49,6 @@
              android:layout_height="wrap_content"
              android:layout_width="wrap_content"
              app:icon="@drawable/save_24px"
-             android:layout_marginEnd="5dp"
              style="?attr/materialIconButtonFilledStyle"
              android:id="@+id/btnGuardar" />
 
@@ -157,7 +154,6 @@
              android:layout_height="wrap_content"
              android:layout_width="wrap_content"
              app:icon="@drawable/outline_add_box"
-             android:layout_marginEnd="5dp"
              style="?attr/materialIconButtonFilledStyle"
              android:id="@+id/añadir" />
 
@@ -165,7 +161,6 @@
              android:layout_height="wrap_content"
              android:layout_width="wrap_content"
              app:icon="@drawable/outline_palette"
-             android:layout_marginEnd="5dp"
              style="?attr/materialIconButtonFilledStyle"
              android:id="@+id/paleta" />
 
@@ -173,7 +168,6 @@
              android:layout_height="wrap_content"
              android:layout_width="wrap_content"
              app:icon="@drawable/text_format"
-             android:layout_marginEnd="5dp"
              style="?attr/materialIconButtonFilledStyle"
              android:id="@+id/text_style" />
 

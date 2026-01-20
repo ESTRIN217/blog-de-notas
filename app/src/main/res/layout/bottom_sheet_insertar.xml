@@ -104,4 +104,11 @@
 
     </LinearLayout>
 
+    <Button
+         android:layout_height="wrap_content"
+         android:layout_width="match_parent"
+         app:icon="@drawable/round_check_box"
+         android:id="@+id/check_box"
+         android:text="@string/casilla_de_verificacion" />
+
 </LinearLayout>

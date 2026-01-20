@@ -47,10 +47,7 @@
              android:layout_height="wrap_content"
              android:layout_width="wrap_content"
              android:src="@drawable/round_mic"
-             app:backgroundTint="?attr/colorPrimary"
              android:layout_marginHorizontal="32dp"
-             app:tint="?attr/colorOnPrimary"
-             app:fabSize="normal"
              android:id="@+id/fabGrabar" />
 
         <ImageView

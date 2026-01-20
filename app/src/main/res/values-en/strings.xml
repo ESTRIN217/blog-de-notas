@@ -33,4 +33,5 @@
     <string name="mostrar_cuadricula">Show grid</string>
     <string name="m3_expressive_primary_fab_content_description">New Note</string>
     <string name="modoVistaTargeta">Modo de vista de la targeta</string>
+    <string name="casilla_de_verificacion">Añadir casillas de verificación</string>
 </resources>

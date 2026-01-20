@@ -26,7 +26,6 @@
                  android:layout_width="wrap_content"
                  app:icon="@drawable/outline_view_agenda"
                  android:contentDescription="@string/modoVistaTargeta"
-                 android:layout_marginEnd="8dp"
                  style="?attr/materialIconButtonStyle"
                  android:id="@+id/modoVistaTargeta" />
 
@@ -58,7 +57,6 @@
                  app:icon="@drawable/settings_24px"
                  android:contentDescription="Volver atrás"
                  style="?attr/materialIconButtonStyle"
-                 android:layout_marginStart="8dp"
                  android:id="@+id/btnSettings" />
 
         </LinearLayout>
