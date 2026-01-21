@@ -10,6 +10,7 @@ import android.provider.Settings;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.View;
+import android.view.MotionEvent;
 import android.widget.EditText;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -110,6 +111,7 @@ public class EditorActivity extends AppCompatActivity {
     private boolean isBoldActive = false;
     private boolean isItalicActive = false;
     private boolean isUnderlineActive = false;
+    private View vistaArrastrada;
 
 
     // --- Permiso para ventana flotante ---
@@ -357,6 +359,11 @@ public class EditorActivity extends AppCompatActivity {
         textoEstilo = findViewById(R.id.text_style);
         contenedorAdjuntos = findViewById(R.id.contenedorAdjuntos);
         lblContador = findViewById(R.id.lblContador);
+        // Activa la capacidad de recibir items arrastrados
+        activarArrastreEnContenedor();
+        // Opcional: Activar animación suave cuando se reordenan
+        android.animation.LayoutTransition transition = new android.animation.LayoutTransition();
+        contenedorAdjuntos.setLayoutTransition(transition);
     }
 
     private void establecerFecha() {
@@ -447,7 +454,8 @@ public class EditorActivity extends AppCompatActivity {
     View btnFoto = layout.findViewById(R.id.ins_foto);
     View btnCamara = layout.findViewById(R.id.ins_camara); // ID corregido
     View btnAudio = layout.findViewById(R.id.ins_audio);
-    View btnDibujo = layout.findViewById(R.id.ins_dibujo); // ID corregido
+    View btnDibujo = layout.findViewById(R.id.ins_dibujo);
+    View btnCheck = layout.findViewById(R.id.check_box);// ID corregido
 
     // 3. Configurar Listeners
 
@@ -480,6 +488,19 @@ public class EditorActivity extends AppCompatActivity {
         Intent intent = new Intent(this, DibujoActivity.class);
         dibujoLauncher.launch(intent); // Corregido: .launch() en vez de .layout()
         bottomSheetInsertar.dismiss();
+    });
+    btnCheck.setOnClickListener(view -> {
+    View vistaCheck = getLayoutInflater().inflate(R.layout.item_check, null);
+    
+    // Configurar el arrastre para este nuevo item
+    configurarItemCheck(vistaCheck);
+    
+    // Añadir al contenedor
+    contenedorAdjuntos.addView(vistaCheck);
+    
+    // Foco automático en el EditText para escribir rápido
+    EditText editCheck = vistaCheck.findViewById(R.id.txtCheckCuerpo); // Asigna ID en el XML
+    if(editCheck != null) editCheck.requestFocus();
     });
 
     bottomSheetInsertar.show();
@@ -1341,5 +1362,79 @@ public class EditorActivity extends AppCompatActivity {
 
     // 3. Mostrar en el TextView
     lblContador.setText(numPalabras + " palabras | " + caracteres + " caracteres");
+    }
+    
+    private void configurarItemCheck(View vistaFila) {
+    ImageView handle = vistaFila.findViewById(R.id.drag);
+    ImageView btnEliminar = vistaFila.findViewById(R.id.btnEliminarCheck); // Si agregas uno para borrar
+
+    // 1. Configurar el "Manejador" (los puntitos) para iniciar el arrastre
+    handle.setOnTouchListener((v, event) -> {
+        if (event.getAction() == MotionEvent.ACTION_DOWN) {
+            // Guardamos la referencia de la vista que vamos a mover
+            vistaArrastrada = vistaFila;
+            
+            // Iniciamos la sombra de arrastre
+            View.DragShadowBuilder shadowBuilder = new View.DragShadowBuilder(vistaFila);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                vistaFila.startDragAndDrop(null, shadowBuilder, vistaFila, 0);
+            } else {
+                vistaFila.startDrag(null, shadowBuilder, vistaFila, 0);
+            }
+            
+            // Hacemos la fila invisible mientras se arrastra (efecto visual)
+            vistaFila.setVisibility(View.INVISIBLE);
+            return true;
+        }
+        return false;
+    });
+    }
+
+// 2. Configurar el contenedor para recibir los movimientos
+    private void activarArrastreEnContenedor() {
+    contenedorAdjuntos.setOnDragListener((v, event) -> {
+        switch (event.getAction()) {
+            case android.view.DragEvent.ACTION_DRAG_STARTED:
+                return true;
+
+            case android.view.DragEvent.ACTION_DRAG_LOCATION:
+                // Aquí ocurre la magia: Calcular dónde soltar
+                float y = event.getY();
+                
+                // Recorremos los hijos para ver sobre cuál estamos
+                for (int i = 0; i < contenedorAdjuntos.getChildCount(); i++) {
+                    View hijo = contenedorAdjuntos.getChildAt(i);
+                    
+                    // Si estamos sobre un hijo y NO es el mismo que arrastramos
+                    if (hijo != vistaArrastrada && y > hijo.getTop() && y < hijo.getBottom()) {
+                        
+                        // Obtenemos los índices
+                        int indexArrastrado = contenedorAdjuntos.indexOfChild(vistaArrastrada);
+                        int indexObjetivo = i;
+                        
+                        // Intercambiamos las vistas
+                        contenedorAdjuntos.removeView(vistaArrastrada);
+                        contenedorAdjuntos.addView(vistaArrastrada, indexObjetivo);
+                        break; // Salimos del bucle al hacer un cambio
+                    }
+                }
+                return true;
+
+            case android.view.DragEvent.ACTION_DROP:
+                // Al soltar, volvemos a mostrar la vista
+                if (vistaArrastrada != null) {
+                    vistaArrastrada.setVisibility(View.VISIBLE);
+                }
+                return true;
+
+            case android.view.DragEvent.ACTION_DRAG_ENDED:
+                if (vistaArrastrada != null) {
+                    vistaArrastrada.setVisibility(View.VISIBLE);
+                    vistaArrastrada = null;
+                }
+                return true;
+        }
+        return false;
+    });
     }
 }
