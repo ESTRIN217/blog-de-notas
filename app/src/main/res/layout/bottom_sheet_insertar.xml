@@ -115,7 +115,7 @@
              android:layout_height="48dp"
              android:layout_width="48dp"
              android:layout_marginEnd="10dp"
-             android:src="@drawable/round_check_box"
+             android:src="@drawable/check_box_24px"
              android:padding="12dp" />
 
         <TextView

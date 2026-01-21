@@ -16,12 +16,12 @@
         android:orientation="horizontal">
 
         <Button
-             android:layout_height="wrap_content"
-             android:layout_width="wrap_content"
-             android:contentDescription="Volver atrás"
-             app:icon="@drawable/arrow_back_24px"
-             style="?attr/materialIconButtonStyle"
-             android:id="@+id/btnAtrasSettings" />
+            android:layout_height="wrap_content"
+            android:layout_width="wrap_content"
+            android:contentDescription="Volver atrás"
+            app:icon="@drawable/arrow_back_24px"
+            style="?attr/materialIconButtonStyle"
+            android:id="@+id/btnAtrasSettings" />
 
         <com.google.android.material.textview.MaterialTextView
             android:layout_height="wrap_content"
@@ -75,12 +75,12 @@
                     android:orientation="horizontal"
                 >
                     <ImageView
-                            android:layout_height="48dp"
+                        android:layout_height="48dp"
                         android:layout_width="48dp"
                         android:padding="12dp"
                         android:background="@drawable/bottom_background"
                         android:src="@drawable/outline_palette" />
-                        
+
                     <com.google.android.material.materialswitch.MaterialSwitch
                         android:layout_height="wrap_content"
                         android:layout_width="match_parent"
@@ -101,55 +101,65 @@
                 app:cardElevation="1dp"
                 android:layout_margin="8dp"
                 app:contentPadding="16dp">
-
-        <LinearLayout
-             android:layout_height="wrap_content"
-             android:layout_width="match_parent"
-             android:orientation="horizontal">
-
-            <ImageView
-                 android:layout_height="wrap_content"
-                 android:layout_width="wrap_content"
-                 android:src="@drawable/outline_palette"
-                 android:background="@drawable/bottom_background"/>
-
-            <TextView
-                 android:layout_height="wrap_content"
-                 android:layout_width="wrap_content" />
-
-        </LinearLayout>
-
-
-                <RadioGroup
+                <LinearLayout
                     android:layout_height="wrap_content"
                     android:layout_width="match_parent"
-                    android:id="@+id/grupoTema">
+                    android:orientation="vertical">
 
-                    <RadioButton
+                    <LinearLayout
                         android:layout_height="wrap_content"
                         android:layout_width="match_parent"
-                        android:paddingVertical="12dp"
-                        android:textColor="?attr/colorOnSurface"
-                        android:id="@+id/rbClaro"
-                        android:text="@string/claro" />
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal">
 
-                    <RadioButton
+                        <ImageView
+                            android:layout_height="48dp"
+                            android:layout_width="48dp"
+                            android:padding="12dp"
+                            android:src="@drawable/bedtime_24px"
+                            android:background="@drawable/bottom_background" />
+
+                        <TextView
+                            android:layout_height="wrap_content"
+                            android:layout_width="wrap_content"
+                            android:layout_marginStart="10dp"
+                            android:textStyle="bold"
+                            android:text="@string/tema_oscuro" />
+
+                    </LinearLayout>
+
+
+                    <RadioGroup
                         android:layout_height="wrap_content"
                         android:layout_width="match_parent"
-                        android:paddingVertical="12dp"
-                        android:textColor="?attr/colorOnSurface"
-                        android:id="@+id/rbOscuro"
-                        android:text="@string/oscuro" />
+                        android:id="@+id/grupoTema">
 
-                    <RadioButton
-                        android:layout_height="wrap_content"
-                        android:layout_width="match_parent"
-                        android:paddingVertical="12dp"
-                        android:textColor="?attr/colorOnSurface"
-                        android:id="@+id/rbSistema"
-                        android:text="@string/usar_configuración_del_sistema" />
+                        <RadioButton
+                            android:layout_height="wrap_content"
+                            android:layout_width="match_parent"
+                            android:paddingVertical="12dp"
+                            android:textColor="?attr/colorOnSurface"
+                            android:id="@+id/rbClaro"
+                            android:text="@string/claro" />
 
-                </RadioGroup>
+                        <RadioButton
+                            android:layout_height="wrap_content"
+                            android:layout_width="match_parent"
+                            android:paddingVertical="12dp"
+                            android:textColor="?attr/colorOnSurface"
+                            android:id="@+id/rbOscuro"
+                            android:text="@string/oscuro" />
+
+                        <RadioButton
+                            android:layout_height="wrap_content"
+                            android:layout_width="match_parent"
+                            android:paddingVertical="12dp"
+                            android:textColor="?attr/colorOnSurface"
+                            android:id="@+id/rbSistema"
+                            android:text="@string/usar_configuración_del_sistema" />
+
+                    </RadioGroup>
+                </LinearLayout>
 
             </com.google.android.material.card.MaterialCardView>
 
