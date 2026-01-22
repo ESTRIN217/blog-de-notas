@@ -144,15 +144,11 @@ public class EditorActivity extends AppCompatActivity {
     uri -> {
         if (uri != null) {
             try {
-                // Opción A: Poner la imagen en el EditText (si es transparente)
-                // Opción B: Ponerla en el Layout principal (Recomendado)
                 
                 // Carga simple usando Bitmap para ajustar al fondo
                 Bitmap bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), uri);
                 Drawable drawable = new BitmapDrawable(getResources(), bitmap);
                 
-                // Asumiendo que 'txtNota' o su padre es lo que quieres cambiar
-                // findViewById(R.id.main).setBackground(drawable); // Si tienes ID en el root
                 background.setBackground(drawable); 
             } catch (Exception e) {
                 e.printStackTrace();
@@ -266,8 +262,6 @@ public class EditorActivity extends AppCompatActivity {
     configurarBotones();
 
     // 3. Lógica de carga
-    // NOTA: Ya no configuramos el color aquí. 'cargarNotaSAF()' se encarga de
-    // leer el HTML y pintar el fondo automáticamente.
     if (uriArchivoActual != null) {
         cargarNotaSAF();
     } else {
@@ -443,21 +437,17 @@ public class EditorActivity extends AppCompatActivity {
         });
         
 
-// En configurarListeners añade esto:
     añadir.setOnClickListener(v -> {
     BottomSheetDialog bottomSheetInsertar = new BottomSheetDialog(this);
     // 1. Inflamos la vista del menú
     View layout = getLayoutInflater().inflate(R.layout.bottom_sheet_insertar, null);
     bottomSheetInsertar.setContentView(layout);
     
-    // 2. Vinculamos las vistas USANDO 'layout.'
-    // Asumo que son View, LinearLayout o ImageView según tu XML
     View btnFoto = layout.findViewById(R.id.ins_foto);
-    View btnCamara = layout.findViewById(R.id.ins_camara); // ID corregido
+    View btnCamara = layout.findViewById(R.id.ins_camara);
     View btnAudio = layout.findViewById(R.id.ins_audio);
     View btnDibujo = layout.findViewById(R.id.ins_dibujo);
-    View btnCheck = layout.findViewById(R.id.check_box);// ID corregido
-
+    View btnCheck = layout.findViewById(R.id.check_box);//
     // 3. Configurar Listeners
 
     // --- FOTO ---
@@ -474,7 +464,6 @@ public class EditorActivity extends AppCompatActivity {
 
     // --- AUDIO ---
     btnAudio.setOnClickListener(view -> {
-        // Al tener un 'if', las llaves {} son obligatorias
         if (chequearPermisosAudio()) {
             mostrarGrabadoraVisual();
         } else {
@@ -485,9 +474,8 @@ public class EditorActivity extends AppCompatActivity {
 
     // --- DIBUJO ---
     btnDibujo.setOnClickListener(view -> {
-        // Al declarar variables, las llaves {} son obligatorias
         Intent intent = new Intent(this, DibujoActivity.class);
-        dibujoLauncher.launch(intent); // Corregido: .launch() en vez de .layout()
+        dibujoLauncher.launch(intent);
         bottomSheetInsertar.dismiss();
     });
     btnCheck.setOnClickListener(view -> {
@@ -591,9 +579,9 @@ public class EditorActivity extends AppCompatActivity {
     if (isUnderlineActive) btnUnderline.setColorFilter(Color.BLUE);
 
     // --- LÓGICA DE TAMAÑOS ---
-    btnSmall.setOnClickListener(view -> txtNota.setTextSize(14));
-    btnNormal.setOnClickListener(view -> txtNota.setTextSize(18));
-    btnLarge.setOnClickListener(view -> txtNota.setTextSize(24));
+    btnSmall.setOnClickListener(view -> txtNota.setTextSize(14sp));
+    btnNormal.setOnClickListener(view -> txtNota.setTextSize(18sp));
+    btnLarge.setOnClickListener(view -> txtNota.setTextSize(24sp));
 
     btnBold.setOnClickListener(view -> {
     isBoldActive = !isBoldActive;
@@ -605,7 +593,6 @@ public class EditorActivity extends AppCompatActivity {
     }
     });
 
-// --- LÓGICA DE CURSIVA (Corregida) ---
     btnItalic.setOnClickListener(view -> {
     isItalicActive = !isItalicActive;
     });

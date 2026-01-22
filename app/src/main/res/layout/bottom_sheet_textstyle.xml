@@ -21,31 +21,41 @@
              android:gravity="center_vertical"
              android:orientation="horizontal">
 
-            <ImageView
-                 android:layout_height="48dp"
-                 android:layout_width="48dp"
-                 android:src="@drawable/format_size"
-                 android:background="?attr/selectableItemBackgroundBorderless"
-                 android:scaleX="0.8"
-                 android:padding="12dp"
-                 android:scaleY="0.8"
-                 android:id="@+id/size_small" />
+            <com.google.android.material.button.MaterialButtonGroup
+                 android:layout_height="wrap_content"
+                 android:layout_width="match_parent"
+                 android:gravity="center_horizontal"
+                 android:paddingBottom="8dp"
+                 android:spacing="4dp"
+                 style="@style/Widget.Material3.MaterialButtonGroup.Connected">
 
-            <ImageView
-                 android:layout_height="48dp"
-                 android:layout_width="48dp"
-                 android:src="@drawable/text_fields"
-                 android:background="?attr/selectableItemBackgroundBorderless"
-                 android:padding="10dp"
-                 android:id="@+id/size_normal" />
+                <Button
+                     android:layout_height="wrap_content"
+                     android:layout_width="wrap_content"
+                     app:icon="@drawable/format_size"
+                     android:gravity="center"
+                     android:scaleX="0.8"
+                     android:scaleY="0.8"
+                     style="?attr/materialIconButtonStyle"
+                     android:id="@+id/size_small" />
 
-            <ImageView
-                 android:layout_height="48dp"
-                 android:layout_width="48dp"
-                 android:src="@drawable/format_size"
-                 android:background="?attr/selectableItemBackgroundBorderless"
-                 android:padding="8dp"
-                 android:id="@+id/size_large" />
+                <Button
+                     android:layout_height="wrap_content"
+                     android:layout_width="wrap_content"
+                     app:icon="@drawable/text_fields"
+                     android:gravity="center"
+                     style="?attr/materialIconButtonStyle"
+                     android:id="@+id/size_normal" />
+
+                <Button
+                     android:layout_height="wrap_content"
+                     android:layout_width="wrap_content"
+                     app:icon="@drawable/format_size"
+                     android:gravity="center"
+                     style="?attr/materialIconButtonStyle"
+                     android:id="@+id/size_large" />
+
+            </com.google.android.material.button.MaterialButtonGroup>
 
             <View
                  android:layout_height="32dp"
