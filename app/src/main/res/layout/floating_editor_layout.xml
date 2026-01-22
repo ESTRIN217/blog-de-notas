@@ -40,12 +40,20 @@
          app:layout_constraintTop_toTopOf="@id/floating_header"
          android:textSize="12sp"
          android:textColor="?attr/colorOnPrimary"
-         app:layout_constraintEnd_toStartOf="@id/modify"
+         app:layout_constraintEnd_toStartOf="@id/minimizar"
          app:layout_constraintBottom_toBottomOf="@id/floating_header"
          android:id="@+id/lbl_contador_floating"
          android:text="0p | 0c" />
 
-
+    <Button
+         android:layout_height="wrap_content"
+         android:layout_width="wrap_content"
+         app:icon="@drawable/round_minimize"
+         app:layout_constraintTop_toTopOf="@id/floating_header"
+         app:layout_constraintEnd_toStartOf="@id/modify"
+         style="?attr/materialIconButtonStyle"
+         app:layout_constraintBottom_toBottomOf="@id/floating_header"
+         android:id="@+id/minimizar" />
 
     <ImageView
          android:layout_height="32dp"
@@ -113,5 +121,22 @@
              app:layout_constraintBottom_toBottomOf="parent" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <FrameLayout
+         android:layout_height="60dp"
+         android:layout_width="60dp"
+         android:visibility="gone"
+         android:background="@drawable/borde_redondeado"
+         android:id="@+id/minimized_container"
+         android:layout_gravity="center">
+
+        <ImageView
+             android:layout_height="30dp"
+             android:layout_width="30dp"
+             android:src="@drawable/ic_launcher_round"
+             android:id="@+id/minimized_icon"
+             android:layout_gravity="center" />
+
+    </FrameLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

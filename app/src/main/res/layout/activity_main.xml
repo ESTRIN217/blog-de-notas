@@ -27,6 +27,7 @@
                  android:layout_width="wrap_content"
                  app:icon="@drawable/outline_view_agenda"
                  android:contentDescription="@string/modoVistaTargeta"
+                 app:tint="?attr/colorOnSurface"
                  style="?attr/materialIconButtonStyle"
                  android:id="@+id/modoVistaTargeta" />
 

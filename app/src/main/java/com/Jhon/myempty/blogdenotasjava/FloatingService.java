@@ -22,6 +22,9 @@ import android.view.WindowManager;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Button;
+import android.widget.FrameLayout;
+import com.google.android.material.color.MaterialColors;
 
 import androidx.core.app.NotificationCompat;
 import androidx.documentfile.provider.DocumentFile;
@@ -29,6 +32,11 @@ import androidx.documentfile.provider.DocumentFile;
 import com.google.android.material.color.DynamicColors;
 
 import java.io.OutputStream;
+import java.io.BufferedReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.util.regex.Pattern;
+import java.util.regex.Matcher;
 
 public class FloatingService extends Service {
 
@@ -39,11 +47,22 @@ public class FloatingService extends Service {
     private EditText floatingTxtNota;
     private TextView floatingTitleText, lblContadorFlotante;
     private ImageView btnClose, btnModify;
+    private Button minimizar;
     private View headerView, resizeHandle;
+    private FrameLayout minimizedContainer;
+    private ImageView minimizedIcon;
 
     private Uri uriArchivoActual;
     private int minWidthPx;
     private int minHeightPx;
+    
+    // Variables para controlar el estado
+    private boolean isMinimized = false;
+    private int savedWidth, savedHeight;
+    private int savedX, savedY;
+    
+    // Variable para almacenar el checklist (si existe)
+    private String checklistData = "";
 
     @Override
     public IBinder onBind(Intent intent) { return null; }
@@ -105,6 +124,10 @@ public class FloatingService extends Service {
         headerView = mFloatingView.findViewById(R.id.floating_header);
         resizeHandle = mFloatingView.findViewById(R.id.resize_handle);
         lblContadorFlotante = mFloatingView.findViewById(R.id.lbl_contador_floating);
+        minimizar = mFloatingView.findViewById(R.id.minimizar);
+        
+        minimizedContainer = mFloatingView.findViewById(R.id.minimized_container);
+        minimizedIcon = mFloatingView.findViewById(R.id.minimized_icon);
     }
 
     private void configurarParametrosVentana(DisplayMetrics metrics) {
@@ -127,50 +150,77 @@ public class FloatingService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-    if (intent != null) {
-        String contenidoRaw = intent.getStringExtra("contenido_nota");
-        String uriString = intent.getStringExtra("uri_archivo");
+        if (intent != null) {
+            String contenidoRaw = intent.getStringExtra("contenido_nota");
+            String uriString = intent.getStringExtra("uri_archivo");
 
-        if (uriString != null && !uriString.isEmpty()) {
-            uriArchivoActual = Uri.parse(uriString);
-            DocumentFile df = DocumentFile.fromSingleUri(this, uriArchivoActual);
-            if (df != null && df.getName() != null) {
-                floatingTitleText.setText(df.getName().replace(".txt", ""));
+            if (uriString != null && !uriString.isEmpty()) {
+                uriArchivoActual = Uri.parse(uriString);
+                DocumentFile df = DocumentFile.fromSingleUri(this, uriArchivoActual);
+                if (df != null && df.getName() != null) {
+                    floatingTitleText.setText(df.getName().replace(".txt", ""));
+                }
+            }
+
+            if (floatingTxtNota != null && contenidoRaw != null) {
+                // --- LÓGICA COMPATIBLE CON EditorActivity ---
+                
+                // 1. Extraer y almacenar el checklist (si existe)
+                checklistData = extraerChecklistData(contenidoRaw);
+                
+                // 2. Extraer y aplicar el color de fondo
+                int colorNota = extraerColorDeHtml(contenidoRaw);
+                floatingTxtNota.setBackgroundColor(colorNota);
+
+                // 3. Limpiar el HTML para mostrar solo el texto limpio
+                // Primero eliminamos el checklistData para que no aparezca como texto
+                String contenidoSinChecklist = contenidoRaw;
+                if (!checklistData.isEmpty()) {
+                    contenidoSinChecklist = contenidoRaw.replace(checklistData, "");
+                }
+                
+                // Luego quitamos el DIV envolvente de color
+                String textoLimpio = contenidoSinChecklist.replaceAll("<div[^>]*>", "").replace("</div>", "");
+                
+                // 4. Mostrar el texto en el EditText
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                    floatingTxtNota.setText(android.text.Html.fromHtml(textoLimpio, android.text.Html.FROM_HTML_MODE_LEGACY));
+                } else {
+                    floatingTxtNota.setText(android.text.Html.fromHtml(textoLimpio));
+                }
+                
+                try {
+                    floatingTxtNota.setSelection(floatingTxtNota.getText().length());
+                } catch (Exception ignored) {}
+                
+                // 5. Actualizar contador
+                String inicial = floatingTxtNota.getText().toString().trim();
+                int p = inicial.isEmpty() ? 0 : inicial.split("\\s+").length;
+                lblContadorFlotante.setText(p + "p | " + floatingTxtNota.getText().length() + "c");
             }
         }
-
-        if (floatingTxtNota != null && contenidoRaw != null) {
-            // --- NUEVA LÓGICA DE PROCESAMIENTO ---
-            
-            // 1. Extraer y aplicar el color de fondo
-            int colorNota = extraerColorDeHtml(contenidoRaw);
-            floatingTxtNota.setBackgroundColor(colorNota);
-
-            // 2. Limpiar el HTML para mostrar solo el texto limpio al usuario
-            // Quitamos el DIV envolvente para que no se vea el código
-            String textoLimpio = contenidoRaw.replaceAll("<div[^>]*>", "").replace("</div>", "");
-            
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                floatingTxtNota.setText(android.text.Html.fromHtml(textoLimpio, android.text.Html.FROM_HTML_MODE_LEGACY));
-            } else {
-                floatingTxtNota.setText(android.text.Html.fromHtml(textoLimpio));
-            }
-            
-            try {
-                floatingTxtNota.setSelection(floatingTxtNota.getText().length());
-            } catch (Exception ignored) {}
-            String inicial = floatingTxtNota.getText().toString().trim();
-    int p = inicial.isEmpty() ? 0 : inicial.split("\\s+").length;
-    lblContadorFlotante.setText(p + "p | " + floatingTxtNota.getText().length() + "c");
-        }
+        return START_STICKY;
     }
-    return START_STICKY;
+
+    private String extraerChecklistData(String html) {
+        try {
+            // Buscar el bloque <div id='checklist_data'>...</div>
+            Pattern pattern = Pattern.compile("<div id='checklist_data'.*?>(.*?)</div>", Pattern.DOTALL);
+            Matcher matcher = pattern.matcher(html);
+            
+            if (matcher.find()) {
+                // Devolvemos todo el bloque DIV (no solo el contenido interno)
+                return matcher.group(0);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return ""; // Retornar cadena vacía si no hay checklist
     }
 
     private void configurarListeners() {
         // 1. Habilitar teclado al tocar el texto
         floatingTxtNota.setOnTouchListener((v, event) -> {
-            
             if (event.getAction() == MotionEvent.ACTION_DOWN) {
                 params.flags = WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL | WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH;
                 mWindowManager.updateViewLayout(mFloatingView, params);
@@ -179,22 +229,23 @@ public class FloatingService extends Service {
             }
             return false;
         });
+        
         floatingTxtNota.addTextChangedListener(new android.text.TextWatcher() {
-    @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
-    @Override public void onTextChanged(CharSequence s, int start, int before, int count) {
-        String texto = s.toString().trim();
-        int p = texto.isEmpty() ? 0 : texto.split("\\s+").length;
-        int c = s.length();
-        if (lblContadorFlotante != null) {
-            lblContadorFlotante.setText(p + "p | " + c + "c");
-        }
-    }
-    @Override public void afterTextChanged(android.text.Editable s) {}
+            @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+            @Override public void onTextChanged(CharSequence s, int start, int before, int count) {
+                String texto = s.toString().trim();
+                int p = texto.isEmpty() ? 0 : texto.split("\\s+").length;
+                int c = s.length();
+                if (lblContadorFlotante != null) {
+                    lblContadorFlotante.setText(p + "p | " + c + "c");
+                }
+            }
+            @Override public void afterTextChanged(android.text.Editable s) {}
         });
 
         // 2. Guardar y quitar teclado al tocar fuera de la ventana
         mFloatingView.setOnTouchListener((v, event) -> {
-            if (event.getAction() == MotionEvent.ACTION_OUTSIDE) {
+            if (event.getAction() == MotionEvent.ACTION_OUTSIDE && !isMinimized) {
                 guardarNotaFlotante();
                 params.flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE | WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH;
                 mWindowManager.updateViewLayout(mFloatingView, params);
@@ -203,12 +254,14 @@ public class FloatingService extends Service {
             return false;
         });
 
-        // 3. Mover ventana (Header)
+        // 3. Mover ventana (Header) - Solo cuando no está minimizado
         headerView.setOnTouchListener(new View.OnTouchListener() {
             private int initialX, initialY;
             private float initialTouchX, initialTouchY;
             @Override
             public boolean onTouch(View v, MotionEvent event) {
+                if (isMinimized) return false;
+                
                 switch (event.getAction()) {
                     case MotionEvent.ACTION_DOWN:
                         initialX = params.x; initialY = params.y;
@@ -224,13 +277,15 @@ public class FloatingService extends Service {
             }
         });
 
-        // 4. Redimensionar ventana (Resize Handle) - ¡AQUÍ ESTÁ LA LÓGICA RESTAURADA!
+        // 4. Redimensionar ventana (Resize Handle)
         resizeHandle.setOnTouchListener(new View.OnTouchListener() {
             private int initialWidth, initialHeight;
             private float initialTouchX, initialTouchY;
 
             @Override
             public boolean onTouch(View v, MotionEvent event) {
+                if (isMinimized) return false;
+                
                 switch (event.getAction()) {
                     case MotionEvent.ACTION_DOWN:
                         initialWidth = params.width;
@@ -245,7 +300,6 @@ public class FloatingService extends Service {
                         int newWidth = initialWidth + deltaX;
                         int newHeight = initialHeight + deltaY;
 
-                        // Respetar tamaños mínimos
                         if (newWidth >= minWidthPx) params.width = newWidth;
                         if (newHeight >= minHeightPx) params.height = newHeight;
 
@@ -256,58 +310,150 @@ public class FloatingService extends Service {
             }
         });
 
-        // 5. Botones en FloatingService
+        // 5. Botón cerrar
         btnClose.setOnClickListener(v -> {
-    guardarNotaFlotante(); // Guardamos antes de cerrar
-    stopSelf();
+            guardarNotaFlotante();
+            stopSelf();
         });
 
-        // 5. Botón para volver al Editor completo
+        // 6. Botón para volver al Editor completo
         btnModify.setOnClickListener(v -> {
-    guardarNotaFlotante(); // Guardar cambios actuales
-    
-    Intent intent = new Intent(this, EditorActivity.class);
-    // Aseguramos que la llave sea "uri_archivo"
-    intent.putExtra("uri_archivo", uriArchivoActual != null ? uriArchivoActual.toString() : "");
-    
-    // IMPORTANTE: Añadir Flags para que no cree una instancia nueva si ya existe
-    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
-    
-    startActivity(intent);
-    stopSelf(); // Cerrar la burbuja
-    });
+            guardarNotaFlotante();
+            
+            Intent intent = new Intent(this, EditorActivity.class);
+            intent.putExtra("uri_archivo", uriArchivoActual != null ? uriArchivoActual.toString() : "");
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            
+            startActivity(intent);
+            stopSelf();
+        });
+
+        // 7. Botón para minimizar/restaurar
+        minimizar.setOnClickListener(v -> {
+            toggleMinimize();
+        });
+
+        // 8. Listener para el icono minimizado
+        minimizedContainer.setOnClickListener(v -> {
+            if (isMinimized) {
+                toggleMinimize();
+            }
+        });
+
+        // 9. Permitir mover la ventana minimizada
+        minimizedContainer.setOnTouchListener(new View.OnTouchListener() {
+            private int initialX, initialY;
+            private float initialTouchX, initialTouchY;
+            
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                if (!isMinimized) return false;
+                
+                switch (event.getAction()) {
+                    case MotionEvent.ACTION_DOWN:
+                        initialX = params.x;
+                        initialY = params.y;
+                        initialTouchX = event.getRawX();
+                        initialTouchY = event.getRawY();
+                        return true;
+                    case MotionEvent.ACTION_MOVE:
+                        params.x = initialX + (int) (event.getRawX() - initialTouchX);
+                        params.y = initialY + (int) (event.getRawY() - initialTouchY);
+                        mWindowManager.updateViewLayout(mFloatingView, params);
+                        return true;
+                }
+                return false;
+            }
+        });
+    }
+
+    private void toggleMinimize() {
+        if (!isMinimized) {
+            // Guardar estado actual antes de minimizar
+            guardarNotaFlotante();
+            savedWidth = params.width;
+            savedHeight = params.height;
+            savedX = params.x;
+            savedY = params.y;
+            
+            // Ocultar todos los elementos de la vista normal
+            floatingTxtNota.setVisibility(View.GONE);
+            floatingTitleText.setVisibility(View.GONE);
+            btnClose.setVisibility(View.GONE);
+            btnModify.setVisibility(View.GONE);
+            headerView.setVisibility(View.GONE);
+            resizeHandle.setVisibility(View.GONE);
+            lblContadorFlotante.setVisibility(View.GONE);
+            minimizar.setVisibility(View.GONE);
+            
+            // Mostrar la vista minimizada
+            minimizedContainer.setVisibility(View.VISIBLE);
+            
+            // Cambiar el tamaño de la ventana
+            DisplayMetrics metrics = getResources().getDisplayMetrics();
+            int minimizedSize = (int) (60 * metrics.density);
+            
+            params.width = minimizedSize;
+            params.height = minimizedSize;
+            
+            params.flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE | 
+                          WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH;
+            
+            isMinimized = true;
+            
+        } else {
+            // Restaurar la vista normal
+            minimizedContainer.setVisibility(View.GONE);
+            
+            floatingTxtNota.setVisibility(View.VISIBLE);
+            floatingTitleText.setVisibility(View.VISIBLE);
+            btnClose.setVisibility(View.VISIBLE);
+            btnModify.setVisibility(View.VISIBLE);
+            headerView.setVisibility(View.VISIBLE);
+            resizeHandle.setVisibility(View.VISIBLE);
+            lblContadorFlotante.setVisibility(View.VISIBLE);
+            minimizar.setVisibility(View.VISIBLE);
+            
+            params.width = savedWidth;
+            params.height = savedHeight;
+            
+            isMinimized = false;
+        }
+        
+        mWindowManager.updateViewLayout(mFloatingView, params);
+        minimizar.setText(isMinimized ? "↗" : "🗕");
     }
 
     private void guardarNotaFlotante() {
-    if (uriArchivoActual == null) return;
+        if (uriArchivoActual == null || isMinimized) return;
 
-    // 1. Convertir el texto que ves en la ventana flotante a HTML
-    // Esto preserva negritas, cursivas, etc. si las hubiera.
-    String contenidoHtml = android.text.Html.toHtml(floatingTxtNota.getText());
+        // 1. Convertir el texto visible a HTML
+        String contenidoHtml = android.text.Html.toHtml(floatingTxtNota.getText());
 
-    // 2. Obtener el color de fondo actual de la vista flotante
-    // IMPORTANTE: Asumo que al abrir la ventana flotante, le pusiste el color al floatingTxtNota.
-    // Si el color está en otro layout padre, cambia 'floatingTxtNota' por esa vista.
-    int colorActual = android.graphics.Color.WHITE; // Color por defecto de seguridad
-    if (floatingTxtNota.getBackground() instanceof android.graphics.drawable.ColorDrawable) {
-        colorActual = ((android.graphics.drawable.ColorDrawable) floatingTxtNota.getBackground()).getColor();
-    }
-
-    // 3. Convertir el color a formato Hexadecimal (#RRGGBB)
-    String hexColor = String.format("#%06X", (0xFFFFFF & colorActual));
-
-    // 4. Envolver todo en la etiqueta DIV con el estilo de fondo
-    // Esto mantiene la compatibilidad con tu EditorActivity
-    String htmlParaGuardar = "<div style='background-color:" + hexColor + ";'>" + contenidoHtml + "</div>";
-
-    // 5. Escribir en el archivo
-    try (java.io.OutputStream os = getContentResolver().openOutputStream(uriArchivoActual, "wt")) {
-        if (os != null) {
-            os.write(htmlParaGuardar.getBytes());
+        // 2. Obtener el color de fondo actual
+        int colorActual = com.google.android.material.color.MaterialColors.getColor(floatingTxtNota, com.google.android.material.R.attr.colorSurfaceContainer);
+        if (floatingTxtNota.getBackground() instanceof android.graphics.drawable.ColorDrawable) {
+            colorActual = ((android.graphics.drawable.ColorDrawable) floatingTxtNota.getBackground()).getColor();
         }
-    } catch (Exception e) {
-        e.printStackTrace();
-    }
+
+        // 3. Convertir el color a hexadecimal
+        String hexColor = String.format("#%06X", (0xFFFFFF & colorActual));
+
+        // 4. Construir el HTML FINAL (COMPATIBLE con EditorActivity)
+        // Estructura: <div con color> + Contenido HTML + Checklist (si existe) + </div>
+        String htmlParaGuardar = "<div style='background-color:" + hexColor + ";'>" 
+                               + contenidoHtml 
+                               + (checklistData != null && !checklistData.isEmpty() ? checklistData : "")
+                               + "</div>";
+
+        // 5. Escribir en el archivo
+        try (OutputStream os = getContentResolver().openOutputStream(uriArchivoActual, "wt")) {
+            if (os != null) {
+                os.write(htmlParaGuardar.getBytes());
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
@@ -322,17 +468,23 @@ public class FloatingService extends Service {
         }
         super.onDestroy();
     }
+    
     private int extraerColorDeHtml(String html) {
-    try {
-        if (html != null && html.contains("background-color:")) {
-            int inicio = html.indexOf("background-color:") + 17;
-            int fin = html.indexOf(";", inicio);
-            String hexColor = html.substring(inicio, fin).trim();
-            return Color.parseColor(hexColor);
+        try {
+            if (html != null && html.contains("background-color:")) {
+                int inicio = html.indexOf("background-color:") + 17;
+                int fin = html.indexOf(";", inicio);
+                if (fin == -1) fin = html.indexOf("\"", inicio);
+                if (fin == -1) fin = html.indexOf("'", inicio);
+                
+                if (fin > inicio) {
+                    String hexColor = html.substring(inicio, fin).trim();
+                    return Color.parseColor(hexColor);
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
-    } catch (Exception e) {
-        e.printStackTrace();
-    }
-    return Color.WHITE; // Color por defecto si falla
+        return com.google.android.material.R.attr.colorSurfaceContainer; 
     }
 }

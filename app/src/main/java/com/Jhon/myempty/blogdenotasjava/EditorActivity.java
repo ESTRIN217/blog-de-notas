@@ -643,7 +643,6 @@ public class EditorActivity extends AppCompatActivity {
     } catch (Exception e) {
         e.printStackTrace();
     }
-    // Si no se encuentra color o falla, devolvemos TRANSPARENT o WHITE
     return com.google.android.material.R.attr.colorSurfaceContainer; 
     }
 
