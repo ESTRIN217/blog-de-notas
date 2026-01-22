@@ -13,6 +13,7 @@ import android.view.View;
 import android.view.MotionEvent;
 import android.widget.EditText;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.ImageView;
 import android.widget.PopupMenu;
 import android.widget.TextView;
@@ -491,15 +492,11 @@ public class EditorActivity extends AppCompatActivity {
     });
     btnCheck.setOnClickListener(view -> {
     View vistaCheck = getLayoutInflater().inflate(R.layout.item_check, null);
-    
-    // Configurar el arrastre para este nuevo item
-    configurarItemCheck(vistaCheck);
-    
-    // Añadir al contenedor
+    // Pasamos null y false porque es nuevo
+    configurarItemCheck(vistaCheck, null, false); 
     contenedorAdjuntos.addView(vistaCheck);
     
-    // Foco automático en el EditText para escribir rápido
-    EditText editCheck = vistaCheck.findViewById(R.id.txtCheckCuerpo); // Asigna ID en el XML
+    EditText editCheck = vistaCheck.findViewById(R.id.txtCheckCuerpo);
     if(editCheck != null) editCheck.requestFocus();
     });
 
@@ -647,7 +644,7 @@ public class EditorActivity extends AppCompatActivity {
         e.printStackTrace();
     }
     // Si no se encuentra color o falla, devolvemos TRANSPARENT o WHITE
-    return android.graphics.Color.TRANSPARENT; 
+    return com.google.android.material.R.attr.colorSurfaceContainer; 
     }
 
     private void cargarNotaSAF() {
@@ -655,7 +652,7 @@ public class EditorActivity extends AppCompatActivity {
 
     archivoActualSAF = DocumentFile.fromSingleUri(this, uriArchivoActual);
 
-    // 1. Limpieza de la interfaz
+    // 1. Limpieza total de la interfaz antes de cargar
     contenedorAdjuntos.removeAllViews();
     listaRutasAudios.clear();
     listaRutasFotos.clear();
@@ -663,7 +660,7 @@ public class EditorActivity extends AppCompatActivity {
 
     StringBuilder contentBuilder = new StringBuilder();
     try {
-        // 2. Leer el archivo (HTML)
+        // 2. Leer el archivo físico (Contenido HTML)
         try (InputStream is = getContentResolver().openInputStream(uriArchivoActual);
              BufferedReader br = new BufferedReader(new InputStreamReader(is))) {
             
@@ -675,22 +672,52 @@ public class EditorActivity extends AppCompatActivity {
         
         String stringFinal = contentBuilder.toString();
         
-        // 3. LÓGICA DE FONDO DINÁMICO
-        // Extraemos el color y dejamos que 'aplicarColorFondoDinamico' decida el contraste
+        // 3. LÓGICA DE FONDO (Color)
         int colorDetectado = extraerColorDeHtml(stringFinal);
         aplicarColorFondoDinamico(colorDetectado);
 
-        // 4. Convertir HTML a texto visual
+        // 4. --- NUEVA LÓGICA: EXTRAER Y CARGAR CHECKLIST ---
+        String contenidoParaEditor = stringFinal;
+        
+        // Buscamos el bloque oculto <div id='checklist_data'>...</div>
+        java.util.regex.Pattern patternCheck = java.util.regex.Pattern.compile("<div id='checklist_data'.*?>(.*?)</div>", java.util.regex.Pattern.DOTALL);
+        java.util.regex.Matcher matcherCheck = patternCheck.matcher(stringFinal);
+
+        if (matcherCheck.find()) {
+            String dataChecklist = matcherCheck.group(1); // El contenido interno de los checks
+            
+            // Eliminamos el bloque del checklist del string para que no se vea como texto en la nota
+            contenidoParaEditor = stringFinal.replace(matcherCheck.group(0), "");
+            
+            // Buscamos cada item: <chk state="true|false">Texto</chk>
+            java.util.regex.Pattern patternItem = java.util.regex.Pattern.compile("<chk state=\"(true|false)\">(.*?)</chk>");
+            java.util.regex.Matcher matcherItem = patternItem.matcher(dataChecklist);
+            
+            while (matcherItem.find()) {
+                boolean estaMarcado = Boolean.parseBoolean(matcherItem.group(1));
+                String textoTarea = matcherItem.group(2);
+                
+                // Inflamos la vista y la configuramos (usando el método que creamos antes)
+                View vistaCheck = getLayoutInflater().inflate(R.layout.item_check, null);
+                configurarItemCheck(vistaCheck, textoTarea, estaMarcado);
+                contenedorAdjuntos.addView(vistaCheck);
+            }
+        }
+
+        // 5. CONVERTIR HTML RESTANTE A TEXTO (Para el EditText)
         esCambioProgramatico = true;
+        // Limpiamos los divs de color para que el convertidor de HTML no se confunda
+        String htmlLimpio = contenidoParaEditor.replaceAll("<div[^>]*>", "").replace("</div>", "");
+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            txtNota.setText(Html.fromHtml(stringFinal, Html.FROM_HTML_MODE_LEGACY));
+            txtNota.setText(android.text.Html.fromHtml(htmlLimpio, android.text.Html.FROM_HTML_MODE_LEGACY));
         } else {
-            txtNota.setText(Html.fromHtml(stringFinal));
+            txtNota.setText(android.text.Html.fromHtml(htmlLimpio));
         }
         actualizarContador(txtNota.getText().toString());
         esCambioProgramatico = false;
         
-        // 5. Configurar Título y Adjuntos
+        // 6. Configurar Título y Adjuntos multimedia
         if (archivoActualSAF != null && archivoActualSAF.getName() != null) {
             String nombreNota = archivoActualSAF.getName();
             txtTitulo.setText(nombreNota.replace(".txt", ""));
@@ -705,7 +732,7 @@ public class EditorActivity extends AppCompatActivity {
         }
         
     } catch (Exception e) {
-        e.printStackTrace();
+        Log.e("CARGA_SAF", "Error: " + e.getMessage());
         Toast.makeText(this, "Error al abrir la nota", Toast.LENGTH_SHORT).show();
     }
     }
@@ -721,26 +748,53 @@ public class EditorActivity extends AppCompatActivity {
         return;
     }
 
-    // 1. Obtener HTML del texto
+    // 1. Obtener HTML del texto principal
     String contenidoHtml = Html.toHtml(txtNota.getText());
     String titulo = txtTitulo.getText().toString().trim();
     if (titulo.isEmpty()) titulo = "Sin_titulo";
 
-    // --- NUEVA LÓGICA: COLOR DENTRO DEL HTML ---
-    // a) Obtener el color actual del 'background'
-    int colorActual = android.graphics.Color.TRANSPARENT;
+    // 2. LÓGICA DE COLOR DE FONDO
+    // a) Obtener el color actual (intentamos obtener del drawable, sino el default del tema)
+    int colorActual = com.google.android.material.color.MaterialColors.getColor(background, com.google.android.material.R.attr.colorSurfaceContainer);
     if (background.getBackground() instanceof android.graphics.drawable.ColorDrawable) {
         colorActual = ((android.graphics.drawable.ColorDrawable) background.getBackground()).getColor();
     }
 
-    // b) Convertir color a Hexadecimal (ej: #FFAFA8)
-    // El 0xFFFFFF & colorActual asegura que el formato sea correcto
+    // b) Convertir color a Hexadecimal
     String hexColor = String.format("#%06X", (0xFFFFFF & colorActual));
 
-    // c) Envolver el contenido en un DIV con el estilo background-color
-    // Este string es lo que realmente se escribirá en el archivo
-    String htmlParaGuardar = "<div style='background-color:" + hexColor + ";'>" + contenidoHtml + "</div>";
+    // 3. --- NUEVO: GENERAR HTML DEL CHECKLIST ---
+    // Recorremos el contenedor de adjuntos para buscar los items tipo Check
+    StringBuilder checklistHtml = new StringBuilder();
+    checklistHtml.append("<div id='checklist_data' style='display:none;'>"); // Oculto visualmente
+    
+    if (contenedorAdjuntos != null) {
+        for (int i = 0; i < contenedorAdjuntos.getChildCount(); i++) {
+            View v = contenedorAdjuntos.getChildAt(i);
+            
+            // Buscamos las vistas por ID para saber si es una fila de checklist
+            android.widget.CheckBox cb = v.findViewById(R.id.chkEstado);
+            EditText et = v.findViewById(R.id.txtCheckCuerpo);
+            
+            // Si encontramos ambos componentes, es un ítem de lista válido
+            if (cb != null && et != null) {
+                 String isChecked = cb.isChecked() ? "true" : "false";
+                 String textoItem = et.getText().toString();
+                 
+                 // Guardamos en formato: <chk state="true">Comprar leche</chk>
+                 checklistHtml.append("<chk state=\"").append(isChecked).append("\">")
+                              .append(textoItem).append("</chk>");
+            }
+        }
+    }
+    checklistHtml.append("</div>");
 
+    // 4. UNIR TODO EN EL STRING FINAL
+    // Estructura: <div con color> + Texto Nota + <div con checklist> + </div>
+    String htmlParaGuardar = "<div style='background-color:" + hexColor + ";'>" 
+                           + contenidoHtml 
+                           + checklistHtml.toString() 
+                           + "</div>";
 
     try {
         DocumentFile rootDoc = null;
@@ -749,7 +803,7 @@ public class EditorActivity extends AppCompatActivity {
             rootDoc = DocumentFile.fromTreeUri(this, rootUri);
         }
 
-        // --- BLOQUE 1: CREACIÓN DE ARCHIVO Y CARPETA ---
+        // --- BLOQUE 1: CREACIÓN DE ARCHIVO Y CARPETA (Si es nuevo) ---
         if (uriArchivoActual == null) {
             if (rootDoc == null) return;
             
@@ -770,13 +824,12 @@ public class EditorActivity extends AppCompatActivity {
         // --- BLOQUE 2: GUARDAR EL HTML COMPLETO ---
         if (uriArchivoActual != null) {
             try (OutputStream os = getContentResolver().openOutputStream(uriArchivoActual, "wt")) {
-                // AQUÍ USAMOS LA VERSIÓN CON EL COLOR INCRUSTADO
                 os.write(htmlParaGuardar.getBytes());
             }
 
             archivoActualSAF = DocumentFile.fromSingleUri(this, uriArchivoActual);
 
-            // --- BLOQUE 3: GUARDAR IMÁGENES (SharedPreferences ELIMINADO) ---
+            // --- BLOQUE 3: GUARDAR IMÁGENES ---
             if (archivoActualSAF != null && rootDoc != null) {
                  guardarImagenesEnCarpetaNota(rootDoc, archivoActualSAF.getName());
             }
@@ -1319,7 +1372,7 @@ public class EditorActivity extends AppCompatActivity {
     // 1. CORRECCIÓN: Si el color recibido es transparente (0), asignamos blanco (o el del tema)
     if (color == Color.TRANSPARENT) {
         // Opción PRO para Material You: 
-        color = com.google.android.material.color.MaterialColors.getColor(txtNota, com.google.android.material.R.attr.colorSurfaceContainer);
+        color = com.google.android.material.color.MaterialColors.getColor(background, com.google.android.material.R.attr.colorSurfaceContainer);
     }
 
     // 2. Aplicar el color al layout principal
@@ -1364,25 +1417,49 @@ public class EditorActivity extends AppCompatActivity {
     lblContador.setText(numPalabras + " palabras | " + caracteres + " caracteres");
     }
     
-    private void configurarItemCheck(View vistaFila) {
+    // Añadimos parámetros opcionales para cuando cargamos datos guardados
+    private void configurarItemCheck(View vistaFila, String texto, boolean marcado) {
     ImageView handle = vistaFila.findViewById(R.id.drag);
-    ImageView btnEliminar = vistaFila.findViewById(R.id.btnEliminarCheck); // Si agregas uno para borrar
+    ImageView btnEliminar = vistaFila.findViewById(R.id.btnEliminarCheck); 
+    CheckBox checkBox = vistaFila.findViewById(R.id.chkEstado);
+    EditText editText = vistaFila.findViewById(R.id.txtCheckCuerpo);
 
-    // 1. Configurar el "Manejador" (los puntitos) para iniciar el arrastre
+    // 1. Si vienen datos guardados, los ponemos
+    if (texto != null) editText.setText(texto);
+    checkBox.setChecked(marcado);
+
+    // 2. Lógica del Botón Eliminar
+    btnEliminar.setOnClickListener(v -> {
+        contenedorAdjuntos.removeView(vistaFila);
+        guardarNotaSilenciosamente(); 
+    });
+
+    // 3. Tachado automático al marcar (Estético)
+    checkBox.setOnCheckedChangeListener((buttonView, isChecked) -> {
+        if (isChecked) {
+            editText.setPaintFlags(editText.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
+            editText.setTextColor(Color.GRAY);
+        } else {
+            editText.setPaintFlags(editText.getPaintFlags() & (~Paint.STRIKE_THRU_TEXT_FLAG));
+            editText.setTextColor(MaterialColors.getColor(editText, com.google.android.material.R.attr.colorOnSurface));
+        }
+    });
+    // Aplicar estado inicial del tachado
+    if (marcado) {
+        editText.setPaintFlags(editText.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
+        editText.setTextColor(Color.GRAY);
+    }
+
+    // 4. Configurar Arrastre (Drag)
     handle.setOnTouchListener((v, event) -> {
         if (event.getAction() == MotionEvent.ACTION_DOWN) {
-            // Guardamos la referencia de la vista que vamos a mover
             vistaArrastrada = vistaFila;
-            
-            // Iniciamos la sombra de arrastre
             View.DragShadowBuilder shadowBuilder = new View.DragShadowBuilder(vistaFila);
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
                 vistaFila.startDragAndDrop(null, shadowBuilder, vistaFila, 0);
             } else {
                 vistaFila.startDrag(null, shadowBuilder, vistaFila, 0);
             }
-            
-            // Hacemos la fila invisible mientras se arrastra (efecto visual)
             vistaFila.setVisibility(View.INVISIBLE);
             return true;
         }

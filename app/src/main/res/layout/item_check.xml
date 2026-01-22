@@ -22,8 +22,10 @@
     <com.google.android.material.textfield.TextInputEditText
          android:layout_height="wrap_content"
          android:layout_width="wrap_content"
+         android:textColor="?attr/colorOnSurface"
          android:layout_weight="1"
-         android:id="@+id/txtCheckCuerpo" />
+         android:id="@+id/txtCheckCuerpo"
+         android:maxLines="1" />
 
     <ImageView
          android:layout_height="30dp"
