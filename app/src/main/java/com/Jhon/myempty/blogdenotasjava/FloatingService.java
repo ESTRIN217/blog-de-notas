@@ -22,7 +22,6 @@ import android.view.WindowManager;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Button;
 import android.widget.FrameLayout;
 import com.google.android.material.color.MaterialColors;
 
@@ -46,8 +45,7 @@ public class FloatingService extends Service {
 
     private EditText floatingTxtNota;
     private TextView floatingTitleText, lblContadorFlotante;
-    private ImageView btnClose, btnModify;
-    private Button minimizar;
+    private ImageView btnClose, btnModify, minimizar;
     private View headerView, resizeHandle;
     private FrameLayout minimizedContainer;
     private ImageView minimizedIcon;
