@@ -419,7 +419,6 @@ public class FloatingService extends Service {
         }
         
         mWindowManager.updateViewLayout(mFloatingView, params);
-        minimizar.setText(isMinimized ? "↗" : "🗕");
     }
 
     private void guardarNotaFlotante() {
