@@ -133,7 +133,7 @@
         <ImageView
              android:layout_height="30dp"
              android:layout_width="30dp"
-             android:src="@drawable/ic_launcher_round"
+             android:src="@mipmap/ic_launcher_round"
              android:id="@+id/minimized_icon"
              android:layout_gravity="center" />
 
