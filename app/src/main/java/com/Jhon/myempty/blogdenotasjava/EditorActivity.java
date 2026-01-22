@@ -1472,42 +1472,55 @@ public class EditorActivity extends AppCompatActivity {
     contenedorAdjuntos.setOnDragListener((v, event) -> {
         switch (event.getAction()) {
             case android.view.DragEvent.ACTION_DRAG_STARTED:
+                // Desactivar animaciones temporalmente para evitar saltos
+                if (contenedorAdjuntos.getLayoutTransition() != null) {
+                    contenedorAdjuntos.getLayoutTransition().disableTransitionType(android.animation.LayoutTransition.APPEARING);
+                    contenedorAdjuntos.getLayoutTransition().disableTransitionType(android.animation.LayoutTransition.DISAPPEARING);
+                    contenedorAdjuntos.getLayoutTransition().disableTransitionType(android.animation.LayoutTransition.CHANGE_APPEARING);
+                    contenedorAdjuntos.getLayoutTransition().disableTransitionType(android.animation.LayoutTransition.CHANGE_DISAPPEARING);
+                }
                 return true;
 
             case android.view.DragEvent.ACTION_DRAG_LOCATION:
-                // Aquí ocurre la magia: Calcular dónde soltar
                 float y = event.getY();
+                int indexArrastrado = contenedorAdjuntos.indexOfChild(vistaArrastrada);
                 
-                // Recorremos los hijos para ver sobre cuál estamos
                 for (int i = 0; i < contenedorAdjuntos.getChildCount(); i++) {
                     View hijo = contenedorAdjuntos.getChildAt(i);
-                    
-                    // Si estamos sobre un hijo y NO es el mismo que arrastramos
-                    if (hijo != vistaArrastrada && y > hijo.getTop() && y < hijo.getBottom()) {
-                        
-                        // Obtenemos los índices
-                        int indexArrastrado = contenedorAdjuntos.indexOfChild(vistaArrastrada);
-                        int indexObjetivo = i;
-                        
-                        // Intercambiamos las vistas
+                    if (hijo == vistaArrastrada) continue;
+
+                    // Calculamos el punto medio del hijo para un intercambio suave
+                    float puntoMedioHijo = hijo.getTop() + (hijo.getHeight() / 2f);
+
+                    // Si arrastramos hacia abajo y pasamos la mitad del de abajo
+                    if (indexArrastrado < i && y > puntoMedioHijo) {
                         contenedorAdjuntos.removeView(vistaArrastrada);
-                        contenedorAdjuntos.addView(vistaArrastrada, indexObjetivo);
-                        break; // Salimos del bucle al hacer un cambio
+                        contenedorAdjuntos.addView(vistaArrastrada, i);
+                        break;
+                    } 
+                    // Si arrastramos hacia arriba y pasamos la mitad del de arriba
+                    else if (indexArrastrado > i && y < puntoMedioHijo) {
+                        contenedorAdjuntos.removeView(vistaArrastrada);
+                        contenedorAdjuntos.addView(vistaArrastrada, i);
+                        break;
                     }
                 }
                 return true;
 
             case android.view.DragEvent.ACTION_DROP:
-                // Al soltar, volvemos a mostrar la vista
-                if (vistaArrastrada != null) {
-                    vistaArrastrada.setVisibility(View.VISIBLE);
-                }
+                vistaArrastrada.setVisibility(View.VISIBLE);
                 return true;
 
             case android.view.DragEvent.ACTION_DRAG_ENDED:
                 if (vistaArrastrada != null) {
                     vistaArrastrada.setVisibility(View.VISIBLE);
-                    vistaArrastrada = null;
+                }
+                // Re-activar animaciones
+                if (contenedorAdjuntos.getLayoutTransition() != null) {
+                    contenedorAdjuntos.getLayoutTransition().enableTransitionType(android.animation.LayoutTransition.APPEARING);
+                    contenedorAdjuntos.getLayoutTransition().enableTransitionType(android.animation.LayoutTransition.DISAPPEARING);
+                    contenedorAdjuntos.getLayoutTransition().enableTransitionType(android.animation.LayoutTransition.CHANGE_APPEARING);
+                    contenedorAdjuntos.getLayoutTransition().enableTransitionType(android.animation.LayoutTransition.CHANGE_DISAPPEARING);
                 }
                 return true;
         }

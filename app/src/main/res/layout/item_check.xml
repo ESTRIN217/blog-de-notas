@@ -9,10 +9,13 @@
      android:id="@+id/coordinator">
 
     <ImageView
-         android:layout_height="30dp"
-         android:layout_width="30dp"
+         android:layout_height="40dp"
+         android:layout_width="40dp"
+         android:padding="8dp"
+         android:contentDescription="Arrastrar"
          android:src="@drawable/drag_indicator"
-         android:id="@+id/drag" />
+         android:id="@+id/drag"
+         android:background="?attr/selectableItemBackgroundBorderless"/>
 
     <CheckBox
          android:layout_height="wrap_content"
