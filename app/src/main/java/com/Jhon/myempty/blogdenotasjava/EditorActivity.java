@@ -18,7 +18,8 @@ import android.widget.ImageView;
 import android.widget.PopupMenu;
 import android.widget.TextView;
 import android.widget.Toast;
-import android.widget.LinearLayout; // Ensure this is imported for contenedorAdjuntos
+import android.widget.LinearLayout;
+import androidx.recyclerview.widget.RecyclerView;
 import android.graphics.drawable.GradientDrawable;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
@@ -82,7 +83,7 @@ public class EditorActivity extends AppCompatActivity {
     private TextView lblFecha, lblContador;
     private Button btnAtras, btnDeshacer, btnRehacer, btnGuardar, menu, añadir, paleta, textoEstilo;
     private View background;
-    private LinearLayout contenedorAdjuntos; // Changed to LinearLayout
+    private RecyclerView contenedorAdjuntos;
 
     private ArrayList<String> historial = new ArrayList<>();
     private int posicionHistorial = -1;
@@ -257,7 +258,7 @@ public class EditorActivity extends AppCompatActivity {
 
     inicializarVistas(); 
     manejarIntent(); 
-    
+    activarArrastreEnContenedor();
     establecerFecha();
     configurarBotones();
 
@@ -354,11 +355,6 @@ public class EditorActivity extends AppCompatActivity {
         textoEstilo = findViewById(R.id.text_style);
         contenedorAdjuntos = findViewById(R.id.contenedorAdjuntos);
         lblContador = findViewById(R.id.lblContador);
-        // Activa la capacidad de recibir items arrastrados
-        activarArrastreEnContenedor();
-        // Opcional: Activar animación suave cuando se reordenan
-        android.animation.LayoutTransition transition = new android.animation.LayoutTransition();
-        contenedorAdjuntos.setLayoutTransition(transition);
     }
 
     private void establecerFecha() {
@@ -579,9 +575,9 @@ public class EditorActivity extends AppCompatActivity {
     if (isUnderlineActive) btnUnderline.setColorFilter(Color.BLUE);
 
     // --- LÓGICA DE TAMAÑOS ---
-    btnSmall.setOnClickListener(view -> txtNota.setTextSize(14sp));
-    btnNormal.setOnClickListener(view -> txtNota.setTextSize(18sp));
-    btnLarge.setOnClickListener(view -> txtNota.setTextSize(24sp));
+    btnSmall.setOnClickListener(view -> txtNota.setTextSize(14));
+    btnNormal.setOnClickListener(view -> txtNota.setTextSize(18));
+    btnLarge.setOnClickListener(view -> txtNota.setTextSize(24));
 
     btnBold.setOnClickListener(view -> {
     isBoldActive = !isBoldActive;

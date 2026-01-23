@@ -64,49 +64,47 @@
                  android:alpha="0.3"
                  android:layout_marginHorizontal="8dp" />
 
-            <ImageView
-                 android:layout_height="48dp"
-                 android:layout_width="48dp"
-                 android:src="@drawable/format_bold"
-                 android:background="?attr/selectableItemBackgroundBorderless"
-                 android:padding="10dp"
+            <Button
+                 android:layout_height="wrap_content"
+                 android:layout_width="wrap_content"
+                 app:icon="@drawable/format_bold"
+                 style="?attr/materialIconButtonStyle"
+                 android:checkable="true"
                  android:id="@+id/format_bold" />
 
-            <ImageView
-                 android:layout_height="48dp"
-                 android:layout_width="48dp"
-                 android:src="@drawable/format_italic"
-                 android:background="?attr/selectableItemBackgroundBorderless"
-                 android:padding="10dp"
+            <Button
+                 android:layout_height="wrap_content"
+                 android:layout_width="wrap_content"
+                 app:icon="@drawable/format_italic"
+                 style="?attr/materialIconButtonStyle"
+                 android:checkable="true"
                  android:id="@+id/format_italic" />
 
-            <ImageView
-                 android:layout_height="48dp"
-                 android:layout_width="48dp"
-                 android:src="@drawable/format_underlined"
-                 android:background="?attr/selectableItemBackgroundBorderless"
-                 android:padding="10dp"
+            <Button
+                 android:layout_height="wrap_content"
+                 android:layout_width="wrap_content"
+                 app:icon="@drawable/format_underlined"
+                 style="?attr/materialIconButtonStyle"
+                 android:checkable="true"
                  android:id="@+id/format_underlined" />
 
-            <ImageView
-                 android:layout_height="48dp"
-                 android:layout_width="48dp"
-                 android:src="@drawable/format_clear"
-                 android:background="?attr/selectableItemBackgroundBorderless"
-                 android:padding="10dp"
-                 android:id="@+id/format_clear" />
+            <Button
+                 android:layout_height="wrap_content"
+                 android:layout_width="wrap_content"
+                 app:icon="@drawable/format_clear"
+                 android:id="@+id/format_clear"
+                 style="?attr/materialIconButtonStyle"/>
 
         </LinearLayout>
 
     </HorizontalScrollView>
 
-    <ImageView
-         android:layout_height="48dp"
-         android:layout_width="48dp"
-         android:src="@drawable/close_24px"
-         android:background="?attr/selectableItemBackgroundBorderless"
-         android:padding="10dp"
+    <Button
+         android:layout_height="wrap_content"
+         android:layout_width="wrap_content"
+         app:icon="@drawable/close_24px"
          android:layout_marginStart="8dp"
-         android:id="@+id/closed" />
+         android:id="@+id/closed"
+         style="?attr/materialIconButtonStyle"/>
 
 </LinearLayout>

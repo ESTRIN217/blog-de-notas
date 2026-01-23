@@ -21,8 +21,8 @@
         <Button
              android:layout_height="wrap_content"
              android:layout_width="wrap_content"
-             android:contentDescription="Volver atrás"
              app:icon="@drawable/arrow_back_24px"
+             android:contentDescription="Volver atrás"
              style="?attr/materialIconButtonStyle"
              android:id="@+id/btnAtras" />
 
@@ -60,6 +60,13 @@
              android:id="@+id/menu" />
 
     </LinearLayout>
+
+    <androidx.recyclerview.widget.RecyclerView
+         android:layout_height="wrap_content"
+         android:layout_width="match_parent"
+         android:scrollbars="vertical"
+         android:clipToPadding="false"
+         android:id="@+id/contenedorAdjuntos" />
 
     <androidx.core.widget.NestedScrollView
          android:layout_height="0dp"
@@ -108,16 +115,6 @@
                      android:textSize="13sp"
                      android:layout_marginTop="4dp"
                      android:id="@+id/lblContador" />
-
-            </LinearLayout>
-
-            <LinearLayout
-                 android:layout_height="wrap_content"
-                 android:layout_width="match_parent"
-                 android:orientation="vertical"
-                 android:paddingBottom="8dp"
-                 android:paddingHorizontal="16dp"
-                 android:id="@+id/contenedorAdjuntos">
 
             </LinearLayout>
 
