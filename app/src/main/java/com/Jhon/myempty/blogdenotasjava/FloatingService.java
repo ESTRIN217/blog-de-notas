@@ -9,6 +9,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.graphics.PixelFormat;
+import android.graphics.Paint;
 import android.net.Uri;
 import android.os.Build;
 import android.os.IBinder;
@@ -24,11 +25,14 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.FrameLayout;
 import com.google.android.material.color.MaterialColors;
+import com.google.android.material.checkbox.MaterialCheckBox;
 
 import androidx.core.app.NotificationCompat;
 import androidx.documentfile.provider.DocumentFile;
-
+import androidx.recyclerview.widget.RecyclerView;
 import com.google.android.material.color.DynamicColors;
+import android.text.Html;
+import androidx.recyclerview.widget.LinearLayoutManager;
 
 import java.io.OutputStream;
 import java.io.BufferedReader;
@@ -36,6 +40,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
+import java.util.List;
 
 public class FloatingService extends Service {
 
@@ -45,10 +50,10 @@ public class FloatingService extends Service {
 
     private EditText floatingTxtNota;
     private TextView floatingTitleText, lblContadorFlotante;
-    private ImageView btnClose, btnModify, minimizar;
+    private ImageView btnClose, btnModify, minimizar,minimizedIcon;
     private View headerView, resizeHandle;
     private FrameLayout minimizedContainer;
-    private ImageView minimizedIcon;
+    private RecyclerView contenedorAdjuntos;
 
     private Uri uriArchivoActual;
     private int minWidthPx;
@@ -61,6 +66,8 @@ public class FloatingService extends Service {
     
     // Variable para almacenar el checklist (si existe)
     private String checklistData = "";
+    private SimpleAdapter adapterAdjuntos;
+    private String carpetaUriPadre;
 
     @Override
     public IBinder onBind(Intent intent) { return null; }
@@ -90,6 +97,13 @@ public class FloatingService extends Service {
 
         inicializarVistas();
         
+        // --- ERROR CORREGIDO 1: Inicializar el adaptador ---
+        adapterAdjuntos = new SimpleAdapter();
+        
+        // --- ERROR CORREGIDO 2: Configurar el RecyclerView ---
+        contenedorAdjuntos.setLayoutManager(new LinearLayoutManager(this));
+        contenedorAdjuntos.setAdapter(adapterAdjuntos);
+
         configurarParametrosVentana(metrics);
         configurarListeners();
     }
@@ -126,6 +140,7 @@ public class FloatingService extends Service {
         
         minimizedContainer = mFloatingView.findViewById(R.id.minimized_container);
         minimizedIcon = mFloatingView.findViewById(R.id.minimized_icon);
+        contenedorAdjuntos = mFloatingView.findViewById(R.id.contenedorAdjuntos);
     }
 
     private void configurarParametrosVentana(DisplayMetrics metrics) {
@@ -148,72 +163,96 @@ public class FloatingService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        if (intent != null) {
-            String contenidoRaw = intent.getStringExtra("contenido_nota");
-            String uriString = intent.getStringExtra("uri_archivo");
+    if (intent != null) {
+        String contenidoRaw = intent.getStringExtra("contenido_nota");
+        String uriString = intent.getStringExtra("uri_archivo");
+        
+        carpetaUriPadre = getSharedPreferences("MisPreferencias", MODE_PRIVATE)
+                         .getString("carpeta_uri", null);
 
-            if (uriString != null && !uriString.isEmpty()) {
-                uriArchivoActual = Uri.parse(uriString);
-                DocumentFile df = DocumentFile.fromSingleUri(this, uriArchivoActual);
-                if (df != null && df.getName() != null) {
-                    floatingTitleText.setText(df.getName().replace(".txt", ""));
-                }
-            }
-
-            if (floatingTxtNota != null && contenidoRaw != null) {
-                // --- LÓGICA COMPATIBLE CON EditorActivity ---
-                
-                // 1. Extraer y almacenar el checklist (si existe)
-                checklistData = extraerChecklistData(contenidoRaw);
-                
-                // 2. Extraer y aplicar el color de fondo
-                int colorNota = extraerColorDeHtml(contenidoRaw);
-                floatingTxtNota.setBackgroundColor(colorNota);
-
-                // 3. Limpiar el HTML para mostrar solo el texto limpio
-                // Primero eliminamos el checklistData para que no aparezca como texto
-                String contenidoSinChecklist = contenidoRaw;
-                if (!checklistData.isEmpty()) {
-                    contenidoSinChecklist = contenidoRaw.replace(checklistData, "");
-                }
-                
-                // Luego quitamos el DIV envolvente de color
-                String textoLimpio = contenidoSinChecklist.replaceAll("<div[^>]*>", "").replace("</div>", "");
-                
-                // 4. Mostrar el texto en el EditText
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                    floatingTxtNota.setText(android.text.Html.fromHtml(textoLimpio, android.text.Html.FROM_HTML_MODE_LEGACY));
-                } else {
-                    floatingTxtNota.setText(android.text.Html.fromHtml(textoLimpio));
-                }
-                
-                try {
-                    floatingTxtNota.setSelection(floatingTxtNota.getText().length());
-                } catch (Exception ignored) {}
-                
-                // 5. Actualizar contador
-                String inicial = floatingTxtNota.getText().toString().trim();
-                int p = inicial.isEmpty() ? 0 : inicial.split("\\s+").length;
-                lblContadorFlotante.setText(p + "p | " + floatingTxtNota.getText().length() + "c");
+        if (uriString != null && !uriString.isEmpty()) {
+            uriArchivoActual = Uri.parse(uriString);
+            DocumentFile df = DocumentFile.fromSingleUri(this, uriArchivoActual);
+            if (df != null && df.getName() != null) {
+                floatingTitleText.setText(df.getName().replace(".txt", ""));
             }
         }
-        return START_STICKY;
+
+        if (floatingTxtNota != null && contenidoRaw != null) {
+            // 1. Extraer Checklist del HTML completo
+            String[] resultado = extraerChecklistYTexto(contenidoRaw);
+            String checklistData = resultado[0];
+            String textoSinChecklist = resultado[1];
+            
+            // 2. Procesar checklist
+            if (!checklistData.isEmpty()) {
+                procesarChecklist(checklistData);
+            }
+            
+            // 3. Color de fondo
+            int colorNota = extraerColorDeHtml(contenidoRaw);
+            floatingTxtNota.setBackgroundColor(colorNota);
+            
+            // 4. Mostrar texto principal limpio
+            String textoLimpio = textoSinChecklist.replaceAll("<div[^>]*>", "").replace("</div>", "");
+            
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                floatingTxtNota.setText(Html.fromHtml(textoLimpio, Html.FROM_HTML_MODE_LEGACY));
+            } else {
+                floatingTxtNota.setText(Html.fromHtml(textoLimpio));
+            }
+            
+            actualizarContador();
+        }
     }
 
-    private String extraerChecklistData(String html) {
-        try {
-            // Buscar el bloque <div id='checklist_data'>...</div>
-            Pattern pattern = Pattern.compile("<div id='checklist_data'.*?>(.*?)</div>", Pattern.DOTALL);
-            Matcher matcher = pattern.matcher(html);
-            
-            if (matcher.find()) {
-                // Devolvemos todo el bloque DIV (no solo el contenido interno)
-                return matcher.group(0);
+    // --- CORRECCIÓN AQUÍ ---
+    return START_NOT_STICKY; 
+    }
+    
+    
+    private void procesarChecklist(String data) {
+        if (data == null || data.isEmpty()) return;
+
+        // Buscamos cada item: <chk state="true">Texto</chk>
+        Pattern pattern = Pattern.compile("<chk state=\"(.*?)\">(.*?)</chk>");
+        Matcher matcher = pattern.matcher(data);
+
+        while (matcher.find()) {
+            boolean isChecked = "true".equals(matcher.group(1));
+            String texto = matcher.group(2);
+
+            // Inflamos la vista del item_check
+            View v = LayoutInflater.from(this).inflate(R.layout.item_check, null);
+            android.widget.CheckBox cb = v.findViewById(R.id.chkEstado);
+            EditText et = v.findViewById(R.id.txtCheckCuerpo);
+
+            if (cb != null && et != null) {
+                cb.setChecked(isChecked);
+                et.setText(texto);
+                // Añadimos al adaptador que ya tienes
+                adapterAdjuntos.addView(v, adapterAdjuntos.getItemCount());
             }
-        } catch (Exception e) {
-            e.printStackTrace();
         }
-        return ""; // Retornar cadena vacía si no hay checklist
+    }
+
+    private String[] extraerChecklistYTexto(String html) {
+    String checklistData = "";
+    String textoSinChecklist = html;
+    
+    try {
+        Pattern pattern = Pattern.compile("<div id='checklist_data'.*?>(.*?)</div>", Pattern.DOTALL);
+        Matcher matcher = pattern.matcher(html);
+        
+        if (matcher.find()) {
+            checklistData = matcher.group(0); // Todo el div del checklist
+            textoSinChecklist = html.replace(checklistData, "");
+        }
+    } catch (Exception e) {
+        e.printStackTrace();
+    }
+    
+    return new String[]{checklistData, textoSinChecklist};
     }
 
     private void configurarListeners() {
@@ -424,34 +463,56 @@ public class FloatingService extends Service {
     private void guardarNotaFlotante() {
         if (uriArchivoActual == null || isMinimized) return;
 
-        // 1. Convertir el texto visible a HTML
-        String contenidoHtml = android.text.Html.toHtml(floatingTxtNota.getText());
+        // 1. Obtener HTML del texto principal
+        String contenidoHtml = Html.toHtml(floatingTxtNota.getText());
+        String titulo = floatingTitleText.getText().toString().trim();
+        if (titulo.isEmpty()) titulo = "Sin_titulo";
 
-        // 2. Obtener el color de fondo actual
-        int colorActual = com.google.android.material.color.MaterialColors.getColor(floatingTxtNota, com.google.android.material.R.attr.colorSurfaceContainer);
+        // 2. Obtener color
+        int colorActual = Color.WHITE;
         if (floatingTxtNota.getBackground() instanceof android.graphics.drawable.ColorDrawable) {
             colorActual = ((android.graphics.drawable.ColorDrawable) floatingTxtNota.getBackground()).getColor();
         }
-
-        // 3. Convertir el color a hexadecimal
         String hexColor = String.format("#%06X", (0xFFFFFF & colorActual));
 
-        // 4. Construir el HTML FINAL (COMPATIBLE con EditorActivity)
-        // Estructura: <div con color> + Contenido HTML + Checklist (si existe) + </div>
-        String htmlParaGuardar = "<div style='background-color:" + hexColor + ";'>" 
-                               + contenidoHtml 
-                               + (checklistData != null && !checklistData.isEmpty() ? checklistData : "")
-                               + "</div>";
+        // 3. GENERAR HTML DEL CHECKLIST DESDE EL ADAPTADOR
+        StringBuilder checklistHtml = new StringBuilder();
+checklistHtml.append("<div id='checklist_data' style='display:none;'>");
 
-        // 5. Escribir en el archivo
-        try (OutputStream os = getContentResolver().openOutputStream(uriArchivoActual, "wt")) {
-            if (os != null) {
-                os.write(htmlParaGuardar.getBytes());
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
+if (adapterAdjuntos != null) {
+    List<View> views = adapterAdjuntos.getViews();
+    for (View v : views) {
+        android.widget.CheckBox cb = v.findViewById(R.id.chkEstado);
+        EditText et = v.findViewById(R.id.txtCheckCuerpo);
+        
+        if (cb != null && et != null) {
+            String isChecked = cb.isChecked() ? "true" : "false";
+            String textoItem = et.getText().toString();
+            checklistHtml.append("<chk state=\"").append(isChecked).append("\">")
+                         .append(textoItem).append("</chk>");
         }
     }
+}
+checklistHtml.append("</div>");
+
+        // 4. UNIR TODO Y GUARDAR
+        String htmlParaGuardar = "<div style='background-color:" + hexColor + ";'>" 
+                               + Html.toHtml(floatingTxtNota.getText()) 
+                               + checklistHtml.toString() 
+                               + "</div>";
+
+        try {
+            // Lógica de guardado en archivo SAF
+            if (uriArchivoActual != null) {
+                try (OutputStream os = getContentResolver().openOutputStream(uriArchivoActual, "wt")) {
+                    os.write(htmlParaGuardar.getBytes());
+                }
+            }
+        } catch (Exception e) {
+            android.util.Log.e("FLOATING_SAVE", "Error: " + e.getMessage());
+        }
+    }
+
 
     @Override
     public void onDestroy() {
@@ -483,5 +544,46 @@ public class FloatingService extends Service {
         e.printStackTrace();
     }
     return MaterialColors.getColor(this, com.google.android.material.R.attr.colorSurfaceContainer, Color.WHITE);
+    }
+    private void actualizarContador() {
+        String texto = floatingTxtNota.getText().toString().trim();
+        int p = texto.isEmpty() ? 0 : texto.split("\\s+").length;
+        if (lblContadorFlotante != null) {
+            lblContadorFlotante.setText(p + "p | " + texto.length() + "c");
+        }
+    }
+    private void configurarItemCheck(View vistaFila, String texto, boolean marcado) {
+    ImageView handle = vistaFila.findViewById(R.id.drag);
+    ImageView btnEliminar = vistaFila.findViewById(R.id.btnEliminarCheck); 
+    MaterialCheckBox checkBox = vistaFila.findViewById(R.id.chkEstado);
+    EditText editText = vistaFila.findViewById(R.id.txtCheckCuerpo);
+        
+        handle.setVisibility(View.INVISIBLE);
+
+    // 1. Si vienen datos guardados, los ponemos
+    if (texto != null) editText.setText(texto);
+    checkBox.setChecked(marcado);
+
+    // 2. Lógica del Botón Eliminar
+    btnEliminar.setOnClickListener(v -> {
+
+    ((SimpleAdapter)contenedorAdjuntos.getAdapter()).removeView(vistaFila);
+    });
+
+    // 3. Tachado automático al marcar (Estético)
+    checkBox.setOnCheckedChangeListener((buttonView, isChecked) -> {
+        if (isChecked) {
+            editText.setPaintFlags(editText.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
+            editText.setTextColor(Color.GRAY);
+        } else {
+            editText.setPaintFlags(editText.getPaintFlags() & (~Paint.STRIKE_THRU_TEXT_FLAG));
+            editText.setTextColor(MaterialColors.getColor(editText, com.google.android.material.R.attr.colorOnSurface));
+        }
+    });
+    // Aplicar estado inicial del tachado
+    if (marcado) {
+        editText.setPaintFlags(editText.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
+        editText.setTextColor(Color.GRAY);
+    }
     }
 }

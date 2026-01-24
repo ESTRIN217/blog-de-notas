@@ -1,39 +1,47 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
+<com.google.android.material.card.MaterialCardView
      xmlns:android="http://schemas.android.com/apk/res/android"
      xmlns:app="http://schemas.android.com/apk/res-auto"
      android:layout_height="wrap_content"
      android:layout_width="match_parent"
-     android:gravity="center_vertical"
-     android:orientation="horizontal"
-     android:id="@+id/coordinator">
+     app:cardBackgroundColor="?attr/colorSurfaceContainerHigh"
+     app:cardCornerRadius="12dp">
 
-    <ImageView
-         android:layout_height="40dp"
-         android:layout_width="40dp"
-         android:padding="8dp"
-         android:contentDescription="Arrastrar"
-         android:src="@drawable/drag_indicator"
-         android:id="@+id/drag"
-         android:background="?attr/selectableItemBackgroundBorderless"/>
-
-    <CheckBox
+    <LinearLayout
          android:layout_height="wrap_content"
-         android:layout_width="wrap_content"
-         android:id="@+id/chkEstado" />
+         android:layout_width="match_parent"
+         android:gravity="center_vertical"
+         android:orientation="horizontal"
+         android:id="@+id/coordinator">
 
-    <com.google.android.material.textfield.TextInputEditText
-         android:layout_height="wrap_content"
-         android:layout_width="wrap_content"
-         android:textColor="?attr/colorOnSurface"
-         android:layout_weight="1"
-         android:id="@+id/txtCheckCuerpo"
-         android:maxLines="1" />
+        <ImageView
+             android:layout_height="40dp"
+             android:layout_width="40dp"
+             android:contentDescription="Arrastrar"
+             android:src="@drawable/drag_indicator"
+             android:background="?attr/selectableItemBackgroundBorderless"
+             android:padding="8dp"
+             android:id="@+id/drag" />
 
-    <ImageView
-         android:layout_height="30dp"
-         android:layout_width="30dp"
-         android:src="@drawable/close_24px"
-         android:id="@+id/btnEliminarCheck" />
+        <CheckBox
+             android:layout_height="wrap_content"
+             android:layout_width="wrap_content"
+             android:id="@+id/chkEstado" />
 
-</LinearLayout>
+        <com.google.android.material.textfield.TextInputEditText
+             android:layout_height="wrap_content"
+             android:layout_width="wrap_content"
+             android:textColor="?attr/colorOnSurface"
+             android:maxLines="1"
+             android:layout_weight="1"
+             android:id="@+id/txtCheckCuerpo" />
+
+        <ImageView
+             android:layout_height="30dp"
+             android:layout_width="30dp"
+             android:src="@drawable/close_24px"
+             android:id="@+id/btnEliminarCheck" />
+
+    </LinearLayout>
+
+</com.google.android.material.card.MaterialCardView>

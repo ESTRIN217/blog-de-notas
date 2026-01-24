@@ -31,16 +31,12 @@ public class SimpleAdapter extends RecyclerView.Adapter<SimpleAdapter.ViewHolder
 
     // --- CORRECCIÓN 2: Método para mover items (Drag & Drop) ---
     public void moveItem(int fromPosition, int toPosition) {
-        if (fromPosition < toPosition) {
-            for (int i = fromPosition; i < toPosition; i++) {
-                java.util.Collections.swap(views, i, i + 1);
-            }
-        } else {
-            for (int i = fromPosition; i > toPosition; i--) {
-                java.util.Collections.swap(views, i, i - 1);
-            }
-        }
-        notifyItemMoved(fromPosition, toPosition);
+    if (fromPosition < 0 || toPosition < 0 || fromPosition >= views.size() || toPosition >= views.size()) {
+        return;
+    }
+    View view = views.remove(fromPosition);
+    views.add(toPosition, view);
+    notifyItemMoved(fromPosition, toPosition);
     }
     
     // Getter para ayudar a encontrar posiciones

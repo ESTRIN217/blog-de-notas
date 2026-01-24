@@ -4,9 +4,9 @@ import android.os.Bundle;
 import android.os.Build;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.appcompat.app.AppCompatActivity;
-import android.widget.ImageView;
 import androidx.activity.EdgeToEdge;
 import com.google.android.material.textview.MaterialTextView;
+import com.google.android.material.button.MaterialButton;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import com.Jhon.myempty.blogdenotasjava.Cambio;
@@ -15,7 +15,7 @@ import java.util.ArrayList;
 
 public class ChangelogActivity extends AppCompatActivity {
 
-    private ImageView btnAtras;
+    private MaterialButton btnAtras;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -29,6 +29,11 @@ public class ChangelogActivity extends AppCompatActivity {
         List<Cambio> listaCambios = new ArrayList<>();
         
         // AQUÍ AGREGAS TUS VERSIONES
+        listaCambios.add(new Cambio("1.9.0 Editor", "24 de enero de 2026", "1.Se a mejorado la UI dándole un aspecto más a material 3.\n" +
+        "2.Se mejoro visualmente la pantalla de Configuracion.\n" +
+        "3.se añadió la opción de añadir casillas de verificación\n" +
+        "4. Se mejoro el icono de la app y se agrego la compatibilidad con icono monochrome\n" +
+        "5. Se añadió el botón de minimizar al modo Flotante"));
         listaCambios.add(new Cambio("1.8.0 Editor", "15 de enero de 2026", "1. Sincronización Editor ↔ FloatingService\n" +
         "Corrección de Llaves: Estandarizamos el uso de 'uri_archivo' para que ambos componentes compartan la misma referencia.\n" +
         

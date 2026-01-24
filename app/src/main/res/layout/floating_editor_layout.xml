@@ -1,158 +1,175 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="@drawable/bg_floating_window"
-    android:elevation="8dp">
+     xmlns:android="http://schemas.android.com/apk/res/android"
+     xmlns:app="http://schemas.android.com/apk/res-auto"
+     xmlns:tools="http://schemas.android.com/tools"
+     android:layout_height="match_parent"
+     android:layout_width="match_parent"
+     android:background="@drawable/bg_floating_window"
+     android:elevation="8dp">
 
-    <!-- Header para mover la ventana -->
     <View
-        android:id="@+id/floating_header"
-        android:layout_width="0dp"
-        android:layout_height="48dp"
-        android:background="?attr/colorPrimary"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
+         android:layout_height="48dp"
+         android:layout_width="0dp"
+         android:background="?attr/colorPrimary"
+         app:layout_constraintTop_toTopOf="parent"
+         app:layout_constraintStart_toStartOf="parent"
+         app:layout_constraintEnd_toEndOf="parent"
+         android:id="@+id/floating_header" />
 
-    <!-- Título de la nota -->
+    <!-- Primero declara el TextView del contador -->
     <com.google.android.material.textview.MaterialTextView
-        android:id="@+id/floating_title_text"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:layout_marginEnd="8dp"
-        android:ellipsize="end"
-        android:textSize="16sp"
-        android:textColor="?attr/colorOnPrimary"
-        android:maxLines="1"
-        android:text="Nota Rápida"
-        android:textStyle="bold"
-        app:layout_constraintEnd_toStartOf="@id/lbl_contador_floating"
-        app:layout_constraintBottom_toBottomOf="@id/floating_header"
-        app:layout_constraintTop_toTopOf="@id/floating_header"
-        app:layout_constraintStart_toStartOf="parent" />
+         android:layout_height="wrap_content"
+         android:layout_width="wrap_content"
+         android:layout_marginEnd="8dp"
+         android:alpha="0.8"
+         app:layout_constraintTop_toTopOf="@id/floating_header"
+         android:textSize="12sp"
+         android:textColor="?attr/colorOnPrimary"
+         app:layout_constraintEnd_toStartOf="@+id/minimizar" 
+         app:layout_constraintBottom_toBottomOf="@id/floating_header"
+         android:id="@+id/lbl_contador_floating"
+         android:text="0p | 0c" />
 
-    <!-- Contador de palabras/caracteres -->
+    <!-- Luego el título que referencia al contador -->
     <com.google.android.material.textview.MaterialTextView
-        android:id="@+id/lbl_contador_floating"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginEnd="8dp"
-        android:alpha="0.8"
-        android:textSize="12sp"
-        android:textColor="?attr/colorOnPrimary"
-        android:text="0p | 0c"
-        app:layout_constraintTop_toTopOf="@id/floating_header"
-        app:layout_constraintEnd_toStartOf="@id/minimizar"
-        app:layout_constraintBottom_toBottomOf="@id/floating_header" />
+         android:layout_height="wrap_content"
+         android:layout_width="0dp"
+         android:layout_marginEnd="8dp"
+         android:ellipsize="end"
+         android:textSize="16sp"
+         android:textColor="?attr/colorOnPrimary"
+         app:layout_constraintEnd_toStartOf="@id/lbl_contador_floating"
+         app:layout_constraintBottom_toBottomOf="@id/floating_header"
+         android:layout_marginStart="8dp"
+         app:layout_constraintTop_toTopOf="@id/floating_header"
+         app:layout_constraintStart_toStartOf="parent"
+         android:maxLines="1"
+         android:id="@+id/floating_title_text"
+         android:text="Nota Rápida"
+         android:textStyle="bold" />
 
-    <!-- Botón para minimizar (usando ImageView en lugar de Button para icono) -->
     <ImageView
-        android:id="@+id/minimizar"
-        android:layout_width="32dp"
-        android:layout_height="32dp"
-        android:layout_marginEnd="4dp"
-        android:contentDescription="Minimizar"
-        android:src="@drawable/round_minimize"
-        android:padding="6dp"
-        app:tint="?attr/colorOnPrimary"
-        app:layout_constraintTop_toTopOf="@id/floating_header"
-        app:layout_constraintEnd_toStartOf="@id/modify"
-        app:layout_constraintBottom_toBottomOf="@id/floating_header" />
+         android:layout_height="32dp"
+         android:layout_width="32dp"
+         android:layout_marginEnd="4dp"
+         android:contentDescription="Minimizar"
+         android:src="@drawable/round_minimize"
+         app:layout_constraintTop_toTopOf="@id/floating_header"
+         android:padding="6dp"
+         app:tint="?attr/colorOnPrimary"
+         app:layout_constraintEnd_toStartOf="@+id/modify"
+         app:layout_constraintBottom_toBottomOf="@id/floating_header"
+         android:id="@+id/minimizar" />
 
-    <!-- Botón para abrir en pantalla completa -->
     <ImageView
-        android:id="@+id/modify"
-        android:layout_width="32dp"
-        android:layout_height="32dp"
-        android:layout_marginEnd="4dp"
-        android:contentDescription="Abrir en pantalla completa"
-        android:src="@drawable/open_in_full_24px"
-        android:padding="6dp"
-        app:tint="?attr/colorOnPrimary"
-        app:layout_constraintTop_toTopOf="@id/floating_header"
-        app:layout_constraintEnd_toStartOf="@id/btn_close_floating"
-        app:layout_constraintBottom_toBottomOf="@id/floating_header" />
+         android:layout_height="32dp"
+         android:layout_width="32dp"
+         android:layout_marginEnd="4dp"
+         android:contentDescription="Abrir en pantalla completa"
+         android:src="@drawable/open_in_full_24px"
+         app:layout_constraintTop_toTopOf="@id/floating_header"
+         android:padding="6dp"
+         app:tint="?attr/colorOnPrimary"
+         app:layout_constraintEnd_toStartOf="@+id/btn_close_floating"
+         app:layout_constraintBottom_toBottomOf="@id/floating_header"
+         android:id="@+id/modify" />
 
-    <!-- Botón para cerrar -->
     <ImageView
-        android:id="@+id/btn_close_floating"
-        android:layout_width="32dp"
-        android:layout_height="32dp"
-        android:layout_marginEnd="8dp"
-        android:contentDescription="Cerrar nota flotante"
-        android:src="@drawable/close_24px"
-        android:padding="4dp"
-        app:tint="?attr/colorOnPrimary"
-        app:layout_constraintTop_toTopOf="@id/floating_header"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintBottom_toBottomOf="@id/floating_header" />
+         android:layout_height="32dp"
+         android:layout_width="32dp"
+         android:layout_marginEnd="8dp"
+         android:contentDescription="Cerrar nota flotante"
+         android:src="@drawable/close_24px"
+         app:layout_constraintTop_toTopOf="@id/floating_header"
+         android:padding="4dp"
+         app:tint="?attr/colorOnPrimary"
+         app:layout_constraintEnd_toEndOf="parent"
+         app:layout_constraintBottom_toBottomOf="@id/floating_header"
+         android:id="@+id/btn_close_floating" />
 
-    <!-- Área de edición de texto -->
-    <EditText
-        android:id="@+id/floating_txtNota"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:padding="16dp"
-        android:importantForAutofill="no"
-        android:textSize="16sp"
-        android:textColor="?attr/colorOnSurface"
-        android:background="@android:color/transparent"
-        android:gravity="top|start"
-        android:hint="Escribe aquí..."
-        android:textColorHint="?attr/colorOnSurfaceVariant"
-        android:inputType="textMultiLine|textCapSentences"
-        app:layout_constraintBottom_toTopOf="@id/resize_handle"
-        app:layout_constraintTop_toBottomOf="@id/floating_header"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
+    <androidx.core.widget.NestedScrollView
+         android:layout_height="0dp"
+         android:layout_width="match_parent"
+         android:fillViewport="true"
+         app:layout_constraintStart_toStartOf="parent"
+         app:layout_constraintEnd_toEndOf="parent"
+         app:layout_constraintBottom_toTopOf="@id/resize_handle"
+         app:layout_constraintTop_toBottomOf="@id/floating_header">
 
-    <!-- Handle para redimensionar -->
+        <LinearLayout
+             android:layout_height="wrap_content"
+             android:layout_width="match_parent"
+             android:orientation="vertical">
+
+            <androidx.recyclerview.widget.RecyclerView
+                 android:layout_height="wrap_content"
+                 android:layout_width="match_parent"
+                 android:scrollbars="vertical"
+                 android:clipToPadding="false"
+                 android:id="@+id/contenedorAdjuntos" />
+
+            <EditText
+                 android:layout_height="wrap_content"
+                 android:layout_width="match_parent"
+                 android:importantForAutofill="no"
+                 android:textSize="18sp"
+                 android:textColor="?attr/colorOnSurface"
+                 android:scrollbars="none"
+                 android:background="@android:color/transparent"
+                 android:gravity="top|start"
+                 android:hint="Comienza a escribir..."
+                 android:minHeight="200dp"
+                 android:textColorHint="?attr/colorOnSurfaceVariant"
+                 android:paddingBottom="24dp"
+                 android:paddingHorizontal="16dp"
+                 android:inputType="textMultiLine|textCapSentences"
+                 android:id="@+id/floating_txtNota" />
+
+        </LinearLayout>
+
+    </androidx.core.widget.NestedScrollView>
+
     <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/resize_handle"
-        android:layout_width="0dp"
-        android:layout_height="24dp"
-        android:background="?attr/colorSurfaceVariant"
-        android:clickable="true"
-        android:focusable="true"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent">
+         android:layout_height="24dp"
+         android:layout_width="0dp"
+         android:background="?attr/colorSurfaceVariant"
+         android:clickable="true"
+         app:layout_constraintStart_toStartOf="parent"
+         app:layout_constraintEnd_toEndOf="parent"
+         app:layout_constraintBottom_toBottomOf="parent"
+         android:focusable="true"
+         android:id="@+id/resize_handle">
 
         <ImageView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:src="@drawable/drag_handle_24px"
-            app:tint="?attr/colorOnSurfaceVariant"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent" />
+             android:layout_height="wrap_content"
+             android:layout_width="wrap_content"
+             android:src="@drawable/drag_handle_24px"
+             app:layout_constraintTop_toTopOf="parent"
+             app:tint="?attr/colorOnSurfaceVariant"
+             app:layout_constraintStart_toStartOf="parent"
+             app:layout_constraintEnd_toEndOf="parent"
+             app:layout_constraintBottom_toBottomOf="parent" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
-    <!-- Vista minimizada (ahora con constraints correctas) -->
     <FrameLayout
-        android:id="@+id/minimized_container"
-        android:layout_width="60dp"
-        android:layout_height="60dp"
-        android:visibility="gone"
-        android:background="@drawable/borde_redondeado"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent">
+         android:layout_height="60dp"
+         android:layout_width="60dp"
+         android:visibility="gone"
+         android:background="@drawable/borde_redondeado"
+         app:layout_constraintTop_toTopOf="parent"
+         app:layout_constraintStart_toStartOf="parent"
+         app:layout_constraintEnd_toEndOf="parent"
+         app:layout_constraintBottom_toBottomOf="parent"
+         android:id="@+id/minimized_container">
 
         <ImageView
-            android:id="@+id/minimized_icon"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:src="@mipmap/ic_launcher_round"
-            android:layout_gravity="center" />
+             android:layout_height="40dp"
+             android:layout_width="40dp"
+             android:src="@mipmap/ic_launcher_round"
+             android:id="@+id/minimized_icon"
+             android:layout_gravity="center" />
 
     </FrameLayout>
 

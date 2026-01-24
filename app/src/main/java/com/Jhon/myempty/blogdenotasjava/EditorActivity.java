@@ -12,7 +12,6 @@ import android.text.TextWatcher;
 import android.view.View;
 import android.view.MotionEvent;
 import android.widget.EditText;
-import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.ImageView;
 import android.widget.PopupMenu;
@@ -39,6 +38,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AppCompatDelegate;
 import androidx.documentfile.provider.DocumentFile;
 import androidx.recyclerview.widget.RecyclerView;
+import com.Jhon.myempty.blogdenotasjava.SimpleAdapter;
 import com.google.android.material.color.DynamicColors;
 import com.google.android.material.color.MaterialColors;
 import android.media.MediaRecorder;
@@ -47,6 +47,7 @@ import android.content.pm.PackageManager;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
+import com.google.android.material.button.MaterialButton;
 import android.widget.Chronometer;
 import android.os.SystemClock;
 import android.media.MediaPlayer;
@@ -80,7 +81,7 @@ public class EditorActivity extends AppCompatActivity {
 
     private EditText txtNota, txtTitulo;
     private TextView lblFecha, lblContador;
-    private Button btnAtras, btnDeshacer, btnRehacer, btnGuardar, menu, añadir, paleta, textoEstilo;
+    private MaterialButton btnAtras, btnDeshacer, btnRehacer, btnGuardar, menu, añadir, paleta, textoEstilo;
     private View background;
     private RecyclerView contenedorAdjuntos;
 
@@ -113,6 +114,7 @@ public class EditorActivity extends AppCompatActivity {
     private boolean isItalicActive = false;
     private boolean isUnderlineActive = false;
     private View vistaArrastrada;
+    private SimpleAdapter adapterAdjuntos;
 
 
     // --- Permiso para ventana flotante ---
@@ -132,9 +134,16 @@ public class EditorActivity extends AppCompatActivity {
         if (result.getResultCode() == RESULT_OK && result.getData() != null) {
             Uri uriDibujo = result.getData().getData();
             if (uriDibujo != null) {
-                // Añadimos a la lista para que guardarImagenesEnCarpetaNota la vea
-                listaRutasFotos.add(uriDibujo.toString());
-                agregarAdjuntoVisual(uriDibujo.toString(), "DIBUJO", "");
+                String extra = result.getData().getStringExtra("tipo");
+                String tipo = (extra != null) ? extra : "DIBUJO";
+                agregarAdjuntoVisual(uriDibujo.toString(), tipo, "");
+                
+                // Add to appropriate list
+                if ("DIBUJO".equals(tipo)) {
+                    listaRutasDibujos.add(uriDibujo.toString());
+                } else {
+                    listaRutasFotos.add(uriDibujo.toString());
+                }
             }
         }
     });
@@ -559,20 +568,20 @@ public class EditorActivity extends AppCompatActivity {
     dialogTextStyle.setContentView(layout);
 
     // --- 1. REFERENCIAS DE TAMAÑO ---
-    View btnSmall = layout.findViewById(R.id.size_small);
-    View btnNormal = layout.findViewById(R.id.size_normal);
-    View btnLarge = layout.findViewById(R.id.size_large);
+    MaterialButton btnSmall = layout.findViewById(R.id.size_small);
+    MaterialButton btnNormal = layout.findViewById(R.id.size_normal);
+    MaterialButton btnLarge = layout.findViewById(R.id.size_large);
 
     // --- 2. REFERENCIAS DE ESTILO ---
-    ImageView btnBold = layout.findViewById(R.id.format_bold);
-    ImageView btnItalic = layout.findViewById(R.id.format_italic);
-    ImageView btnUnderline = layout.findViewById(R.id.format_underlined);
-    ImageView btnClear = layout.findViewById(R.id.format_clear);
-    ImageView btnClose = layout.findViewById(R.id.closed);
+    MaterialButton btnBold = layout.findViewById(R.id.format_bold);
+    MaterialButton btnItalic = layout.findViewById(R.id.format_italic);
+    MaterialButton btnUnderline = layout.findViewById(R.id.format_underlined);
+    MaterialButton btnClear = layout.findViewById(R.id.format_clear);
+    MaterialButton btnClose = layout.findViewById(R.id.closed);
     
-    if (isBoldActive) btnBold.setColorFilter(Color.BLUE);
-    if (isItalicActive) btnItalic.setColorFilter(Color.BLUE);
-    if (isUnderlineActive) btnUnderline.setColorFilter(Color.BLUE);
+    if (isBoldActive) btnBold.setCheckable(true);
+    if (isItalicActive) btnItalic.setCheckable(true);
+    if (isUnderlineActive) btnUnderline.setCheckable(true);
 
     // --- LÓGICA DE TAMAÑOS ---
     btnSmall.setOnClickListener(view -> txtNota.setTextSize(14));
@@ -583,25 +592,34 @@ public class EditorActivity extends AppCompatActivity {
     isBoldActive = !isBoldActive;
     // Opcional: Cambiar color del botón para indicar que está activo
     if (isBoldActive) {
-        btnBold.setColorFilter(Color.BLUE);
+        btnBold.setCheckable(true);
     } else {
-        btnBold.clearColorFilter();
+        btnBold.setCheckable(false);
     }
     });
 
     btnItalic.setOnClickListener(view -> {
     isItalicActive = !isItalicActive;
+    if (isItalicActive) {
+        btnItalic.setCheckable(true);
+    } else {
+        btnItalic.setCheckable(false);
+    }
     });
 
     // --- LÓGICA DE SUBRAYADO ---
     btnUnderline.setOnClickListener(view -> {
         isUnderlineActive = !isUnderlineActive;
+        if (isUnderlineActive) {
+        btnUnderline.setCheckable(true);
+    } else {
+        btnUnderline.setCheckable(false);
+    }
     });
 
     // --- LÓGICA DE LIMPIAR FORMATO ---
     btnClear.setOnClickListener(view -> {
         txtNota.setTypeface(null, android.graphics.Typeface.NORMAL);
-        txtNota.setTextSize(18); // Tamaño por defecto
         txtNota.setPaintFlags(txtNota.getPaintFlags() & ~android.graphics.Paint.UNDERLINE_TEXT_FLAG);
         Toast.makeText(this, "Formato restaurado", Toast.LENGTH_SHORT).show();
     });
@@ -914,16 +932,34 @@ public class EditorActivity extends AppCompatActivity {
     }
 
     private void iniciarServicioFlotante() {
-        Intent serviceIntent = new Intent(this, FloatingService.class);
-        serviceIntent.putExtra("contenido_nota", txtNota.getText().toString());
-        serviceIntent.putExtra("uri_archivo", uriArchivoActual != null ? uriArchivoActual.toString() : "");
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            startForegroundService(serviceIntent);
-        } else {
-            startService(serviceIntent);
+        Intent intent = new Intent(this, FloatingService.class);
+    
+    // 1. Obtenemos el texto principal
+    String textoCuerpo = txtNota.getText().toString(); 
+    
+    // 2. Generamos el HTML del checklist actual (igual que al guardar)
+    StringBuilder checklistHtml = new StringBuilder();
+    checklistHtml.append("<div id='checklist_data' style='display:none;'>");
+    if (adapterAdjuntos != null) {
+        for (View v : adapterAdjuntos.getViews()) {
+            CheckBox cb = v.findViewById(R.id.chkEstado);
+            EditText et = v.findViewById(R.id.txtCheckCuerpo);
+            if (cb != null && et != null) {
+                checklistHtml.append("<chk state=\"").append(cb.isChecked()).append("\">")
+                             .append(et.getText().toString()).append("</chk>");
+            }
         }
-        finish();
+    }
+    checklistHtml.append("</div>");
+
+    // 3. Empaquetamos todo el HTML
+    String contenidoCompleto = "<div>" + textoCuerpo + checklistHtml.toString() + "</div>";
+    
+    intent.putExtra("contenido_nota", contenidoCompleto);
+    intent.putExtra("uri_archivo", uriArchivoActual != null ? uriArchivoActual.toString() : "");
+    
+    startService(intent);
+    finish(); // Cerramos el editor para evitar conflictos de edición doble
     }
 
     // --- LÓGICA DESHACER/REHACER ---
@@ -1461,36 +1497,42 @@ public class EditorActivity extends AppCompatActivity {
                 return true;
 
             case android.view.DragEvent.ACTION_DRAG_LOCATION:
-                // Obtenemos el adaptador
-                SimpleAdapter adapter = (SimpleAdapter) contenedorAdjuntos.getAdapter();
-                if (adapter == null) return true;
-
                 float y = event.getY();
-                
-                // Buscamos la posición actual de la vista que estamos arrastrando
+                int height = v.getHeight();
+
+                // --- LIMITACIÓN DE BORDES (CLAMPING) ---
+                // Si el dedo se sale por arriba (<0), forzamos a 0.
+                // Si el dedo se sale por abajo (>height), forzamos al límite máximo.
+                // Esto garantiza que el ítem llegue siempre al extremo.
+                if (y < 0) y = 0;
+                if (y > height) y = height;
+
+                SimpleAdapter adapter = (SimpleAdapter) contenedorAdjuntos.getAdapter();
+                if (adapter == null || vistaArrastrada == null) return true;
+
                 int indexArrastrado = adapter.getViews().indexOf(vistaArrastrada);
                 if (indexArrastrado == -1) return true;
 
-                // Iteramos sobre las vistas visibles del RecyclerView
+                // Buscamos sobre qué hijo estamos pasando el dedo
                 for (int i = 0; i < contenedorAdjuntos.getChildCount(); i++) {
                     View child = contenedorAdjuntos.getChildAt(i);
-                    // Obtenemos la posición real en el adaptador de esta vista visual
                     int adapterPos = contenedorAdjuntos.getChildAdapterPosition(child);
                     
                     if (adapterPos == RecyclerView.NO_POSITION || adapterPos == indexArrastrado) continue;
 
-                    // Lógica de colisión (mitad del item)
-                    float puntoMedio = child.getTop() + (child.getHeight() / 2f);
-
-                    // Si movemos hacia abajo
-                    if (indexArrastrado < adapterPos && y > child.getTop()) {
+                    // Si la posición Y (limitada) está dentro del área de este hijo
+                    if (y >= child.getTop() && y <= child.getBottom()) {
                         adapter.moveItem(indexArrastrado, adapterPos);
+                        
+                        // --- OPCIONAL: AUTO-SCROLL ---
+                        // Si tienes muchos items y quieres que la lista suba/baje sola al arrastrar al borde
+                        if (y < 50) { // Cerca del borde superior
+                            contenedorAdjuntos.smoothScrollBy(0, -15);
+                        } else if (y > height - 50) { // Cerca del borde inferior
+                            contenedorAdjuntos.smoothScrollBy(0, 15);
+                        }
+                        
                         return true; 
-                    }
-                    // Si movemos hacia arriba
-                    else if (indexArrastrado > adapterPos && y < child.getBottom()) {
-                        adapter.moveItem(indexArrastrado, adapterPos);
-                        return true;
                     }
                 }
                 return true;

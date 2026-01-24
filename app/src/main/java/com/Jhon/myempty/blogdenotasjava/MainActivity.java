@@ -10,7 +10,6 @@ import android.text.Editable;
 import android.text.Html;
 import android.text.TextWatcher;
 import android.view.View;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
@@ -29,6 +28,7 @@ import androidx.recyclerview.widget.StaggeredGridLayoutManager;
 
 import com.google.android.material.color.DynamicColors;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.android.material.button.MaterialButton;
 
 import java.io.BufferedReader;
 import java.io.InputStream;
@@ -45,7 +45,7 @@ public class MainActivity extends AppCompatActivity {
     private RecyclerView recyclerNotas;
     private FloatingActionButton btnNuevaNota;
     private EditText buscar;
-    private Button btnSettings, modoVistaTargeta;
+    private MaterialButton btnSettings, modoVistaTargeta;
 
     private List<Nota> listaDeNotasCompleta;
     private NotaAdapter adaptador;
@@ -321,10 +321,10 @@ public class MainActivity extends AppCompatActivity {
     private void aplicarModoVista() {
         if (esModoCuadricula) {
             recyclerNotas.setLayoutManager(new StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL));
-            modoVistaTargeta.setCompoundDrawablesWithIntrinsicBounds(R.drawable.outline_view_agenda, 0, 0, 0);
+            modoVistaTargeta.setIconResource(R.drawable.outline_view_agenda);
         } else {
             recyclerNotas.setLayoutManager(new LinearLayoutManager(this));
-            modoVistaTargeta.setCompoundDrawablesWithIntrinsicBounds(R.drawable.grid_view, 0, 0, 0);
+            modoVistaTargeta.setIconResource(R.drawable.grid_view);
         }
         if (adaptador != null) adaptador.notifyDataSetChanged();
     }

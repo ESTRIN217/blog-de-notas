@@ -5,6 +5,7 @@ import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
 import android.widget.ImageView;
+import android.widget.Button;
 import android.widget.Toast;
 import android.widget.PopupMenu; // Importar PopupMenu
 
@@ -30,7 +31,8 @@ import java.io.FileOutputStream;
 public class DibujoActivity extends AppCompatActivity {
 
   private LienzoView lienzo;
-  private ImageView btnSelect, btnMaker, btnResaltador, btnAtras, btnUndo, btnRedo, btnMore, btnPen, btnEraser;
+  private ImageView btnSelect, btnMaker, btnResaltador , btnUndo, btnRedo, btnMore, btnPen, btnEraser;
+    private Button btnAtras;
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
