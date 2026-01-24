@@ -466,19 +466,22 @@ public class FloatingService extends Service {
         super.onDestroy();
     }
     
-    private int extraerColorDeHtml(String htmlContent) {
+    private int extraerColorDeHtml(String html) {
     try {
-        // Buscamos el patrón: background-color: #XXXXXX;
-        java.util.regex.Pattern pattern = java.util.regex.Pattern.compile("background-color:\\s*(#[0-9A-Fa-f]{6,8})");
-        java.util.regex.Matcher matcher = pattern.matcher(htmlContent);
-
-        if (matcher.find()) {
-            // Si encontramos el color, lo convertimos a entero
-            return android.graphics.Color.parseColor(matcher.group(1));
+        if (html != null && html.contains("background-color:")) {
+            int inicio = html.indexOf("background-color:") + 17;
+            int fin = html.indexOf(";", inicio);
+            if (fin == -1) fin = html.indexOf("\"", inicio);
+            if (fin == -1) fin = html.indexOf("'", inicio);
+            
+            if (fin > inicio) {
+                String hexColor = html.substring(inicio, fin).trim();
+                return Color.parseColor(hexColor);
+            }
         }
     } catch (Exception e) {
         e.printStackTrace();
     }
-    return com.google.android.material.R.attr.colorSurfaceContainer; 
+    return MaterialColors.getColor(this, com.google.android.material.R.attr.colorSurfaceContainer, Color.WHITE);
     }
 }

@@ -31,7 +31,6 @@ import android.text.Spannable;
 import android.text.style.StyleSpan;
 import android.text.style.UnderlineSpan;
 import android.graphics.Typeface;
-import android.graphics.Color;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.EdgeToEdge;
@@ -39,7 +38,7 @@ import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AppCompatDelegate;
 import androidx.documentfile.provider.DocumentFile;
-
+import androidx.recyclerview.widget.RecyclerView;
 import com.google.android.material.color.DynamicColors;
 import com.google.android.material.color.MaterialColors;
 import android.media.MediaRecorder;
@@ -57,11 +56,10 @@ import android.view.ViewGroup;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
-import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.view.LayoutInflater; // Added for LayoutInflater
-import android.widget.ImageButton; // Added for ImageButton
+import androidx.recyclerview.widget.LinearLayoutManager;
 
 import java.io.BufferedReader;
 import java.io.InputStream;
@@ -75,6 +73,7 @@ import java.io.IOException;
 import java.io.File;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.List;
 
 
 public class EditorActivity extends AppCompatActivity {
@@ -355,6 +354,7 @@ public class EditorActivity extends AppCompatActivity {
         textoEstilo = findViewById(R.id.text_style);
         contenedorAdjuntos = findViewById(R.id.contenedorAdjuntos);
         lblContador = findViewById(R.id.lblContador);
+        contenedorAdjuntos.setLayoutManager(new LinearLayoutManager(this));contenedorAdjuntos.setAdapter(new SimpleAdapter());
     }
 
     private void establecerFecha() {
@@ -478,7 +478,7 @@ public class EditorActivity extends AppCompatActivity {
     View vistaCheck = getLayoutInflater().inflate(R.layout.item_check, null);
     // Pasamos null y false porque es nuevo
     configurarItemCheck(vistaCheck, null, false); 
-    contenedorAdjuntos.addView(vistaCheck);
+    ((SimpleAdapter)contenedorAdjuntos.getAdapter()).addView(vistaCheck);
     
     EditText editCheck = vistaCheck.findViewById(R.id.txtCheckCuerpo);
     if(editCheck != null) editCheck.requestFocus();
@@ -626,7 +626,7 @@ public class EditorActivity extends AppCompatActivity {
     } catch (Exception e) {
         e.printStackTrace();
     }
-    return com.google.android.material.R.attr.colorSurfaceContainer; 
+    return MaterialColors.getColor(this, com.google.android.material.R.attr.colorSurfaceContainer, Color.WHITE);
     }
 
     private void cargarNotaSAF() {
@@ -682,7 +682,7 @@ public class EditorActivity extends AppCompatActivity {
                 // Inflamos la vista y la configuramos (usando el método que creamos antes)
                 View vistaCheck = getLayoutInflater().inflate(R.layout.item_check, null);
                 configurarItemCheck(vistaCheck, textoTarea, estaMarcado);
-                contenedorAdjuntos.addView(vistaCheck);
+                ((SimpleAdapter)contenedorAdjuntos.getAdapter()).addView(vistaCheck);
             }
         }
 
@@ -1123,15 +1123,14 @@ public class EditorActivity extends AppCompatActivity {
         }
     });
 
-    contenedorAdjuntos.addView(vistaAdjunto);
+    ((SimpleAdapter)contenedorAdjuntos.getAdapter()).addView(vistaAdjunto);
     }
     
-    // Helper for Audio attachment view setup
+    // Asistente para la configuración de la vista de archivos adjuntos de audio
     private void setupAudioAttachmentView(View viewAudio, String rutaAudio, String tagInText) {
         ImageView btnPlay = viewAudio.findViewById(R.id.btnPlayAudio);
         ImageView btnEliminar = viewAudio.findViewById(R.id.btnEliminarAudio);
         ProgressBar progressBar = viewAudio.findViewById(R.id.progressAudio);
-        // TextView txtDuracion = viewAudio.findViewById(R.id.txtDuracion); // If you want to show duration
 
         btnPlay.setOnClickListener(v -> {
             if (mediaPlayer != null && mediaPlayer.isPlaying()) {
@@ -1172,14 +1171,14 @@ public class EditorActivity extends AppCompatActivity {
                 contenedorAdjuntos.setVisibility(View.GONE);
             }
             listaRutasAudios.remove(rutaAudio);
-            // Optionally delete the physical file: new File(rutaAudio).delete(); 
+            new File(rutaAudio).delete(); 
         });
     }
 
-    // Helper for Image/Drawing attachment view setup
+    // Asistente para la configuración de la vista de adjuntos de imágenes/dibujos
     private void setupImageAttachmentView(View viewImage, String rutaImagen, String tagInText) {
         ImageView imgAdjunta = viewImage.findViewById(R.id.miniatura);
-        ImageButton btnEliminarFoto = viewImage.findViewById(R.id.btnEliminar);
+        ImageView btnEliminarFoto = viewImage.findViewById(R.id.btnEliminar);
 
         try {
             Uri uri = Uri.parse(rutaImagen);
@@ -1189,7 +1188,7 @@ public class EditorActivity extends AppCompatActivity {
 
             int anchoContenedor = contenedorAdjuntos.getWidth();
             if (anchoContenedor <= 0) {
-                // Fallback to screen width minus some margin if layout is not yet measured
+                // Volver al ancho de la pantalla menos algún margen si aún no se ha medido el diseño
                 anchoContenedor = getResources().getDisplayMetrics().widthPixels - (int) (32 * getResources().getDisplayMetrics().density); 
             }
             
@@ -1258,60 +1257,64 @@ public class EditorActivity extends AppCompatActivity {
     }
     
     private void guardarImagenesEnCarpetaNota(DocumentFile carpetaPadre, String nombreNota) {
-    if (listaRutasFotos.isEmpty()) return; // Si no hay nada nuevo, salimos
+    if (listaRutasFotos.isEmpty() && listaRutasDibujos.isEmpty()) return;
 
-    // Construir nombre de carpeta
     String nombreCarpeta = nombreNota.replace(".txt", "") + "_resources";
-
     DocumentFile carpetaRecursos = carpetaPadre.findFile(nombreCarpeta);
-    // Si no existe (raro, porque la creamos arriba), la creamos
+    
     if (carpetaRecursos == null) {
         carpetaRecursos = carpetaPadre.createDirectory(nombreCarpeta);
     }
 
     if (carpetaRecursos == null) {
-        Log.e("GUARDADO", "ERROR CRÍTICO: No existe la carpeta " + nombreCarpeta);
-        return; 
+        Log.e("GUARDADO", "ERROR: No se pudo crear la carpeta " + nombreCarpeta);
+        return;
     }
 
-    for (String ruta : listaRutasFotos) {
-        // Evitamos guardar lo que ya está en resources (por si acaso)
-        if (ruta.contains("_resources")) continue;
+    // Combinar todas las rutas
+    List<String> todasRutas = new ArrayList<>();
+    todasRutas.addAll(listaRutasFotos);
+    todasRutas.addAll(listaRutasDibujos);
 
+    for (String ruta : todasRutas) {
         try {
             Uri uriOrigen = Uri.parse(ruta);
-            String extension = "png"; // Por defecto
-            String mime = "image/png";
             
-            // Detección simple para audio vs imagen
-            if (ruta.endsWith("3gp")) { 
-                extension = "3gp"; 
-                mime = "audio/3gpp"; 
+            // Verificar si ya existe en la carpeta destino
+            String nombreArchivoOrigen = new File(ruta).getName();
+            if (carpetaRecursos.findFile(nombreArchivoOrigen) != null) {
+                continue; // Ya existe, saltar
             }
 
+            String mimeType = getContentResolver().getType(uriOrigen);
+            if (mimeType == null) {
+                mimeType = "image/png"; // Valor por defecto
+            }
+
+            String extension = mimeType.split("/")[1];
             String fileName = "FILE_" + System.currentTimeMillis() + "." + extension;
-            DocumentFile nuevoArchivo = carpetaRecursos.createFile(mime, fileName);
+            
+            DocumentFile nuevoArchivo = carpetaRecursos.createFile(mimeType, fileName);
 
             if (nuevoArchivo != null) {
                 try (InputStream in = getContentResolver().openInputStream(uriOrigen);
                      OutputStream out = getContentResolver().openOutputStream(nuevoArchivo.getUri())) {
                     
-                    byte[] buffer = new byte[4096]; // Buffer un poco más grande
+                    byte[] buffer = new byte[8192];
                     int read;
                     while ((read = in.read(buffer)) != -1) {
                         out.write(buffer, 0, read);
                     }
-                    out.flush();
-                    Log.d("GUARDADO", "Archivo guardado: " + fileName);
                 }
             }
         } catch (Exception e) {
-            Log.e("GUARDADO", "Fallo al copiar: " + e.getMessage());
+            Log.e("GUARDADO", "Error al guardar archivo: " + e.getMessage());
         }
     }
     
-    // Solo limpiamos la lista después de intentar guardar todo
-    listaRutasFotos.clear(); 
+    // Limpiar listas
+    listaRutasFotos.clear();
+    listaRutasDibujos.clear();
     }
     
     private void cargarAdjuntosDesdeCarpeta(DocumentFile carpetaPadre, String nombreNota) {
@@ -1412,8 +1415,9 @@ public class EditorActivity extends AppCompatActivity {
 
     // 2. Lógica del Botón Eliminar
     btnEliminar.setOnClickListener(v -> {
-        contenedorAdjuntos.removeView(vistaFila);
-        guardarNotaSilenciosamente(); 
+
+    ((SimpleAdapter)contenedorAdjuntos.getAdapter()).removeView(vistaFila);
+    guardarNotaSilenciosamente(); 
     });
 
     // 3. Tachado automático al marcar (Estético)
@@ -1454,59 +1458,63 @@ public class EditorActivity extends AppCompatActivity {
     contenedorAdjuntos.setOnDragListener((v, event) -> {
         switch (event.getAction()) {
             case android.view.DragEvent.ACTION_DRAG_STARTED:
-                // Desactivar animaciones temporalmente para evitar saltos
-                if (contenedorAdjuntos.getLayoutTransition() != null) {
-                    contenedorAdjuntos.getLayoutTransition().disableTransitionType(android.animation.LayoutTransition.APPEARING);
-                    contenedorAdjuntos.getLayoutTransition().disableTransitionType(android.animation.LayoutTransition.DISAPPEARING);
-                    contenedorAdjuntos.getLayoutTransition().disableTransitionType(android.animation.LayoutTransition.CHANGE_APPEARING);
-                    contenedorAdjuntos.getLayoutTransition().disableTransitionType(android.animation.LayoutTransition.CHANGE_DISAPPEARING);
-                }
                 return true;
 
             case android.view.DragEvent.ACTION_DRAG_LOCATION:
+                // Obtenemos el adaptador
+                SimpleAdapter adapter = (SimpleAdapter) contenedorAdjuntos.getAdapter();
+                if (adapter == null) return true;
+
                 float y = event.getY();
-                int indexArrastrado = contenedorAdjuntos.indexOfChild(vistaArrastrada);
                 
+                // Buscamos la posición actual de la vista que estamos arrastrando
+                int indexArrastrado = adapter.getViews().indexOf(vistaArrastrada);
+                if (indexArrastrado == -1) return true;
+
+                // Iteramos sobre las vistas visibles del RecyclerView
                 for (int i = 0; i < contenedorAdjuntos.getChildCount(); i++) {
-                    View hijo = contenedorAdjuntos.getChildAt(i);
-                    if (hijo == vistaArrastrada) continue;
+                    View child = contenedorAdjuntos.getChildAt(i);
+                    // Obtenemos la posición real en el adaptador de esta vista visual
+                    int adapterPos = contenedorAdjuntos.getChildAdapterPosition(child);
+                    
+                    if (adapterPos == RecyclerView.NO_POSITION || adapterPos == indexArrastrado) continue;
 
-                    // Calculamos el punto medio del hijo para un intercambio suave
-                    float puntoMedioHijo = hijo.getTop() + (hijo.getHeight() / 2f);
+                    // Lógica de colisión (mitad del item)
+                    float puntoMedio = child.getTop() + (child.getHeight() / 2f);
 
-                    // Si arrastramos hacia abajo y pasamos la mitad del de abajo
-                    if (indexArrastrado < i && y > puntoMedioHijo) {
-                        contenedorAdjuntos.removeView(vistaArrastrada);
-                        contenedorAdjuntos.addView(vistaArrastrada, i);
-                        break;
-                    } 
-                    // Si arrastramos hacia arriba y pasamos la mitad del de arriba
-                    else if (indexArrastrado > i && y < puntoMedioHijo) {
-                        contenedorAdjuntos.removeView(vistaArrastrada);
-                        contenedorAdjuntos.addView(vistaArrastrada, i);
-                        break;
+                    // Si movemos hacia abajo
+                    if (indexArrastrado < adapterPos && y > child.getTop()) {
+                        adapter.moveItem(indexArrastrado, adapterPos);
+                        return true; 
+                    }
+                    // Si movemos hacia arriba
+                    else if (indexArrastrado > adapterPos && y < child.getBottom()) {
+                        adapter.moveItem(indexArrastrado, adapterPos);
+                        return true;
                     }
                 }
                 return true;
 
             case android.view.DragEvent.ACTION_DROP:
-                vistaArrastrada.setVisibility(View.VISIBLE);
-                return true;
-
             case android.view.DragEvent.ACTION_DRAG_ENDED:
                 if (vistaArrastrada != null) {
                     vistaArrastrada.setVisibility(View.VISIBLE);
-                }
-                // Re-activar animaciones
-                if (contenedorAdjuntos.getLayoutTransition() != null) {
-                    contenedorAdjuntos.getLayoutTransition().enableTransitionType(android.animation.LayoutTransition.APPEARING);
-                    contenedorAdjuntos.getLayoutTransition().enableTransitionType(android.animation.LayoutTransition.DISAPPEARING);
-                    contenedorAdjuntos.getLayoutTransition().enableTransitionType(android.animation.LayoutTransition.CHANGE_APPEARING);
-                    contenedorAdjuntos.getLayoutTransition().enableTransitionType(android.animation.LayoutTransition.CHANGE_DISAPPEARING);
                 }
                 return true;
         }
         return false;
     });
+    }
+    @Override
+    protected void onDestroy() {
+    super.onDestroy();
+    if (mediaPlayer != null) {
+        mediaPlayer.release();
+        mediaPlayer = null;
+    }
+    if (mediaRecorder != null) {
+        mediaRecorder.release();
+        mediaRecorder = null;
+    }
     }
 }
