@@ -2,7 +2,7 @@
 agp = "9.0.0"
 core = "1.18.0-alpha01"
 appcompat = "1.7.1"
-material = "1.14.0-alpha08"
+material = "1.14.0-alpha09"
 constraintlayout = "2.2.1"
 cardview = "1.0.0"
 documentfile = "1.1.0"

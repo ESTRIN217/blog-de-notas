@@ -13,9 +13,9 @@
          android:layout_height="wrap_content"
          android:layout_width="match_parent"
          android:gravity="center_vertical"
+         android:background="@drawable/bottom_background"
          android:orientation="horizontal"
          app:elevation="4dp"
-         android:paddingHorizontal="8dp"
          android:id="@+id/barraSuperior">
 
         <Button
@@ -31,33 +31,42 @@
              android:layout_width="wrap_content"
              android:layout_weight="1" />
 
-        <Button
+        <com.google.android.material.button.MaterialButtonGroup
              android:layout_height="wrap_content"
              android:layout_width="wrap_content"
-             app:icon="@drawable/undo_24px"
-             style="?attr/materialIconButtonFilledStyle"
-             android:id="@+id/btnDeshacer" />
+             android:gravity="center_horizontal"
+             android:spacing="4dp"
+             style="@style/Widget.Material3.MaterialButtonGroup.Connected">
 
-        <Button
-             android:layout_height="wrap_content"
-             android:layout_width="wrap_content"
-             app:icon="@drawable/redo_24px"
-             style="?attr/materialIconButtonFilledStyle"
-             android:id="@+id/btnRehacer" />
+            <Button
+                 android:layout_height="wrap_content"
+                 android:layout_width="wrap_content"
+                 app:icon="@drawable/undo_24px"
+                 style="?attr/materialIconButtonFilledStyle"
+                 android:id="@+id/btnDeshacer" />
 
-        <Button
-             android:layout_height="wrap_content"
-             android:layout_width="wrap_content"
-             app:icon="@drawable/save_24px"
-             style="?attr/materialIconButtonFilledStyle"
-             android:id="@+id/btnGuardar" />
+            <Button
+                 android:layout_height="wrap_content"
+                 android:layout_width="wrap_content"
+                 app:icon="@drawable/redo_24px"
+                 style="?attr/materialIconButtonFilledStyle"
+                 android:id="@+id/btnRehacer" />
 
-        <Button
-             android:layout_height="wrap_content"
-             android:layout_width="wrap_content"
-             app:icon="@drawable/more_vert"
-             style="?attr/materialIconButtonFilledStyle"
-             android:id="@+id/menu" />
+            <Button
+                 android:layout_height="wrap_content"
+                 android:layout_width="wrap_content"
+                 app:icon="@drawable/save_24px"
+                 style="?attr/materialIconButtonFilledStyle"
+                 android:id="@+id/btnGuardar" />
+
+            <Button
+                 android:layout_height="wrap_content"
+                 android:layout_width="wrap_content"
+                 app:icon="@drawable/more_vert"
+                 style="?attr/materialIconButtonFilledStyle"
+                 android:id="@+id/menu" />
+
+        </com.google.android.material.button.MaterialButtonGroup>
 
     </LinearLayout>
 
@@ -142,31 +151,40 @@
          android:layout_height="wrap_content"
          android:layout_width="match_parent"
          android:gravity="center_vertical"
+         android:background="@drawable/bottom_background"
          android:elevation="8dp"
-         android:paddingVertical="4dp"
          android:padding="10dp"
          android:orientation="horizontal">
 
-        <Button
+        <com.google.android.material.button.MaterialButtonGroup
              android:layout_height="wrap_content"
              android:layout_width="wrap_content"
-             app:icon="@drawable/outline_add_box"
-             style="?attr/materialIconButtonFilledStyle"
-             android:id="@+id/añadir" />
+             android:gravity="center_vertical"
+             android:spacing="4dp"
+             style="@style/Widget.Material3.MaterialButtonGroup.Connected">
 
-        <Button
-             android:layout_height="wrap_content"
-             android:layout_width="wrap_content"
-             app:icon="@drawable/outline_palette"
-             style="?attr/materialIconButtonFilledStyle"
-             android:id="@+id/paleta" />
+            <Button
+                 android:layout_height="wrap_content"
+                 android:layout_width="wrap_content"
+                 app:icon="@drawable/outline_add_box"
+                 style="?attr/materialIconButtonFilledStyle"
+                 android:id="@+id/añadir" />
 
-        <Button
-             android:layout_height="wrap_content"
-             android:layout_width="wrap_content"
-             app:icon="@drawable/text_format"
-             style="?attr/materialIconButtonFilledStyle"
-             android:id="@+id/text_style" />
+            <Button
+                 android:layout_height="wrap_content"
+                 android:layout_width="wrap_content"
+                 app:icon="@drawable/outline_palette"
+                 style="?attr/materialIconButtonFilledStyle"
+                 android:id="@+id/paleta" />
+
+            <Button
+                 android:layout_height="wrap_content"
+                 android:layout_width="wrap_content"
+                 app:icon="@drawable/text_format"
+                 style="?attr/materialIconButtonFilledStyle"
+                 android:id="@+id/text_style" />
+
+        </com.google.android.material.button.MaterialButtonGroup>
 
     </LinearLayout>
 

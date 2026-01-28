@@ -10,17 +10,17 @@
     <LinearLayout
          android:layout_height="match_parent"
          android:layout_width="match_parent"
+         android:paddingRight="5dp"
          android:orientation="vertical"
-         android:paddingLeft="10dp"
-         android:paddingRight="10dp">
+         android:paddingLeft="5dp">
 
         <LinearLayout
              android:layout_height="wrap_content"
              android:layout_width="match_parent"
              android:layout_marginBottom="10dp"
              android:gravity="center_vertical"
-             android:orientation="horizontal"
-             android:paddingHorizontal="8dp">
+             android:background="@drawable/bottom_background"
+             android:orientation="horizontal">
 
             <Button
                  android:layout_height="wrap_content"

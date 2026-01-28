@@ -32,14 +32,14 @@
              android:layout_height="wrap_content"
              android:layout_width="wrap_content"
              android:textColor="?attr/colorOnSurface"
-             android:maxLines="1"
              android:layout_weight="1"
              android:id="@+id/txtCheckCuerpo" />
 
-        <ImageView
-             android:layout_height="30dp"
-             android:layout_width="30dp"
-             android:src="@drawable/close_24px"
+        <Button
+             android:layout_height="wrap_content"
+             android:layout_width="wrap_content"
+             app:icon="@drawable/close_24px"
+             style="?attr/materialIconButtonStyle"
              android:id="@+id/btnEliminarCheck" />
 
     </LinearLayout>

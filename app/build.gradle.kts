@@ -10,7 +10,7 @@ android {
     defaultConfig {
         applicationId = "com.Jhon.myempty.blogdenotasjava"
         minSdk = 23
-        targetSdk = 34
+        targetSdk = 36
         versionCode = 190
         versionName = "1.9.0"
 

@@ -24,8 +24,7 @@
             <com.google.android.material.button.MaterialButtonGroup
                  android:layout_height="wrap_content"
                  android:layout_width="match_parent"
-                 android:gravity="center_horizontal"
-                 android:paddingBottom="8dp"
+                 android:gravity="center_vertical"
                  android:spacing="4dp"
                  style="@style/Widget.Material3.MaterialButtonGroup.Connected">
 
@@ -68,32 +67,32 @@
                  android:layout_height="wrap_content"
                  android:layout_width="wrap_content"
                  app:icon="@drawable/format_bold"
-                 style="?attr/materialIconButtonStyle"
                  android:checkable="true"
+                 style="?attr/materialIconButtonStyle"
                  android:id="@+id/format_bold" />
 
             <Button
                  android:layout_height="wrap_content"
                  android:layout_width="wrap_content"
                  app:icon="@drawable/format_italic"
-                 style="?attr/materialIconButtonStyle"
                  android:checkable="true"
+                 style="?attr/materialIconButtonStyle"
                  android:id="@+id/format_italic" />
 
             <Button
                  android:layout_height="wrap_content"
                  android:layout_width="wrap_content"
                  app:icon="@drawable/format_underlined"
-                 style="?attr/materialIconButtonStyle"
                  android:checkable="true"
+                 style="?attr/materialIconButtonStyle"
                  android:id="@+id/format_underlined" />
 
             <Button
                  android:layout_height="wrap_content"
                  android:layout_width="wrap_content"
                  app:icon="@drawable/format_clear"
-                 android:id="@+id/format_clear"
-                 style="?attr/materialIconButtonStyle"/>
+                 style="?attr/materialIconButtonStyle"
+                 android:id="@+id/format_clear" />
 
         </LinearLayout>
 
@@ -103,8 +102,8 @@
          android:layout_height="wrap_content"
          android:layout_width="wrap_content"
          app:icon="@drawable/close_24px"
+         style="?attr/materialIconButtonStyle"
          android:layout_marginStart="8dp"
-         android:id="@+id/closed"
-         style="?attr/materialIconButtonStyle"/>
+         android:id="@+id/closed" />
 
 </LinearLayout>

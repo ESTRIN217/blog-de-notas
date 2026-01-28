@@ -1441,7 +1441,7 @@ public class EditorActivity extends AppCompatActivity {
     // Añadimos parámetros opcionales para cuando cargamos datos guardados
     private void configurarItemCheck(View vistaFila, String texto, boolean marcado) {
     ImageView handle = vistaFila.findViewById(R.id.drag);
-    ImageView btnEliminar = vistaFila.findViewById(R.id.btnEliminarCheck); 
+    MaterialButton btnEliminar = vistaFila.findViewById(R.id.btnEliminarCheck); 
     CheckBox checkBox = vistaFila.findViewById(R.id.chkEstado);
     EditText editText = vistaFila.findViewById(R.id.txtCheckCuerpo);
 
