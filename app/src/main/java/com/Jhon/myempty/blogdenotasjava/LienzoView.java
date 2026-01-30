@@ -360,4 +360,47 @@ public class LienzoView extends View {
     invalidate(); // Redibujar
     return mMostrarCuadricula;
     }
+    
+    public void activarPluma() {
+        setModo("PEN");
+        // Opcional: forzar color negro si vienes de borrador
+        if (mColorActual == Color.WHITE) mColorActual = Color.BLACK; 
+    }
+
+    public void activarMarcador() {
+        setModo("MARKER");
+    }
+
+    public void activarResaltador() {
+        setModo("RESALTADOR");
+        // Opcional: forzar amarillo si no tiene color definido
+        // setColor(Color.YELLOW); 
+    }
+
+    public void activarBorrador() {
+        setModo("ERASER");
+    }
+
+    public void activarSeleccion() {
+        setModo("SELECTION");
+    }
+    // En LienzoView.java
+
+    public void setNuevoColor(int color) {
+        // Cambia el color actual
+        this.mColorActual = color;
+        if (mCurrentPaint != null) {
+            mCurrentPaint.setColor(color);
+        }
+        // Si hay un objeto seleccionado, le cambiamos el color también
+        if (objetoSeleccionado != null) {
+            objetoSeleccionado.paint.setColor(color);
+            invalidate();
+        }
+    }
+
+    public void deseleccionarTodo() {
+        objetoSeleccionado = null;
+        invalidate();
+    }
 }

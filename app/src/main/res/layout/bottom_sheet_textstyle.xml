@@ -5,8 +5,7 @@
      android:layout_height="wrap_content"
      android:layout_width="match_parent"
      android:gravity="center_vertical"
-     android:background="?attr/colorSurface"
-     android:padding="8dp"
+     android:background="@drawable/background"
      android:orientation="horizontal">
 
     <HorizontalScrollView
@@ -25,7 +24,6 @@
                  android:layout_height="wrap_content"
                  android:layout_width="match_parent"
                  android:gravity="center_vertical"
-                 android:spacing="4dp"
                  style="@style/Widget.Material3.MaterialButtonGroup.Connected">
 
                 <Button

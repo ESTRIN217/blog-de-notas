@@ -1,125 +1,175 @@
 <?xml version="1.0" encoding="utf-8"?>
+<androidx.coordinatorlayout.widget.CoordinatorLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#F5F5F5"
+    android:fitsSystemWindows="true">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginBottom="60dp">
+
+        <LinearLayout
+            android:layout_height="wrap_content"
+            android:layout_width="match_parent"
+            android:orientation="horizontal"
+            android:background="@drawable/background"
+            android:id="@+id/topBar"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <Button
+                android:layout_height="wrap_content"
+                android:layout_width="wrap_content"
+                app:icon="@drawable/arrow_back_24px"
+                android:contentDescription="Volver atrás"
+                style="?attr/materialIconButtonStyle"
+                android:id="@+id/back" />
+
+            <Space
+                android:layout_height="wrap_content"
+                android:layout_width="wrap_content"
+                android:layout_weight="1" />
+
+            <Button
+                android:layout_height="wrap_content"
+                android:layout_width="wrap_content"
+                app:icon="@drawable/undo_24px"
+                style="?attr/materialIconButtonFilledStyle"
+                android:id="@+id/undo" />
+
+            <Button
+                android:layout_height="wrap_content"
+                android:layout_width="wrap_content"
+                app:icon="@drawable/redo_24px"
+                style="?attr/materialIconButtonFilledStyle"
+                android:id="@+id/redo" />
+
+            <Button
+                android:layout_height="wrap_content"
+                android:layout_width="wrap_content"
+                app:icon="@drawable/outline_done"
+                style="?attr/materialIconButtonFilledStyle"
+                android:id="@+id/btnDone" />
+
+            <Button
+                android:layout_height="wrap_content"
+                android:layout_width="wrap_content"
+                app:icon="@drawable/more_vert"
+                style="?attr/materialIconButtonFilledStyle"
+                android:id="@+id/more" />
+
+        </LinearLayout>
+
+        <com.Jhon.myempty.blogdenotasjava.LienzoView
+            android:layout_height="0dp"
+            android:layout_width="0dp"
+            android:background="@android:color/white"
+            android:layout_weight="1"
+            android:id="@+id/lienzo"
+            app:layout_constraintTop_toBottomOf="@id/topBar"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
+        />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+    <LinearLayout
+        android:id="@+id/bottom_sheet"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/background"
+        android:orientation="vertical"
+        android:elevation="16dp"
+        app:behavior_hideable="false"
+        app:behavior_peekHeight="40dp"
+        app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior">
+
+        <com.google.android.material.tabs.TabLayout
+            android:id="@+id/tabLayoutHerramientas"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:tabMode="fixed"
+            app:tabGravity="fill" />
+
 <LinearLayout
-     xmlns:android="http://schemas.android.com/apk/res/android"
-     xmlns:app="http://schemas.android.com/apk/res-auto"
-     android:layout_height="match_parent"
-     android:layout_width="match_parent"
-     android:background="?attr/colorSurfaceContainer"
-     android:orientation="vertical"
-     android:fitsSystemWindows="true">
+            android:id="@+id/panelControles"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="16dp">
 
-    <LinearLayout
-         android:layout_height="wrap_content"
-         android:layout_width="match_parent"
-         android:orientation="horizontal">
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnAccionDeseleccionar"
+                style="@style/Widget.Material3.Button.TextButton"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Deseleccionar todo"
+                android:textColor="?attr/colorPrimary"
+                android:visibility="gone"
+                app:iconGravity="textStart"/>
 
-        <Button
-             android:layout_height="wrap_content"
-             android:layout_width="wrap_content"
-             app:icon="@drawable/arrow_back_24px"
-             android:contentDescription="Volver atrás"
-             style="?attr/materialIconButtonStyle"
-             android:id="@+id/back" />
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnAccionBorrarLienzo"
+                style="@style/Widget.Material3.Button.TextButton"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Borrar todo el lienzo"
+                android:textColor="?attr/colorError"
+                android:visibility="gone"
+                app:icon="@drawable/delete_24px"
+                app:iconGravity="textStart"/>
 
-        <Space
-             android:layout_height="wrap_content"
-             android:layout_width="wrap_content"
-             android:layout_weight="1" />
+            <LinearLayout
+                android:id="@+id/seccionColores"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
 
-        <ImageView
-             android:layout_height="48dp"
-             android:layout_width="48dp"
-             android:src="@drawable/outline_done"
-             android:background="?attr/selectableItemBackgroundBorderless"
-             android:padding="12dp"
-             android:id="@+id/btnDone" />
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Colores"
+                    android:layout_marginBottom="8dp"
+                    android:textStyle="bold" />
 
-        <ImageView
-             android:layout_height="48dp"
-             android:layout_width="48dp"
-             android:src="@drawable/undo_24px"
-             android:background="?attr/selectableItemBackgroundBorderless"
-             android:padding="12dp"
-             android:id="@+id/undo" />
+                <HorizontalScrollView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:scrollbars="none">
 
-        <ImageView
-             android:layout_height="48dp"
-             android:layout_width="48dp"
-             android:src="@drawable/redo_24px"
-             android:background="?attr/selectableItemBackgroundBorderless"
-             android:padding="12dp"
-             android:id="@+id/redo" />
+                    <LinearLayout
+                        android:id="@+id/contenedorColores"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical">
+                        </LinearLayout>
+                </HorizontalScrollView>
+            </LinearLayout>
 
-        <ImageView
-             android:layout_height="48dp"
-             android:layout_width="48dp"
-             android:src="@drawable/more_vert"
-             android:background="?attr/selectableItemBackgroundBorderless"
-             android:padding="12dp"
-             android:id="@+id/more" />
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="16dp"/>
 
-    </LinearLayout>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Grosor del trazo"
+                android:textStyle="bold" />
 
-    <com.Jhon.myempty.blogdenotasjava.LienzoView
-         android:layout_height="0dp"
-         android:layout_width="match_parent"
-         android:background="@android:color/white"
-         android:layout_weight="1"
-         android:id="@+id/lienzo" />
+            <com.google.android.material.slider.Slider
+                android:id="@+id/sliderGrosor"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:valueFrom="1.0"
+                android:valueTo="80.0"
+                android:stepSize="1.0" />
 
-    <LinearLayout
-         android:layout_height="wrap_content"
-         android:layout_width="match_parent"
-         android:gravity="center"
-         android:background="?attr/colorSurfaceContainer"
-         android:elevation="8dp"
-         android:padding="10dp"
-         android:orientation="horizontal">
-
-        <ImageView
-             android:layout_height="48dp"
-             android:layout_width="48dp"
-             android:src="@drawable/round_border_bottom"
-             android:layout_marginEnd="16dp"
-             android:background="?attr/selectableItemBackgroundBorderless"
-             android:padding="14dp"
-             android:id="@+id/btnSelect" />
-
-        <ImageView
-             android:layout_height="48dp"
-             android:layout_width="48dp"
-             android:src="@drawable/auto_fix_high"
-             android:layout_marginEnd="16dp"
-             android:background="?attr/selectableItemBackgroundBorderless"
-             android:padding="14dp"
-             android:id="@+id/btnEraser" />
-
-        <ImageView
-             android:layout_height="48dp"
-             android:layout_width="48dp"
-             android:src="@drawable/round_edit"
-             android:layout_marginEnd="16dp"
-             android:background="?attr/selectableItemBackgroundBorderless"
-             android:padding="14dp"
-             android:id="@+id/btnPen" />
-
-        <ImageView
-             android:layout_height="48dp"
-             android:layout_width="48dp"
-             android:src="@drawable/round_brush"
-             android:layout_marginEnd="16dp"
-             android:background="?attr/selectableItemBackgroundBorderless"
-             android:padding="14dp"
-             android:id="@+id/btnMarker" />
-
-        <ImageView
-             android:layout_height="48dp"
-             android:layout_width="48dp"
-             android:src="@drawable/outline_edit"
-             android:background="?attr/selectableItemBackgroundBorderless"
-             android:padding="14dp"
-             android:id="@+id/btnResaltador" />
+        </LinearLayout>
 
     </LinearLayout>
 
-</LinearLayout>
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

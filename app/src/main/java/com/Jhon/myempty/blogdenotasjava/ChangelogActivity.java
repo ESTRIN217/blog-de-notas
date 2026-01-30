@@ -29,6 +29,11 @@ public class ChangelogActivity extends AppCompatActivity {
         List<Cambio> listaCambios = new ArrayList<>();
         
         // AQUÍ AGREGAS TUS VERSIONES
+        listaCambios.add(new Cambio("1.10.0 General", "30 de enero de 2026", "1. Mejoras visuales generales.\n" + 
+        "2. Se agrupó botones cercanos en un material button group.\n" + 
+        "3. Mejoras visuales y generales a dibujo activity.\n" + 
+        "4. Se agrego la función texto a voz.\n" + 
+        "5. Ahora se puede exportar a PDF para compartir"));
         listaCambios.add(new Cambio("1.9.0 Editor", "24 de enero de 2026", "1.Se a mejorado la UI dándole un aspecto más a material 3.\n" +
         "2.Se mejoro visualmente la pantalla de Configuracion.\n" +
         "3.se añadió la opción de añadir casillas de verificación\n" +

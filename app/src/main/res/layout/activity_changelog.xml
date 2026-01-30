@@ -9,10 +9,11 @@
      android:fitsSystemWindows="true">
 
     <LinearLayout
-         android:layout_height="?attr/actionBarSize"
+         android:layout_height="wrap_content"
          android:layout_width="match_parent"
          android:gravity="center_vertical"
-         android:orientation="horizontal">
+         android:orientation="horizontal"
+         android:background="@drawable/bottom_background">
 
         <Button
              android:layout_height="wrap_content"
@@ -35,15 +36,15 @@
     <com.google.android.material.card.MaterialCardView
          android:layout_height="wrap_content"
          android:layout_width="match_parent"
-         android:layout_margin="16dp"
-         app:strokeWidth="0dp"
          app:cardBackgroundColor="?attr/colorPrimaryContainer"
+         android:layout_margin="8dp"
+         app:contentPadding="16dp"
+         app:cardElevation="1dp"
          app:cardCornerRadius="16dp">
 
         <com.google.android.material.textview.MaterialTextView
              android:layout_height="wrap_content"
              android:layout_width="wrap_content"
-             android:padding="16dp"
              android:textColor="?attr/colorOnPrimaryContainer"
              android:id="@+id/txtVersionActualInfo"
              android:text="Cargando versión..."

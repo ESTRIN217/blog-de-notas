@@ -16,6 +16,7 @@ import android.widget.CheckBox;
 import android.widget.ImageView;
 import android.widget.PopupMenu;
 import android.widget.TextView;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import android.widget.Toast;
 import android.widget.LinearLayout;
 import androidx.recyclerview.widget.RecyclerView;
@@ -58,6 +59,7 @@ import android.graphics.Bitmap;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Paint;
+import android.graphics.pdf.PdfDocument;
 import android.graphics.Path;
 import android.view.LayoutInflater; // Added for LayoutInflater
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -75,13 +77,18 @@ import java.io.File;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.List;
+import android.speech.tts.TextToSpeech;
+import java.util.Locale;
+import android.net.Uri;
+import androidx.core.content.FileProvider;
+import java.io.FileOutputStream;
 
 
 public class EditorActivity extends AppCompatActivity {
 
     private EditText txtNota, txtTitulo;
     private TextView lblFecha, lblContador;
-    private MaterialButton btnAtras, btnDeshacer, btnRehacer, btnGuardar, menu, añadir, paleta, textoEstilo;
+    private MaterialButton btnAtras, btnDeshacer, btnRehacer, btnGuardar, menu, añadir, paleta, textoEstilo , textToSpeech;
     private View background;
     private RecyclerView contenedorAdjuntos;
 
@@ -115,6 +122,8 @@ public class EditorActivity extends AppCompatActivity {
     private boolean isUnderlineActive = false;
     private View vistaArrastrada;
     private SimpleAdapter adapterAdjuntos;
+    private TextToSpeech mTTS;
+private boolean isTtsInitialized = false;
 
 
     // --- Permiso para ventana flotante ---
@@ -303,6 +312,22 @@ public class EditorActivity extends AppCompatActivity {
             }
         }
     );
+    // Inicializar TextToSpeech
+mTTS = new TextToSpeech(this, status -> {
+    if (status == TextToSpeech.SUCCESS) {
+        // Configurar idioma por defecto del teléfono
+        int result = mTTS.setLanguage(Locale.getDefault());
+        
+        if (result == TextToSpeech.LANG_MISSING_DATA 
+            || result == TextToSpeech.LANG_NOT_SUPPORTED) {
+            // Si el idioma por defecto falla, intentar con Español
+            mTTS.setLanguage(new Locale("es", "ES"));
+        }
+        isTtsInitialized = true;
+    } else {
+        android.util.Log.e("TTS", "La inicialización falló");
+    }
+});
     }
 
     private void manejarIntent() {
@@ -364,6 +389,7 @@ public class EditorActivity extends AppCompatActivity {
         contenedorAdjuntos = findViewById(R.id.contenedorAdjuntos);
         lblContador = findViewById(R.id.lblContador);
         contenedorAdjuntos.setLayoutManager(new LinearLayoutManager(this));contenedorAdjuntos.setAdapter(new SimpleAdapter());
+        textToSpeech = findViewById(R.id.text_to_speech);
     }
 
     private void establecerFecha() {
@@ -629,6 +655,29 @@ public class EditorActivity extends AppCompatActivity {
 
     dialogTextStyle.show();
     });
+    textToSpeech.setOnClickListener(view -> {
+    if (!isTtsInitialized || mTTS == null) {
+        Toast.makeText(this, "El motor de voz aún no está listo", Toast.LENGTH_SHORT).show();
+        return;
+    }
+
+    if (mTTS.isSpeaking()) {
+        // Si ya está hablando, lo callamos (STOP)
+        mTTS.stop();
+        Toast.makeText(this, "Lectura detenida", Toast.LENGTH_SHORT).show();
+    } else {
+        // Si está callado, leemos el texto (PLAY)
+        String textoALeer = txtNota.getText().toString(); 
+
+        if (!textoALeer.isEmpty()) {
+            // QUEUE_FLUSH: Interrumpe lo que esté diciendo y empieza esto nuevo
+            mTTS.speak(textoALeer, TextToSpeech.QUEUE_FLUSH, null, null);
+            Toast.makeText(this, "Leyendo nota...", Toast.LENGTH_SHORT).show();
+        } else {
+            Toast.makeText(this, "No hay texto para leer", Toast.LENGTH_SHORT).show();
+        }
+    }
+});
     }
     // Método para extraer el color hexadecimal del HTML
     private int extraerColorDeHtml(String htmlContent) {
@@ -909,11 +958,81 @@ public class EditorActivity extends AppCompatActivity {
     }
 
     private void compartirNota() {
-        Intent intent = new Intent(Intent.ACTION_SEND);
-        intent.setType("text/plain");
-        intent.putExtra(Intent.EXTRA_TEXT, txtNota.getText().toString());
-        startActivity(Intent.createChooser(intent, "Compartir nota vía"));
+    String[] opciones = {"Enviar como texto", "Enviar como PDF"};
+
+    new com.google.android.material.dialog.MaterialAlertDialogBuilder(this)
+            .setTitle("Compartir nota")
+            .setItems(opciones, (dialog, which) -> {
+                if (which == 0) {
+                    compartirComoTexto();
+                } else {
+                    compartirComoPDF();
+                }
+            })
+            .show();
+}
+
+private void compartirComoTexto() {
+    String texto = txtNota.getText().toString();
+    if (texto.isEmpty()) {
+        Toast.makeText(this, "La nota está vacía", Toast.LENGTH_SHORT).show();
+        return;
     }
+    Intent intent = new Intent(Intent.ACTION_SEND);
+    intent.setType("text/plain");
+    intent.putExtra(Intent.EXTRA_TEXT, texto);
+    startActivity(Intent.createChooser(intent, "Compartir texto vía"));
+}
+
+private void compartirComoPDF() {
+    String contenido = txtNota.getText().toString();
+    if (contenido.isEmpty()) {
+        Toast.makeText(this, "No hay contenido para generar PDF", Toast.LENGTH_SHORT).show();
+        return;
+    }
+
+    // 1. Crear el documento PDF
+    android.graphics.pdf.PdfDocument document = new android.graphics.pdf.PdfDocument();
+    // Tamaño A4 (595 x 842 puntos)
+    android.graphics.pdf.PdfDocument.PageInfo pageInfo = new android.graphics.pdf.PdfDocument.PageInfo.Builder(595, 842, 1).create();
+    android.graphics.pdf.PdfDocument.Page page = document.startPage(pageInfo);
+
+    android.graphics.Canvas canvas = page.getCanvas();
+    android.graphics.Paint paint = new android.graphics.Paint();
+    paint.setTextSize(12);
+
+    // Dibujar el texto (manejo básico de saltos de línea)
+    int x = 50, y = 50;
+    for (String line : contenido.split("\n")) {
+        canvas.drawText(line, x, y, paint);
+        y += paint.descent() - paint.ascent();
+    }
+
+    document.finishPage(page);
+
+    // 2. Guardar el archivo en el cache para compartir
+    try {
+        File cachePath = new File(getCacheDir(), "pdf_temp");
+        cachePath.mkdirs();
+        File file = new File(cachePath, "Nota_" + System.currentTimeMillis() + ".pdf");
+        java.io.FileOutputStream fos = new java.io.FileOutputStream(file);
+        document.writeTo(fos);
+        document.close();
+        fos.close();
+
+        // 3. Compartir el archivo generado
+        Uri contentUri = androidx.core.content.FileProvider.getUriForFile(this, getPackageName() + ".fileprovider", file);
+        
+        Intent intent = new Intent(Intent.ACTION_SEND);
+        intent.setType("application/pdf");
+        intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+        intent.putExtra(Intent.EXTRA_STREAM, contentUri);
+        startActivity(Intent.createChooser(intent, "Compartir PDF vía"));
+
+    } catch (java.io.IOException e) {
+        Toast.makeText(this, "Error al crear PDF: " + e.getMessage(), Toast.LENGTH_LONG).show();
+    }
+}
 
     // --- MODO FLOTANTE ---
     private void iniciarModoFlotante() {
@@ -1549,6 +1668,11 @@ public class EditorActivity extends AppCompatActivity {
     }
     @Override
     protected void onDestroy() {
+    if (mTTS != null) {
+        mTTS.stop();
+        mTTS.shutdown();
+    }
+    
     super.onDestroy();
     if (mediaPlayer != null) {
         mediaPlayer.release();
