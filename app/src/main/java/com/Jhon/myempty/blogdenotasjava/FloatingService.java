@@ -41,6 +41,7 @@ import java.io.InputStreamReader;
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
 import java.util.List;
+import java.util.ArrayList;
 
 public class FloatingService extends Service {
 
@@ -164,95 +165,82 @@ public class FloatingService extends Service {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
     if (intent != null) {
-        String contenidoRaw = intent.getStringExtra("contenido_nota");
         String uriString = intent.getStringExtra("uri_archivo");
-        
         carpetaUriPadre = getSharedPreferences("MisPreferencias", MODE_PRIVATE)
-                         .getString("carpeta_uri", null);
+                            .getString("carpeta_uri", null);
 
         if (uriString != null && !uriString.isEmpty()) {
             uriArchivoActual = Uri.parse(uriString);
+            
+            // 1. Leer contenido usando el Helper
+            String fullContent = NoteIOHelper.readContent(this, uriArchivoActual);
+            
+            // 2. Título del archivo
             DocumentFile df = DocumentFile.fromSingleUri(this, uriArchivoActual);
             if (df != null && df.getName() != null) {
                 floatingTitleText.setText(df.getName().replace(".txt", ""));
             }
-        }
 
-        if (floatingTxtNota != null && contenidoRaw != null) {
-            // 1. Extraer Checklist del HTML completo
-            String[] resultado = extraerChecklistYTexto(contenidoRaw);
-            String checklistData = resultado[0];
-            String textoSinChecklist = resultado[1];
-            
-            // 2. Procesar checklist
+            // 3. Procesar Checklist (Usando Helper)
+            String checklistData = NoteIOHelper.extractChecklistData(fullContent);
             if (!checklistData.isEmpty()) {
                 procesarChecklist(checklistData);
             }
+
+            // 4. Color y Fondo (Usando Helper)
+            int colorNota = NoteIOHelper.extractColor(fullContent);
+            String bgImageUri = NoteIOHelper.extractBackgroundImageUri(fullContent);
             
-            // 3. Color de fondo
-            int colorNota = extraerColorDeHtml(contenidoRaw);
-            floatingTxtNota.setBackgroundColor(colorNota);
-            
-            // 4. Mostrar texto principal limpio
-            String textoLimpio = textoSinChecklist.replaceAll("<div[^>]*>", "").replace("</div>", "");
+            // Aplicar al contenedor flotante (ajusta 'floatingRootView' al ID de tu layout)
+            if (floatingTxtNota != null) {
+                floatingTxtNota.setBackgroundColor(colorNota);
+                // Si tienes un método para poner imagen en el service, úsalo aquí con bgImageUri
+            }
+
+            // 5. Mostrar texto principal limpio
+            String textoLimpio = NoteIOHelper.cleanHtmlForEditor(fullContent);
             
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
                 floatingTxtNota.setText(Html.fromHtml(textoLimpio, Html.FROM_HTML_MODE_LEGACY));
             } else {
                 floatingTxtNota.setText(Html.fromHtml(textoLimpio));
             }
-            
+
             actualizarContador();
         }
     }
-
-    // --- CORRECCIÓN AQUÍ ---
-    return START_NOT_STICKY; 
+    return START_NOT_STICKY;
     }
     
     
     private void procesarChecklist(String data) {
-        if (data == null || data.isEmpty()) return;
+    if (data == null || data.isEmpty()) return;
 
-        // Buscamos cada item: <chk state="true">Texto</chk>
-        Pattern pattern = Pattern.compile("<chk state=\"(.*?)\">(.*?)</chk>");
-        Matcher matcher = pattern.matcher(data);
+    // Regex para los items: <chk state="true">Texto</chk>
+    Pattern pattern = Pattern.compile("<chk state=\"(.*?)\">(.*?)</chk>");
+    Matcher matcher = pattern.matcher(data);
 
-        while (matcher.find()) {
-            boolean isChecked = "true".equals(matcher.group(1));
-            String texto = matcher.group(2);
+    // Limpiar lista antes de cargar si fuera necesario
+    // adapterAdjuntos.clear(); 
 
-            // Inflamos la vista del item_check
-            View v = LayoutInflater.from(this).inflate(R.layout.item_check, null);
-            android.widget.CheckBox cb = v.findViewById(R.id.chkEstado);
-            EditText et = v.findViewById(R.id.txtCheckCuerpo);
+    while (matcher.find()) {
+        boolean isChecked = "true".equalsIgnoreCase(matcher.group(1));
+        String texto = matcher.group(2);
 
-            if (cb != null && et != null) {
-                cb.setChecked(isChecked);
-                et.setText(texto);
-                // Añadimos al adaptador que ya tienes
-                adapterAdjuntos.addView(v, adapterAdjuntos.getItemCount());
-            }
+        // Inflamos la vista del item_check
+        View v = LayoutInflater.from(this).inflate(R.layout.item_check, null);
+        android.widget.CheckBox cb = v.findViewById(R.id.chkEstado);
+        EditText et = v.findViewById(R.id.txtCheckCuerpo);
+
+        if (cb != null && et != null) {
+            cb.setChecked(isChecked);
+            et.setText(texto);
+            
+            // Añadimos al contenedor de la ventana flotante
+            // Nota: Asegúrate de que adapterAdjuntos sea tu contenedor de vistas (LinearLayout)
+            adapterAdjuntos.addView(v); 
         }
     }
-
-    private String[] extraerChecklistYTexto(String html) {
-    String checklistData = "";
-    String textoSinChecklist = html;
-    
-    try {
-        Pattern pattern = Pattern.compile("<div id='checklist_data'.*?>(.*?)</div>", Pattern.DOTALL);
-        Matcher matcher = pattern.matcher(html);
-        
-        if (matcher.find()) {
-            checklistData = matcher.group(0); // Todo el div del checklist
-            textoSinChecklist = html.replace(checklistData, "");
-        }
-    } catch (Exception e) {
-        e.printStackTrace();
-    }
-    
-    return new String[]{checklistData, textoSinChecklist};
     }
 
     private void configurarListeners() {
@@ -459,58 +447,45 @@ public class FloatingService extends Service {
         
         mWindowManager.updateViewLayout(mFloatingView, params);
     }
-
     private void guardarNotaFlotante() {
-        if (uriArchivoActual == null || isMinimized) return;
+    // 1. Validaciones previas
+    if (uriArchivoActual == null || isMinimized) return;
 
-        // 1. Obtener HTML del texto principal
-        String contenidoHtml = Html.toHtml(floatingTxtNota.getText());
-        String titulo = floatingTitleText.getText().toString().trim();
-        if (titulo.isEmpty()) titulo = "Sin_titulo";
-
-        // 2. Obtener color
-        int colorActual = Color.WHITE;
-        if (floatingTxtNota.getBackground() instanceof android.graphics.drawable.ColorDrawable) {
-            colorActual = ((android.graphics.drawable.ColorDrawable) floatingTxtNota.getBackground()).getColor();
-        }
-        String hexColor = String.format("#%06X", (0xFFFFFF & colorActual));
-
-        // 3. GENERAR HTML DEL CHECKLIST DESDE EL ADAPTADOR
-        StringBuilder checklistHtml = new StringBuilder();
-checklistHtml.append("<div id='checklist_data' style='display:none;'>");
-
-if (adapterAdjuntos != null) {
-    List<View> views = adapterAdjuntos.getViews();
-    for (View v : views) {
-        android.widget.CheckBox cb = v.findViewById(R.id.chkEstado);
-        EditText et = v.findViewById(R.id.txtCheckCuerpo);
-        
-        if (cb != null && et != null) {
-            String isChecked = cb.isChecked() ? "true" : "false";
-            String textoItem = et.getText().toString();
-            checklistHtml.append("<chk state=\"").append(isChecked).append("\">")
-                         .append(textoItem).append("</chk>");
-        }
+    // 2. Preparar el contenido del cuerpo (HTML)
+    String bodyHtml = Html.toHtml(floatingTxtNota.getText());
+    
+    // 3. Obtener el color de fondo actual
+    int colorActual = com.google.android.material.color.MaterialColors.getColor(floatingTxtNota, com.google.android.material.R.attr.colorSurfaceContainer);
+    if (floatingTxtNota.getBackground() instanceof android.graphics.drawable.ColorDrawable) {
+        colorActual = ((android.graphics.drawable.ColorDrawable) floatingTxtNota.getBackground()).getColor();
     }
+
+    // 4. Obtener la lista de vistas del checklist
+List<View> checklistViews = new ArrayList<>();
+for (int i = 0; i < contenedorAdjuntos.getChildCount(); i++) {
+    checklistViews.add(contenedorAdjuntos.getChildAt(i));
 }
-checklistHtml.append("</div>");
 
-        // 4. UNIR TODO Y GUARDAR
-        String htmlParaGuardar = "<div style='background-color:" + hexColor + ";'>" 
-                               + Html.toHtml(floatingTxtNota.getText()) 
-                               + checklistHtml.toString() 
-                               + "</div>";
+    // 5. Generar el HTML del checklist usando el Helper
+    String checklistHtml = NoteIOHelper.generateChecklistHtml(checklistViews);
 
-        try {
-            // Lógica de guardado en archivo SAF
-            if (uriArchivoActual != null) {
-                try (OutputStream os = getContentResolver().openOutputStream(uriArchivoActual, "wt")) {
-                    os.write(htmlParaGuardar.getBytes());
-                }
-            }
-        } catch (Exception e) {
-            android.util.Log.e("FLOATING_SAVE", "Error: " + e.getMessage());
-        }
+    // 6. GUARDAR TODO USANDO EL HELPER
+    // IMPORTANTE: Pasamos null en backgroundName y backgroundUri para que 
+    // NoteIOHelper mantenga la compatibilidad o use los valores por defecto.
+    // Si tienes variables globales para estos en el Service, pásalas aquí.
+    boolean exito = NoteIOHelper.saveNote(
+            this, 
+            uriArchivoActual, 
+            bodyHtml, 
+            checklistHtml, 
+            colorActual, 
+            null, // backgroundName (Opcional en el flotante)
+            null  // backgroundImageUri (Opcional en el flotante)
+    );
+
+    if (!exito) {
+        android.util.Log.e("FLOATING_SAVE", "No se pudo guardar la nota");
+    }
     }
 
 
@@ -527,24 +502,6 @@ checklistHtml.append("</div>");
         super.onDestroy();
     }
     
-    private int extraerColorDeHtml(String html) {
-    try {
-        if (html != null && html.contains("background-color:")) {
-            int inicio = html.indexOf("background-color:") + 17;
-            int fin = html.indexOf(";", inicio);
-            if (fin == -1) fin = html.indexOf("\"", inicio);
-            if (fin == -1) fin = html.indexOf("'", inicio);
-            
-            if (fin > inicio) {
-                String hexColor = html.substring(inicio, fin).trim();
-                return Color.parseColor(hexColor);
-            }
-        }
-    } catch (Exception e) {
-        e.printStackTrace();
-    }
-    return MaterialColors.getColor(this, com.google.android.material.R.attr.colorSurfaceContainer, Color.WHITE);
-    }
     private void actualizarContador() {
         String texto = floatingTxtNota.getText().toString().trim();
         int p = texto.isEmpty() ? 0 : texto.split("\\s+").length;

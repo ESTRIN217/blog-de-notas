@@ -23,6 +23,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import android.graphics.drawable.GradientDrawable;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.graphics.drawable.ColorDrawable;
 import android.graphics.Color;
 import android.provider.MediaStore;
 
@@ -123,8 +124,9 @@ public class EditorActivity extends AppCompatActivity {
     private View vistaArrastrada;
     private SimpleAdapter adapterAdjuntos;
     private TextToSpeech mTTS;
-private boolean isTtsInitialized = false;
-
+    private boolean isTtsInitialized = false;
+    private String currentBackgroundName = "default"; 
+    private String currentBackgroundUri = null;
 
     // --- Permiso para ventana flotante ---
     private final ActivityResultLauncher<Intent> launcherPermisoOverlay = registerForActivityResult(
@@ -162,14 +164,20 @@ private boolean isTtsInitialized = false;
     uri -> {
         if (uri != null) {
             try {
+                // 1. PERSISTENCIA: Dar permisos permanentes a la URI (Vital en Android 11+)
+                getContentResolver().takePersistableUriPermission(uri, 
+                        Intent.FLAG_GRANT_READ_URI_PERMISSION);
+
+                // 2. Guardar en la variable global para que saveNote() la vea
+                currentBackgroundUri = uri.toString();
+                currentBackgroundName = "custom_image";
+
+                // 3. Aplicar visualmente (puedes usar tu nuevo método)
+                aplicarImagenFondoDinamico(uri);
                 
-                // Carga simple usando Bitmap para ajustar al fondo
-                Bitmap bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), uri);
-                Drawable drawable = new BitmapDrawable(getResources(), bitmap);
-                
-                background.setBackground(drawable); 
             } catch (Exception e) {
                 e.printStackTrace();
+                Toast.makeText(this, "Error al cargar la imagen", Toast.LENGTH_SHORT).show();
             }
         }
     }
@@ -332,7 +340,6 @@ mTTS = new TextToSpeech(this, status -> {
 
     private void manejarIntent() {
     Intent intent = getIntent();
-    // Buscamos la URI con ambas llaves por seguridad
     String dataRecibida = intent.getStringExtra("uri_archivo");
     if (dataRecibida == null) {
         dataRecibida = intent.getStringExtra("nombre_archivo");
@@ -344,25 +351,39 @@ mTTS = new TextToSpeech(this, status -> {
     if (dataRecibida != null && !dataRecibida.isEmpty()) {
         uriArchivoActual = Uri.parse(dataRecibida);
         
-        // 1. Leer el archivo físico
-        String contenidoCargado = leerArchivo(uriArchivoActual);
+        // 1. Leer el contenido completo usando el Helper
+        // (Asegúrate de que el método en tu Helper se llame readContent)
+        String contenidoCargado = NoteIOHelper.readContent(this, uriArchivoActual);
         
-        // 2. Extraer el color que guardó la burbuja y aplicarlo al fondo
-        int color = extraerColorDeHtml(contenidoCargado);
+        // 2. Extraer y aplicar color (Corregido el punto y coma)
+        int color = NoteIOHelper.extractColor(contenidoCargado); 
         aplicarColorFondoDinamico(color);
         
-        // 3. Limpiar el HTML (quitar el <div>) y poner el texto en el editor
-        String textoLimpio = contenidoCargado.replaceAll("<div[^>]*>", "").replace("</div>", "");
+        // 3. Extraer nombre e imagen de fondo (Para que no se pierdan al editar)
+        currentBackgroundName = NoteIOHelper.extractBackgroundName(contenidoCargado);
+        currentBackgroundUri = NoteIOHelper.extractBackgroundImageUri(contenidoCargado);
+        
+        if (currentBackgroundUri != null) aplicarImagenFondoDinamico(Uri.parse(currentBackgroundUri));
+
+        // 4. Limpiar el HTML y poner el texto en el editor
+        String textoLimpio = NoteIOHelper.cleanHtmlForEditor(contenidoCargado);
+        
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
             txtNota.setText(Html.fromHtml(textoLimpio, Html.FROM_HTML_MODE_LEGACY));
         } else {
             txtNota.setText(Html.fromHtml(textoLimpio));
         }
         
-        // 4. Poner el nombre del archivo en el título
+        // 5. Poner el nombre del archivo en el título
         DocumentFile df = DocumentFile.fromSingleUri(this, uriArchivoActual);
         if (df != null && df.getName() != null) {
             txtTitulo.setText(df.getName().replace(".txt", ""));
+        }
+        
+        // 6. Cargar Checklist (Si lo tienes implementado)
+        String checklistData = NoteIOHelper.extractChecklistData(contenidoCargado);
+        if (!checklistData.isEmpty()) {
+            // Aquí llamarías a tu método procesarChecklist(checklistData)
         }
     }
     }
@@ -584,6 +605,15 @@ mTTS = new TextToSpeech(this, status -> {
             bottomSheetPaleta.dismiss();
         });
     }
+        // 4. Botón Galería: Abrir el selector de archivos
+        if (btnGaleria != null) {
+    btnGaleria.setOnClickListener(view -> {
+        seleccionarFondoLauncher.launch("image/*"); 
+        // Eliminamos las líneas de aquí, porque la URI aún no existe hasta que el usuario elige una
+        bottomSheetPaleta.dismiss(); 
+    });
+        }
+    
 
     bottomSheetPaleta.show();
     });
@@ -679,107 +709,71 @@ mTTS = new TextToSpeech(this, status -> {
     }
 });
     }
-    // Método para extraer el color hexadecimal del HTML
-    private int extraerColorDeHtml(String htmlContent) {
-    try {
-        // Buscamos el patrón: background-color: #XXXXXX;
-        java.util.regex.Pattern pattern = java.util.regex.Pattern.compile("background-color:\\s*(#[0-9A-Fa-f]{6,8})");
-        java.util.regex.Matcher matcher = pattern.matcher(htmlContent);
-
-        if (matcher.find()) {
-            // Si encontramos el color, lo convertimos a entero
-            return android.graphics.Color.parseColor(matcher.group(1));
-        }
-    } catch (Exception e) {
-        e.printStackTrace();
-    }
-    return MaterialColors.getColor(this, com.google.android.material.R.attr.colorSurfaceContainer, Color.WHITE);
-    }
 
     private void cargarNotaSAF() {
     if (uriArchivoActual == null) return;
 
     archivoActualSAF = DocumentFile.fromSingleUri(this, uriArchivoActual);
 
-    // 1. Limpieza total de la interfaz antes de cargar
+    // 1. Limpieza de interfaz
     contenedorAdjuntos.removeAllViews();
     listaRutasAudios.clear();
     listaRutasFotos.clear();
     listaRutasDibujos.clear();
 
-    StringBuilder contentBuilder = new StringBuilder();
     try {
-        // 2. Leer el archivo físico (Contenido HTML)
-        try (InputStream is = getContentResolver().openInputStream(uriArchivoActual);
-             BufferedReader br = new BufferedReader(new InputStreamReader(is))) {
-            
-            String line;
-            while ((line = br.readLine()) != null) {
-                contentBuilder.append(line);
-            }
+        // 2. Leer contenido completo usando el Helper
+        String fullContent = NoteIOHelper.readContent(this, uriArchivoActual);
+
+        // 3. Aplicar Color y Nombre de Fondo
+        int color = NoteIOHelper.extractColor(fullContent);
+        currentBackgroundName = NoteIOHelper.extractBackgroundName(fullContent);
+        aplicarColorFondoDinamico(color);
+
+        // 4. Aplicar Imagen de Fondo (si existe)
+        currentBackgroundUri = NoteIOHelper.extractBackgroundImageUri(fullContent);
+        if (currentBackgroundUri != null && !currentBackgroundUri.isEmpty()) {
+            aplicarImagenFondoDinamico(Uri.parse(currentBackgroundUri));
         }
-        
-        String stringFinal = contentBuilder.toString();
-        
-        // 3. LÓGICA DE FONDO (Color)
-        int colorDetectado = extraerColorDeHtml(stringFinal);
-        aplicarColorFondoDinamico(colorDetectado);
 
-        // 4. --- NUEVA LÓGICA: EXTRAER Y CARGAR CHECKLIST ---
-        String contenidoParaEditor = stringFinal;
-        
-        // Buscamos el bloque oculto <div id='checklist_data'>...</div>
-        java.util.regex.Pattern patternCheck = java.util.regex.Pattern.compile("<div id='checklist_data'.*?>(.*?)</div>", java.util.regex.Pattern.DOTALL);
-        java.util.regex.Matcher matcherCheck = patternCheck.matcher(stringFinal);
-
-        if (matcherCheck.find()) {
-            String dataChecklist = matcherCheck.group(1); // El contenido interno de los checks
-            
-            // Eliminamos el bloque del checklist del string para que no se vea como texto en la nota
-            contenidoParaEditor = stringFinal.replace(matcherCheck.group(0), "");
-            
-            // Buscamos cada item: <chk state="true|false">Texto</chk>
+        // 5. Cargar Checklist
+        String checklistData = NoteIOHelper.extractChecklistData(fullContent);
+        if (!checklistData.isEmpty()) {
+            // Regex para los items individuales
             java.util.regex.Pattern patternItem = java.util.regex.Pattern.compile("<chk state=\"(true|false)\">(.*?)</chk>");
-            java.util.regex.Matcher matcherItem = patternItem.matcher(dataChecklist);
+            java.util.regex.Matcher matcherItem = patternItem.matcher(checklistData);
             
             while (matcherItem.find()) {
                 boolean estaMarcado = Boolean.parseBoolean(matcherItem.group(1));
                 String textoTarea = matcherItem.group(2);
                 
-                // Inflamos la vista y la configuramos (usando el método que creamos antes)
                 View vistaCheck = getLayoutInflater().inflate(R.layout.item_check, null);
                 configurarItemCheck(vistaCheck, textoTarea, estaMarcado);
                 ((SimpleAdapter)contenedorAdjuntos.getAdapter()).addView(vistaCheck);
             }
         }
 
-        // 5. CONVERTIR HTML RESTANTE A TEXTO (Para el EditText)
+        // 6. Cargar Texto Limpio en el Editor
         esCambioProgramatico = true;
-        // Limpiamos los divs de color para que el convertidor de HTML no se confunda
-        String htmlLimpio = contenidoParaEditor.replaceAll("<div[^>]*>", "").replace("</div>", "");
-
+        String cleanHtml = NoteIOHelper.cleanHtmlForEditor(fullContent);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            txtNota.setText(android.text.Html.fromHtml(htmlLimpio, android.text.Html.FROM_HTML_MODE_LEGACY));
+            txtNota.setText(Html.fromHtml(cleanHtml, Html.FROM_HTML_MODE_LEGACY));
         } else {
-            txtNota.setText(android.text.Html.fromHtml(htmlLimpio));
+            txtNota.setText(Html.fromHtml(cleanHtml));
         }
         actualizarContador(txtNota.getText().toString());
         esCambioProgramatico = false;
-        
-        // 6. Configurar Título y Adjuntos multimedia
+
+        // 7. Configurar Título y Adjuntos multimedia
         if (archivoActualSAF != null && archivoActualSAF.getName() != null) {
             String nombreNota = archivoActualSAF.getName();
             txtTitulo.setText(nombreNota.replace(".txt", ""));
 
             if (carpetaUriPadre != null) {
-                Uri rootUri = Uri.parse(carpetaUriPadre);
-                DocumentFile carpetaRaiz = DocumentFile.fromTreeUri(this, rootUri);
-                if (carpetaRaiz != null) {
-                    cargarAdjuntosDesdeCarpeta(carpetaRaiz, nombreNota);
-                }
+                DocumentFile carpetaRaiz = DocumentFile.fromTreeUri(this, Uri.parse(carpetaUriPadre));
+                if (carpetaRaiz != null) cargarAdjuntosDesdeCarpeta(carpetaRaiz, nombreNota);
             }
         }
-        
     } catch (Exception e) {
         Log.e("CARGA_SAF", "Error: " + e.getMessage());
         Toast.makeText(this, "Error al abrir la nota", Toast.LENGTH_SHORT).show();
@@ -793,94 +787,67 @@ mTTS = new TextToSpeech(this, status -> {
 
     private void guardarNotaSilenciosamente() {
     // Validaciones iniciales
-    if (uriArchivoActual == null && txtTitulo.getText().toString().trim().isEmpty() && txtNota.getText().toString().trim().isEmpty()) {
+    String titulo = txtTitulo.getText().toString().trim();
+    String textoCuerpo = txtNota.getText().toString().trim();
+    
+    if (uriArchivoActual == null && titulo.isEmpty() && textoCuerpo.isEmpty()) {
         return;
     }
 
-    // 1. Obtener HTML del texto principal
-    String contenidoHtml = Html.toHtml(txtNota.getText());
-    String titulo = txtTitulo.getText().toString().trim();
     if (titulo.isEmpty()) titulo = "Sin_titulo";
 
-    // 2. LÓGICA DE COLOR DE FONDO
-    // a) Obtener el color actual (intentamos obtener del drawable, sino el default del tema)
-    int colorActual = com.google.android.material.color.MaterialColors.getColor(background, com.google.android.material.R.attr.colorSurfaceContainer);
-    if (background.getBackground() instanceof android.graphics.drawable.ColorDrawable) {
-        colorActual = ((android.graphics.drawable.ColorDrawable) background.getBackground()).getColor();
-    }
-
-    // b) Convertir color a Hexadecimal
-    String hexColor = String.format("#%06X", (0xFFFFFF & colorActual));
-
-    // 3. --- NUEVO: GENERAR HTML DEL CHECKLIST ---
-    // Recorremos el contenedor de adjuntos para buscar los items tipo Check
-    StringBuilder checklistHtml = new StringBuilder();
-    checklistHtml.append("<div id='checklist_data' style='display:none;'>"); // Oculto visualmente
+    // 1. Preparar datos para el Helper
+    String bodyHtml = Html.toHtml(txtNota.getText());
     
+    // Obtener checklist views
+    List<View> checklistViews = new ArrayList<>();
     if (contenedorAdjuntos != null) {
         for (int i = 0; i < contenedorAdjuntos.getChildCount(); i++) {
-            View v = contenedorAdjuntos.getChildAt(i);
-            
-            // Buscamos las vistas por ID para saber si es una fila de checklist
-            android.widget.CheckBox cb = v.findViewById(R.id.chkEstado);
-            EditText et = v.findViewById(R.id.txtCheckCuerpo);
-            
-            // Si encontramos ambos componentes, es un ítem de lista válido
-            if (cb != null && et != null) {
-                 String isChecked = cb.isChecked() ? "true" : "false";
-                 String textoItem = et.getText().toString();
-                 
-                 // Guardamos en formato: <chk state="true">Comprar leche</chk>
-                 checklistHtml.append("<chk state=\"").append(isChecked).append("\">")
-                              .append(textoItem).append("</chk>");
-            }
+            checklistViews.add(contenedorAdjuntos.getChildAt(i));
         }
     }
-    checklistHtml.append("</div>");
+    String checklistHtml = NoteIOHelper.generateChecklistHtml(checklistViews);
 
-    // 4. UNIR TODO EN EL STRING FINAL
-    // Estructura: <div con color> + Texto Nota + <div con checklist> + </div>
-    String htmlParaGuardar = "<div style='background-color:" + hexColor + ";'>" 
-                           + contenidoHtml 
-                           + checklistHtml.toString() 
-                           + "</div>";
+    // Obtener color visual actual
+    int colorActual = com.google.android.material.color.MaterialColors.getColor(background, com.google.android.material.R.attr.colorSurfaceContainer);
+    if (background.getBackground() instanceof ColorDrawable) {
+        colorActual = ((ColorDrawable) background.getBackground()).getColor();
+    }
 
     try {
         DocumentFile rootDoc = null;
         if (carpetaUriPadre != null) {
-            Uri rootUri = Uri.parse(carpetaUriPadre);
-            rootDoc = DocumentFile.fromTreeUri(this, rootUri);
+            rootDoc = DocumentFile.fromTreeUri(this, Uri.parse(carpetaUriPadre));
         }
 
-        // --- BLOQUE 1: CREACIÓN DE ARCHIVO Y CARPETA (Si es nuevo) ---
+        // --- BLOQUE: CREACIÓN DE ARCHIVO NUEVO ---
         if (uriArchivoActual == null) {
             if (rootDoc == null) return;
-            
-            // Crear .txt
             DocumentFile nuevoArchivo = rootDoc.createFile("text/plain", titulo + ".txt");
             
-            // Crear carpeta _resources
+            // Crear carpeta de recursos
             String nombreCarpeta = titulo + "_resources";
-            if (rootDoc.findFile(nombreCarpeta) == null) {
-                rootDoc.createDirectory(nombreCarpeta);
-            }
+            if (rootDoc.findFile(nombreCarpeta) == null) rootDoc.createDirectory(nombreCarpeta);
 
-            if (nuevoArchivo != null) {
-                uriArchivoActual = nuevoArchivo.getUri();
-            }
+            if (nuevoArchivo != null) uriArchivoActual = nuevoArchivo.getUri();
         }
 
-        // --- BLOQUE 2: GUARDAR EL HTML COMPLETO ---
+        // --- BLOQUE: GUARDADO USANDO HELPER ---
         if (uriArchivoActual != null) {
-            try (OutputStream os = getContentResolver().openOutputStream(uriArchivoActual, "wt")) {
-                os.write(htmlParaGuardar.getBytes());
-            }
+            boolean exito = NoteIOHelper.saveNote(
+                this, 
+                uriArchivoActual, 
+                bodyHtml, 
+                checklistHtml, 
+                colorActual, 
+                currentBackgroundName, 
+                currentBackgroundUri
+            );
 
-            archivoActualSAF = DocumentFile.fromSingleUri(this, uriArchivoActual);
-
-            // --- BLOQUE 3: GUARDAR IMÁGENES ---
-            if (archivoActualSAF != null && rootDoc != null) {
-                 guardarImagenesEnCarpetaNota(rootDoc, archivoActualSAF.getName());
+            // Guardar imágenes/multimedia en la carpeta de recursos
+            if (exito && rootDoc != null) {
+                archivoActualSAF = DocumentFile.fromSingleUri(this, uriArchivoActual);
+                guardarImagenesEnCarpetaNota(rootDoc, archivoActualSAF.getName());
             }
         }
 
@@ -1509,40 +1476,70 @@ private void compartirComoPDF() {
     }
     }
     private void aplicarColorFondoDinamico(int color) {
-    // 1. CORRECCIÓN: Si el color recibido es transparente (0), asignamos blanco (o el del tema)
-    if (color == Color.TRANSPARENT) {
-        // Opción PRO para Material You: 
+    // 1. Si el color es transparente o 0, usamos el color por defecto del tema
+    if (color == Color.TRANSPARENT || color == 0) {
         color = com.google.android.material.color.MaterialColors.getColor(background, com.google.android.material.R.attr.colorSurfaceContainer);
     }
 
-    // 2. Aplicar el color al layout principal
+    // 2. Aplicar al fondo
     background.setBackgroundColor(color);
 
-    // 3. Calcular luminancia (0.0 es negro puro, 1.0 es blanco puro)
+    // 3. Calcular luminancia para contraste
     double luminancia = androidx.core.graphics.ColorUtils.calculateLuminance(color);
-
-    // 4. Determinar color de contraste
-    // Si el fondo es claro (> 0.5), texto oscuro (#1C1B1F es "Black" suave de Material)
-    // Si el fondo es oscuro (< 0.5), texto blanco
     int colorInterfaz = (luminancia > 0.5) ? Color.parseColor("#1C1B1F") : Color.WHITE;
-    if (lblContador != null) lblContador.setTextColor(colorInterfaz);
 
-    // 5. Aplicar a todos los elementos de texto
+    // 4. Aplicar a textos
+    if (lblContador != null) lblContador.setTextColor(colorInterfaz);
     txtNota.setTextColor(colorInterfaz);
     txtTitulo.setTextColor(colorInterfaz);
-    
-    // Verificamos nulos por seguridad
     if (lblFecha != null) lblFecha.setTextColor(colorInterfaz);
-    
-    // 6. Aplicar a los iconos (importante para que no desaparezcan)
-    
-    // 7. Estética final
     txtNota.setHintTextColor(colorInterfaz);
     
-    // Nota: El alpha en el texto principal puede dificultar la lectura bajo el sol.
-    // Yo recomendaría dejarlo en 1.0f (opaco) o 0.9f como máximo.
-    txtNota.setAlpha(1.0f); 
+    // 6. Ajustar la barra de estado (opcional, para que los iconos de batería/hora cambien)
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+        View decor = getWindow().getDecorView();
+        if (luminancia > 0.5) {
+            decor.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR);
+        } else {
+            decor.setSystemUiVisibility(0);
+        }
     }
+    }
+    
+    private void aplicarImagenFondoDinamico(Uri uri) {
+    if (uri == null) return;
+
+    try {
+        // 1. Abrir el flujo de la imagen desde la URI de SAF
+        InputStream inputStream = getContentResolver().openInputStream(uri);
+        Drawable drawable = Drawable.createFromStream(inputStream, uri.toString());
+
+        if (drawable != null) {
+            // 2. Si es un BitmapDrawable, podemos ajustar cómo se ve
+            if (drawable instanceof BitmapDrawable) {
+                // Opcional: Ajustar opacidad si la imagen es muy brillante para leer texto
+                // drawable.setAlpha(150); // 0 a 255
+            }
+
+            // 3. Aplicar al layout principal (background es tu contenedor)
+            background.setBackground(drawable);
+            
+            // 4. Guardar la URI actual en tu variable global para que persista al guardar
+            currentBackgroundUri = uri.toString();
+            
+            // 5. IMPORTANTE: Re-calcular el contraste del texto sobre la imagen
+            // Como no sabemos si la imagen es oscura o clara, una técnica segura
+            // es poner un pequeño filtro oscuro o claro al texto si fuera necesario.
+        }
+    } catch (Exception e) {
+        Log.e("FONDO_DINAMICO", "Error al cargar imagen de fondo: " + e.getMessage());
+        // Si falla la imagen, al menos aplicamos un color sólido de respaldo
+        if (background.getBackground() == null) {
+            background.setBackgroundColor(Color.WHITE);
+        }
+    }
+    }
+    
     private void actualizarContador(String texto) {
     // 1. Contar caracteres (incluyendo espacios)
     int caracteres = texto.length();

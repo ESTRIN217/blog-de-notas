@@ -6,7 +6,8 @@
      android:layout_width="match_parent"
      android:gravity="center_vertical"
      android:background="@drawable/background"
-     android:orientation="horizontal">
+     android:orientation="horizontal"
+     android:paddingBottom="16dp">
 
     <HorizontalScrollView
          android:layout_height="wrap_content"

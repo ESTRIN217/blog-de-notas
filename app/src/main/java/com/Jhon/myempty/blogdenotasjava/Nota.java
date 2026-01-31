@@ -5,12 +5,14 @@ public class Nota {
     private String contenido;
     private String fecha;
     private String uri;
+    private int color;
 
-    public Nota(String titulo, String contenido, String fecha, String uri) {
+    public Nota(String titulo, String contenido, String fecha, int color, String uri ) {
         this.titulo = titulo;
         this.contenido = contenido;
         this.fecha = fecha;
         this.uri = uri;
+        this: color = color;
     }
 
     // Getters
@@ -19,4 +21,5 @@ public class Nota {
     public String getFecha() { return fecha; }
     
     public String getUri() { return uri; } 
+    public int getColor() { return color; }
 }

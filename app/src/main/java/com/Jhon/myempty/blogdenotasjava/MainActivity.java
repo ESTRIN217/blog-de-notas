@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.net.Uri;
+import android.util.Log;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.Html;
@@ -29,6 +30,8 @@ import androidx.recyclerview.widget.StaggeredGridLayoutManager;
 import com.google.android.material.color.DynamicColors;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.button.MaterialButton;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
+import com.google.android.material.card.MaterialCardView;
 
 import java.io.BufferedReader;
 import java.io.InputStream;
@@ -39,6 +42,7 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import java.io.File;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -46,6 +50,7 @@ public class MainActivity extends AppCompatActivity {
     private FloatingActionButton btnNuevaNota;
     private EditText buscar;
     private MaterialButton btnSettings, modoVistaTargeta;
+    private MaterialCardView background;
 
     private List<Nota> listaDeNotasCompleta;
     private NotaAdapter adaptador;
@@ -148,78 +153,82 @@ public class MainActivity extends AppCompatActivity {
 
     // --- MÉTODO PRINCIPAL DE CARGA (OPTIMIZADO CON HILO Y ORDENAMIENTO) ---
     private void cargarNotas() {
-        if (carpetaUriString == null) return;
+    if (carpetaUriString == null) return;
 
-        Uri treeUri = Uri.parse(carpetaUriString);
-        DocumentFile root = DocumentFile.fromTreeUri(this, treeUri);
+    Uri treeUri = Uri.parse(carpetaUriString);
+    DocumentFile root = DocumentFile.fromTreeUri(this, treeUri);
 
-        if (root != null && root.canRead()) {
-            new Thread(() -> {
-                List<Nota> notasTemp = new ArrayList<>();
-                DocumentFile[] archivos = root.listFiles();
+    if (root != null && root.canRead()) {
+        new Thread(() -> {
+            List<Nota> notasTemp = new ArrayList<>();
+            DocumentFile[] archivos = root.listFiles();
 
-                // 1. Ordenar por fecha (Más reciente primero)
-                Arrays.sort(archivos, (f1, f2) -> Long.compare(f2.lastModified(), f1.lastModified()));
+            // Ordenar por fecha (Más reciente primero)
+            Arrays.sort(archivos, (f1, f2) -> Long.compare(f2.lastModified(), f1.lastModified()));
 
-                SimpleDateFormat sdf = new SimpleDateFormat("dd MMM yyyy", Locale.getDefault());
+            SimpleDateFormat sdf = new SimpleDateFormat("dd MMM yyyy", Locale.getDefault());
 
-                for (DocumentFile file : archivos) {
-                    if (file.isFile() && file.getName() != null && file.getName().endsWith(".txt")) {
-                        String titulo = file.getName().replace(".txt", "");
-                        // Usamos tu método optimizado que lee solo 10 líneas
-                        String extracto = obtenerResumenSAF(file.getUri());
-                        String fecha = sdf.format(new Date(file.lastModified()));
+            for (DocumentFile file : archivos) {
+                if (file.isFile() && file.getName() != null && file.getName().endsWith(".txt")) {
+                    String titulo = file.getName().replace(".txt", "");
+                    
+                    // Obtener el resumen limpio usando el Helper
+                    String extracto = obtenerResumenSAF(file.getUri());
+                    String fecha = sdf.format(new Date(file.lastModified()));
+                    String fullContent = NoteIOHelper.readContent(this, file.getUri());
+                       int color = NoteIOHelper.extractColor(fullContent);
 
-                        notasTemp.add(new Nota(titulo, extracto, fecha, file.getUri().toString()));
-                    }
+                    // Creamos el objeto Nota
+                    Nota nota = new Nota(titulo, extracto, fecha, color, file.getUri().toString());
+                    
+                    
+
+                    notasTemp.add(nota);
                 }
+            }
 
-                // 2. Actualizar UI en el hilo principal
-                runOnUiThread(() -> {
-                    listaDeNotasCompleta.clear();
-                    listaDeNotasCompleta.addAll(notasTemp);
+            // Actualizar UI en el hilo principal
+            runOnUiThread(() -> {
+                listaDeNotasCompleta.clear();
+                listaDeNotasCompleta.addAll(notasTemp);
 
-                    if (adaptador == null) {
-                        adaptador = new NotaAdapter(listaDeNotasCompleta,
-                                // Click Normal
-                                nota -> abrirEditor(nota.getUri()),
-                                // Click Largo (Menú Opciones)
-                                (view, nota) -> mostrarMenuOpciones(view, nota)
-                        );
-                        recyclerNotas.setAdapter(adaptador);
-                        aplicarModoVista(); 
-                    } else {
-                        adaptador.actualizarLista(listaDeNotasCompleta);
-                    }
-                });
-            }).start();
-        }
+                if (adaptador == null) {
+                    adaptador = new NotaAdapter(listaDeNotasCompleta,
+                            nota -> abrirEditor(nota.getUri()), // Click normal
+                            (view, nota) -> mostrarMenuOpciones(view, nota) // Click largo
+                    );
+                    recyclerNotas.setAdapter(adaptador);
+                    aplicarModoVista(); 
+                } else {
+                    adaptador.actualizarLista(listaDeNotasCompleta);
+                }
+            });
+        }).start();
+    }
     }
 
     private String obtenerResumenSAF(Uri fileUri) {
-        StringBuilder sb = new StringBuilder();
-        try (InputStream is = getContentResolver().openInputStream(fileUri);
-             BufferedReader br = new BufferedReader(new InputStreamReader(is))) {
-            
-            String linea;
-            int lineasContadas = 0;
-            while ((linea = br.readLine()) != null && lineasContadas < 10) {
-                sb.append(linea).append(" "); // Agregamos espacio en lugar de salto de línea para resumen
-                lineasContadas++;
-            }
+    // 1. Leemos el contenido completo usando el Helper
+    String fullContent = NoteIOHelper.readContent(this, fileUri);
+    
+    if (fullContent.isEmpty()) return "Nota vacía";
 
-            String contenidoBruto = sb.toString().trim();
-            if (contenidoBruto.isEmpty()) return "Nota vacía";
+    // 2. Limpiamos el HTML (quitamos divs de color y checklist)
+    String cleanHtml = NoteIOHelper.cleanHtmlForEditor(fullContent);
 
-            // Limpieza HTML
-            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
-                return Html.fromHtml(contenidoBruto, Html.FROM_HTML_MODE_LEGACY).toString();
-            } else {
-                return Html.fromHtml(contenidoBruto).toString();
-            }
-        } catch (Exception e) {
-            return "";
-        }
+    // 3. Convertimos a texto plano para eliminar etiquetas como <b>, <br>, etc.
+    String plainText;
+    if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
+        plainText = Html.fromHtml(cleanHtml, Html.FROM_HTML_MODE_LEGACY).toString();
+    } else {
+        plainText = Html.fromHtml(cleanHtml).toString();
+    }
+
+    if (plainText.length() > 350) {
+        return plainText.substring(0, 100) + "...";
+    }
+    
+    return plainText.isEmpty() ? "Nota vacía" : plainText;
     }
 
     // --- ACCIONES DEL MENÚ CONTEXTUAL (RESTAURADOS) ---
@@ -254,13 +263,135 @@ public class MainActivity extends AppCompatActivity {
         popup.show();
     }
 
-    private void compartirNotaDesdeLista(Nota nota) {
-        String contenido = obtenerTextoDeArchivo(Uri.parse(nota.getUri()));
-        Intent sendIntent = new Intent();
-        sendIntent.setAction(Intent.ACTION_SEND);
-        sendIntent.putExtra(Intent.EXTRA_TEXT, nota.getTitulo() + "\n\n" + contenido);
-        sendIntent.setType("text/plain");
-        startActivity(Intent.createChooser(sendIntent, "Compartir nota vía:"));
+    // 1. Este es el método que llamas desde el clic largo o menú de tu lista
+private void compartirNotaDesdeLista(Nota nota) {
+    String[] opciones = {"Enviar como texto", "Enviar como PDF"};
+
+    new com.google.android.material.dialog.MaterialAlertDialogBuilder(this)
+            .setTitle("Compartir: " + nota.getTitulo())
+            .setItems(opciones, (dialog, which) -> {
+                if (which == 0) {
+                    compartirComoTexto(nota);
+                } else {
+                    compartirComoPDF(nota);
+                }
+            })
+            .show();
+}
+
+    // 2. Compartir Texto Plano
+    private void compartirComoTexto(Nota nota) {
+    // 1. Leer y Limpiar
+    String fullContent = NoteIOHelper.readContent(this, Uri.parse(nota.getUri()));
+    String cleanHtml = NoteIOHelper.cleanHtmlForEditor(fullContent);
+    
+    // 2. Convertir a Texto plano
+    String textoCompartir;
+    if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
+        textoCompartir = Html.fromHtml(cleanHtml, Html.FROM_HTML_MODE_LEGACY).toString();
+    } else {
+        textoCompartir = Html.fromHtml(cleanHtml).toString();
+    }
+
+    // 3. Enviar Intent
+    Intent intent = new Intent(Intent.ACTION_SEND);
+    intent.setType("text/plain");
+    intent.putExtra(Intent.EXTRA_TEXT, nota.getTitulo() + "\n\n" + textoCompartir);
+    startActivity(Intent.createChooser(intent, "Compartir nota vía:"));
+    }
+
+    // 3. Compartir PDF
+    private void compartirComoPDF(Nota nota) {
+    // 1. Usar el Helper para obtener el contenido REAL (Limpio de metadatos y checklists)
+    String fullContent = NoteIOHelper.readContent(this, Uri.parse(nota.getUri()));
+    String htmlLimpio = NoteIOHelper.cleanHtmlForEditor(fullContent);
+    
+    // 2. Convertir a texto plano para el Canvas del PDF
+    String contenidoLimpio;
+    if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
+        contenidoLimpio = android.text.Html.fromHtml(htmlLimpio, android.text.Html.FROM_HTML_MODE_LEGACY).toString();
+    } else {
+        contenidoLimpio = android.text.Html.fromHtml(htmlLimpio).toString();
+    }
+
+    if (contenidoLimpio.trim().isEmpty()) {
+        Toast.makeText(this, "La nota está vacía", Toast.LENGTH_SHORT).show();
+        return;
+    }
+
+    // --- Generación del PDF ---
+    android.graphics.pdf.PdfDocument document = new android.graphics.pdf.PdfDocument();
+    // Tamaño A4 (595 x 842 puntos)
+    android.graphics.pdf.PdfDocument.PageInfo pageInfo = new android.graphics.pdf.PdfDocument.PageInfo.Builder(595, 842, 1).create();
+    android.graphics.pdf.PdfDocument.Page page = document.startPage(pageInfo);
+
+    android.graphics.Canvas canvas = page.getCanvas();
+    android.graphics.Paint paint = new android.graphics.Paint();
+    
+    // Configuración de márgenes y fuente
+    int x = 50;
+    int y = 60;
+    int pageWidth = 500; // Ancho útil para el texto
+
+    // Dibujar Título
+    paint.setTextSize(20);
+    paint.setTypeface(android.graphics.Typeface.create(android.graphics.Typeface.DEFAULT, android.graphics.Typeface.BOLD));
+    canvas.drawText(nota.getTitulo(), x, y, paint);
+    
+    y += 40; // Espacio después del título
+
+    // Configurar cuerpo de texto
+    paint.setTextSize(12);
+    paint.setTypeface(android.graphics.Typeface.DEFAULT);
+    
+    // --- LÓGICA DE DIBUJO CON WRAPPING (AJUSTE DE LÍNEA) ---
+    // TextPaint permite medir mejor el ancho del texto
+    android.text.TextPaint textPaint = new android.text.TextPaint(paint);
+    
+    for (String parrafo : contenidoLimpio.split("\n")) {
+        // StaticLayout es el truco profesional para que el texto salte de línea automáticamente si es largo
+        android.text.StaticLayout layout = new android.text.StaticLayout(
+                parrafo, textPaint, pageWidth, 
+                android.text.Layout.Alignment.ALIGN_NORMAL, 1.0f, 0.0f, false);
+        
+        canvas.save();
+        canvas.translate(x, y);
+        layout.draw(canvas);
+        canvas.restore();
+        
+        y += layout.getHeight() + 5; // Mover 'y' hacia abajo según el tamaño del párrafo
+        
+        if (y > 800) break; // Límite de la página simple
+    }
+
+    document.finishPage(page);
+
+    // --- Guardar y Compartir ---
+    try {
+        File cachePath = new File(getCacheDir(), "pdf_temp");
+        if (!cachePath.exists()) cachePath.mkdirs();
+        
+        String nombreSeguro = nota.getTitulo().replaceAll("[^a-zA-Z0-9]", "_") + ".pdf";
+        File file = new File(cachePath, nombreSeguro);
+        
+        try (java.io.FileOutputStream fos = new java.io.FileOutputStream(file)) {
+            document.writeTo(fos);
+        }
+        document.close();
+
+        Uri contentUri = androidx.core.content.FileProvider.getUriForFile(this, 
+                getPackageName() + ".fileprovider", file);
+        
+        Intent intent = new Intent(Intent.ACTION_SEND);
+        intent.setType("application/pdf");
+        intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+        intent.putExtra(Intent.EXTRA_STREAM, contentUri);
+        startActivity(Intent.createChooser(intent, "Compartir nota como PDF"));
+
+    } catch (Exception e) {
+        Log.e("PDF_ERROR", e.getMessage());
+        Toast.makeText(this, "Error al generar PDF", Toast.LENGTH_SHORT).show();
+    }
     }
 
     private void eliminarNotaDesdeLista(Nota nota) {
