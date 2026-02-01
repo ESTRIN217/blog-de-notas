@@ -28,12 +28,18 @@
              android:layout_width="wrap_content"
              android:id="@+id/chkEstado" />
 
-        <com.google.android.material.textfield.TextInputEditText
-             android:layout_height="wrap_content"
-             android:layout_width="wrap_content"
-             android:textColor="?attr/colorOnSurface"
-             android:layout_weight="1"
-             android:id="@+id/txtCheckCuerpo" />
+        <EditText
+            android:layout_height="wrap_content"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:textColor="?attr/colorOnSurface"
+            android:hint="Tarea..."
+            android:background="@android:color/transparent"
+            android:padding="8dp"
+            android:textSize="16sp"
+            android:id="@+id/txtCheckCuerpo"
+            android:inputType="textCapSentences|textMultiLine"
+            android:importantForAutofill="no"/>
 
         <Button
              android:layout_height="wrap_content"
