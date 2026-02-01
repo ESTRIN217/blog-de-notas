@@ -31,7 +31,6 @@ import com.google.android.material.color.DynamicColors;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
-import com.google.android.material.card.MaterialCardView;
 
 import java.io.BufferedReader;
 import java.io.InputStream;
@@ -50,7 +49,6 @@ public class MainActivity extends AppCompatActivity {
     private FloatingActionButton btnNuevaNota;
     private EditText buscar;
     private MaterialButton btnSettings, modoVistaTargeta;
-    private MaterialCardView background;
 
     private List<Nota> listaDeNotasCompleta;
     private NotaAdapter adaptador;
@@ -193,10 +191,28 @@ public class MainActivity extends AppCompatActivity {
                 listaDeNotasCompleta.addAll(notasTemp);
 
                 if (adaptador == null) {
-                    adaptador = new NotaAdapter(listaDeNotasCompleta,
-                            nota -> abrirEditor(nota.getUri()), // Click normal
-                            (view, nota) -> mostrarMenuOpciones(view, nota) // Click largo
-                    );
+
+adaptador = new NotaAdapter(listaDeNotasCompleta,
+    // Click Normal
+    nota -> {
+        // Si hay items seleccionados, el click normal funciona para seleccionar/deseleccionar (Multiselect)
+        if (adaptador.haySeleccion()) {
+            adaptador.toggleSeleccion(nota);
+        } else {
+            // Si no hay selección, comportamiento normal (abrir editor)
+            abrirEditor(nota.getUri());
+        }
+    },
+    // Click Largo
+    (view, nota, position) -> {
+        // 1. Marcamos visualmente la nota
+        adaptador.toggleSeleccion(nota);
+        
+        // 2. Opcional: Si quieres seguir mostrando el menú popup al mismo tiempo:
+        mostrarMenuOpciones(view, nota);
+        
+    }
+);
                     recyclerNotas.setAdapter(adaptador);
                     aplicarModoVista(); 
                 } else {
@@ -260,6 +276,10 @@ public class MainActivity extends AppCompatActivity {
             }
             return false;
         });
+        popup.setOnDismissListener(menu -> {
+        // Si solo querías resaltar mientras el menú estaba abierto:
+        adaptador.limpiarSeleccion(); 
+    });
         popup.show();
     }
 

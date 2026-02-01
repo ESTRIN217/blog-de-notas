@@ -1,31 +1,33 @@
 package com.Jhon.myempty.blogdenotasjava;
 
+import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
-import java.util.List;
 import com.google.android.material.card.MaterialCardView;
+import java.util.ArrayList;
+import java.util.List;
 
 public class NotaAdapter extends RecyclerView.Adapter<NotaAdapter.NotaViewHolder> {
 
     private List<Nota> listaNotas;
+    // 1. Lista para guardar las posiciones seleccionadas
+    private List<Nota> itemsSeleccionados = new ArrayList<>(); 
+    
     private final OnNotaClickListener listenerClick;
-    private final OnNotaLongClickListener listenerLongClick; // NUEVO
+    private final OnNotaLongClickListener listenerLongClick;
 
-    // Interfaz para click normal
     public interface OnNotaClickListener {
         void onNotaClick(Nota nota);
     }
 
-    // NUEVO: Interfaz para click largo (pasamos la vista para anclar el menú popup)
     public interface OnNotaLongClickListener {
-        void onNotaLongClick(View v, Nota nota);
+        void onNotaLongClick(View v, Nota nota, int position); // Agregamos position
     }
 
-    // Constructor actualizado
     public NotaAdapter(List<Nota> listaNotas, OnNotaClickListener listenerClick, OnNotaLongClickListener listenerLongClick) {
         this.listaNotas = listaNotas;
         this.listenerClick = listenerClick;
@@ -42,7 +44,12 @@ public class NotaAdapter extends RecyclerView.Adapter<NotaAdapter.NotaViewHolder
     @Override
     public void onBindViewHolder(@NonNull NotaViewHolder holder, int position) {
         Nota nota = listaNotas.get(position);
-        holder.bind(nota, listenerClick, listenerLongClick);
+        
+        // 2. Comprobamos si esta nota está seleccionada
+        boolean estaSeleccionada = itemsSeleccionados.contains(nota);
+        
+        // 3. Pasamos el estado de selección al bind
+        holder.bind(nota, listenerClick, listenerLongClick, position, estaSeleccionada);
     }
 
     @Override
@@ -55,9 +62,29 @@ public class NotaAdapter extends RecyclerView.Adapter<NotaAdapter.NotaViewHolder
         notifyDataSetChanged();
     }
 
+    // --- MÉTODOS NUEVOS PARA GESTIONAR LA SELECCIÓN ---
+    
+    public void toggleSeleccion(Nota nota) {
+        if (itemsSeleccionados.contains(nota)) {
+            itemsSeleccionados.remove(nota);
+        } else {
+            itemsSeleccionados.add(nota);
+        }
+        notifyDataSetChanged(); // Refresca la vista para mostrar el borde
+    }
+
+    public void limpiarSeleccion() {
+        itemsSeleccionados.clear();
+        notifyDataSetChanged();
+    }
+    
+    public boolean haySeleccion() {
+        return !itemsSeleccionados.isEmpty();
+    }
+
     static class NotaViewHolder extends RecyclerView.ViewHolder {
         TextView txtTitulo, txtContenido, txtFecha;
-        View background;
+        MaterialCardView background; // Asegúrate de usar MaterialCardView en el XML
 
         public NotaViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -67,19 +94,32 @@ public class NotaAdapter extends RecyclerView.Adapter<NotaAdapter.NotaViewHolder
             background = itemView.findViewById(R.id.nota_background);
         }
 
-        public void bind(final Nota nota, final OnNotaClickListener listener, final OnNotaLongClickListener longListener) {
+        public void bind(final Nota nota, final OnNotaClickListener listener, final OnNotaLongClickListener longListener, int position, boolean isSelected) {
             txtTitulo.setText(nota.getTitulo());
             txtContenido.setText(nota.getContenido());
             txtFecha.setText(nota.getFecha());
-            background.setBackgroundColor(nota.getColor());
+            background.setCardBackgroundColor(nota.getColor());
+
+            // 4. CAMBIO VISUAL AL SELECCIONAR
+            if (isSelected) {
+                // Borde grueso y de color (ej. Azul o el acento del sistema)
+                background.setStrokeWidth(4); 
+                background.setStrokeColor(Color.parseColor("#FF6200EE")); // O usa ContextCompat.getColor(...)
+                background.setAlpha(0.8f); // Opcional: un poco transparente
+            } else {
+                // (estado normal)
+                background.setStrokeWidth(1);
+                background.setAlpha(1.0f);
+            }
 
             // Click Normal
             itemView.setOnClickListener(v -> listener.onNotaClick(nota));
 
-            // NUEVO: Click Largo
+            // Click Largo
             itemView.setOnLongClickListener(v -> {
-                longListener.onNotaLongClick(v, nota);
-                return true; // "true" significa que consumimos el evento (no hace click normal después)
+                // Pasamos la posición también
+                longListener.onNotaLongClick(v, nota, position);
+                return true;
             });
         }
     }
