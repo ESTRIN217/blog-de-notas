@@ -18,8 +18,7 @@ import android.widget.PopupMenu;
 import android.widget.TextView;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import android.widget.Toast;
-import android.widget.LinearLayout;
-import androidx.recyclerview.widget.RecyclerView;
+import android.widget.LinearLayout;;
 import android.graphics.drawable.GradientDrawable;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
@@ -56,7 +55,6 @@ import android.media.MediaPlayer;
 import android.widget.ProgressBar;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import android.view.ViewGroup;
-import android.graphics.Bitmap;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Paint;
@@ -127,6 +125,7 @@ public class EditorActivity extends AppCompatActivity {
     private boolean isTtsInitialized = false;
     private String currentBackgroundName = "default"; 
     private String currentBackgroundUri = null;
+    private String archivoAudioTemporal;
 
     // --- Permiso para ventana flotante ---
     private final ActivityResultLauncher<Intent> launcherPermisoOverlay = registerForActivityResult(
@@ -409,7 +408,7 @@ mTTS = new TextToSpeech(this, status -> {
         textoEstilo = findViewById(R.id.text_style);
         contenedorAdjuntos = findViewById(R.id.contenedorAdjuntos);
         lblContador = findViewById(R.id.lblContador);
-        contenedorAdjuntos.setLayoutManager(new LinearLayoutManager(this));contenedorAdjuntos.setAdapter(new SimpleAdapter());
+        contenedorAdjuntos.setLayoutManager(new LinearLayoutManager(this));contenedorAdjuntos.setAdapter(new SimpleAdapter(this));
         textToSpeech = findViewById(R.id.text_to_speech);
     }
 
@@ -1200,145 +1199,164 @@ private void compartirComoPDF() {
     
     // New unified method to add visual attachments
     private void agregarAdjuntoVisual(String ruta, String tipo, String tag) {
-    View vistaAdjunto = getLayoutInflater().inflate(R.layout.item_adjunto, null);
-    ImageView miniatura = vistaAdjunto.findViewById(R.id.miniatura);
-    ImageView btnEliminar = vistaAdjunto.findViewById(R.id.btnEliminar);
-    ImageView btnEditar = vistaAdjunto.findViewById(R.id.btnEditar); // NUEVO
-
-    // Cargar miniatura (puedes usar Glide o tu método actual)
-    miniatura.setImageURI(Uri.parse(ruta));
-
-    // Lógica del botón Editar
-    btnEditar.setOnClickListener(v -> {
-        if (tipo.equals("DIBUJO")) {
-            // Si es dibujo, lo mandamos a DibujoActivity pasándole la URI
-            Intent intent = new Intent(this, DibujoActivity.class);
-            intent.putExtra("uri_dibujo_editar", ruta);
-            dibujoLauncher.launch(intent);
-        } else if (tipo.equals("FOTO")) {
-            // Si es foto, podrías mandarla a un editor básico o al mismo de dibujo
-            Intent intent = new Intent(this, DibujoActivity.class);
-            intent.putExtra("uri_foto_editar", ruta); 
-            dibujoLauncher.launch(intent);
-        }
-        // Al editar, eliminamos la versión vieja para que la nueva la reemplace
-        contenedorAdjuntos.removeView(vistaAdjunto);
-        listaRutasFotos.remove(ruta);
-    });
-
-    btnEliminar.setOnClickListener(v -> {
-        // 1. Quitar de la vista y de la lista temporal
-        contenedorAdjuntos.removeView(vistaAdjunto);
-        listaRutasFotos.remove(ruta);
-
-        // 2. ELIMINACIÓN FÍSICA: Intentar borrar el archivo real
-        try {
-            Uri uriABorrar = Uri.parse(ruta);
-            // Si la URI es de nuestro proveedor de archivos (SAF), intentamos borrarlo
-            DocumentFile archivo = DocumentFile.fromSingleUri(this, uriABorrar);
-            if (archivo != null && archivo.exists()) {
-                archivo.delete(); 
-                Toast.makeText(this, "Archivo eliminado", Toast.LENGTH_SHORT).show();
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    });
-
-    ((SimpleAdapter)contenedorAdjuntos.getAdapter()).addView(vistaAdjunto);
-    }
+    // 1. Inflar la vista adecuada según el tipo
+    int layoutId = tipo.equals("AUDIO") ? R.layout.item_audio_adjunto : R.layout.item_adjunto;
+    View vistaAdjunto = getLayoutInflater().inflate(layoutId, null);
     
-    // Asistente para la configuración de la vista de archivos adjuntos de audio
-    private void setupAudioAttachmentView(View viewAudio, String rutaAudio, String tagInText) {
-        ImageView btnPlay = viewAudio.findViewById(R.id.btnPlayAudio);
-        ImageView btnEliminar = viewAudio.findViewById(R.id.btnEliminarAudio);
-        ProgressBar progressBar = viewAudio.findViewById(R.id.progressAudio);
+    // 2. Referencias comunes
+    ImageView btnEliminar = vistaAdjunto.findViewById(tipo.equals("AUDIO") ? R.id.btnEliminarAudio : R.id.btnEliminar);
+    SimpleAdapter adapter = (SimpleAdapter) contenedorAdjuntos.getAdapter();
 
-        btnPlay.setOnClickListener(v -> {
+    // 3. Lógica según tipo
+    if (tipo.equals("AUDIO")) {
+        setupAudioAttachmentView(vistaAdjunto, ruta, tag);
+    } else {
+        setupImageAttachmentView(vistaAdjunto, ruta, tag);
+        
+        // Configurar botón editar (Solo para fotos/dibujos)
+        ImageView btnEditar = vistaAdjunto.findViewById(R.id.btnEditar);
+        if (btnEditar != null) {
+            btnEditar.setOnClickListener(v -> {
+                Intent intent = new Intent(this, DibujoActivity.class);
+                intent.putExtra(tipo.equals("DIBUJO") ? "uri_dibujo_editar" : "uri_foto_editar", ruta);
+                dibujoLauncher.launch(intent);
+                
+                // IMPORTANTE: Quitar mediante el ADAPTADOR
+                adapter.removeView(vistaAdjunto);
+                listaRutasFotos.remove(ruta);
+            });
+        }
+    }
+
+    // 4. Lógica de eliminación unificada
+    btnEliminar.setOnClickListener(v -> {
+        if (tipo.equals("AUDIO") && mediaPlayer != null) {
+            mediaPlayer.stop();
+            mediaPlayer.release();
+            mediaPlayer = null;
+        }
+
+        // Eliminar físicamente el archivo
+        eliminarArchivoFisico(ruta);
+
+        // Quitar de la UI mediante el adaptador
+        adapter.removeView(vistaAdjunto);
+        
+        // Quitar de las listas de control
+        if (tipo.equals("AUDIO")) listaRutasAudios.remove(ruta);
+        else listaRutasFotos.remove(ruta);
+        
+        actualizarVisibilidadContenedor();
+    });
+
+    // 5. Añadir al adaptador
+    adapter.addView(vistaAdjunto);
+    contenedorAdjuntos.setVisibility(View.VISIBLE);
+}
+
+// Método auxiliar para no repetir código de borrado físico
+private void setupAudioAttachmentView(View viewAudio, String rutaAudio, String tagInText) {
+    ImageView btnPlay = viewAudio.findViewById(R.id.btnPlayAudio);
+    ImageView btnEliminar = viewAudio.findViewById(R.id.btnEliminarAudio);
+    ProgressBar progressBar = viewAudio.findViewById(R.id.progressAudio);
+
+    btnPlay.setOnClickListener(v -> {
+        try {
+            // Si ya está sonando, pausamos
             if (mediaPlayer != null && mediaPlayer.isPlaying()) {
                 mediaPlayer.pause();
                 btnPlay.setImageResource(R.drawable.play_circle_outline);
-            } else {
-                try {
-                    if (mediaPlayer == null) {
-                        mediaPlayer = new MediaPlayer();
-                        mediaPlayer.setDataSource(rutaAudio);
-                        mediaPlayer.prepare();
-                        mediaPlayer.setOnCompletionListener(mp -> {
-                            btnPlay.setImageResource(R.drawable.play_circle_outline);
-                            progressBar.setProgress(0);
-                            if (mediaPlayer != null) { // Check before releasing
-                                mediaPlayer.release();
-                                mediaPlayer = null;
-                            }
-                        });
-                    }
-                    mediaPlayer.start();
-                    btnPlay.setImageResource(R.drawable.pause_circle_outline);
-                    actualizarProgresoAudio(progressBar);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    Toast.makeText(this, "Error al reproducir", Toast.LENGTH_SHORT).show();
-                }
+                return;
             }
-        });
 
-        btnEliminar.setOnClickListener(v -> {
+            // Si estaba pausado, reanudamos
             if (mediaPlayer != null) {
-                mediaPlayer.release();
-                mediaPlayer = null;
+                mediaPlayer.start();
+                btnPlay.setImageResource(R.drawable.pause_circle_outline);
+                actualizarProgresoAudio(progressBar);
+                return;
             }
-            contenedorAdjuntos.removeView(viewAudio);
-            if (contenedorAdjuntos.getChildCount() == 0) {
-                contenedorAdjuntos.setVisibility(View.GONE);
-            }
-            listaRutasAudios.remove(rutaAudio);
-            new File(rutaAudio).delete(); 
-        });
-    }
 
-    // Asistente para la configuración de la vista de adjuntos de imágenes/dibujos
-    private void setupImageAttachmentView(View viewImage, String rutaImagen, String tagInText) {
-        ImageView imgAdjunta = viewImage.findViewById(R.id.miniatura);
-        ImageView btnEliminarFoto = viewImage.findViewById(R.id.btnEliminar);
-
-        try {
-            Uri uri = Uri.parse(rutaImagen);
-            InputStream is = getContentResolver().openInputStream(uri);
-            Bitmap bitmap = android.graphics.BitmapFactory.decodeStream(is);
-            is.close();
-
-            int anchoContenedor = contenedorAdjuntos.getWidth();
-            if (anchoContenedor <= 0) {
-                // Volver al ancho de la pantalla menos algún margen si aún no se ha medido el diseño
-                anchoContenedor = getResources().getDisplayMetrics().widthPixels - (int) (32 * getResources().getDisplayMetrics().density); 
+            // Si es nulo, inicializamos nuevo
+            mediaPlayer = new MediaPlayer();
+            // Soporte para URIs y rutas locales
+            if (rutaAudio.startsWith("content://")) {
+                mediaPlayer.setDataSource(this, Uri.parse(rutaAudio));
+            } else {
+                mediaPlayer.setDataSource(rutaAudio);
             }
             
-            // Adjust for padding (LinearLayout has 16dp horizontal padding)
-            int padding = (int) (16 * getResources().getDisplayMetrics().density); 
-            int targetWidth = anchoContenedor - padding * 2; 
+            mediaPlayer.prepare();
+            mediaPlayer.setOnCompletionListener(mp -> {
+                btnPlay.setImageResource(R.drawable.play_circle_outline);
+                progressBar.setProgress(0);
+                liberarMediaPlayer();
+            });
 
-            if (targetWidth <= 0) targetWidth = 800; // Fallback if calculation yields non-positive width
+            mediaPlayer.start();
+            btnPlay.setImageResource(R.drawable.pause_circle_outline);
+            actualizarProgresoAudio(progressBar);
 
-            float ratio = (float) bitmap.getHeight() / bitmap.getWidth();
-            int targetHeight = (int) (targetWidth * ratio);
-            
-            Bitmap scaledBitmap = Bitmap.createScaledBitmap(bitmap, targetWidth, targetHeight, true);
-            imgAdjunta.setImageBitmap(scaledBitmap);
-            
         } catch (Exception e) {
             e.printStackTrace();
-            imgAdjunta.setImageResource(android.R.drawable.ic_menu_gallery); // Fallback icon
-            Toast.makeText(this, "Error al cargar imagen/dibujo: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Error al reproducir audio", Toast.LENGTH_SHORT).show();
         }
+    });
 
-        btnEliminarFoto.setOnClickListener(v -> {
-            contenedorAdjuntos.removeView(viewImage);
-            if (contenedorAdjuntos.getChildCount() == 0) {
-                contenedorAdjuntos.setVisibility(View.GONE);
-            }
-        });
+    btnEliminar.setOnClickListener(v -> {
+        liberarMediaPlayer();
+        // IMPORTANTE: Usar el adaptador para remover, no contenedorAdjuntos directamente
+        if (contenedorAdjuntos.getAdapter() instanceof SimpleAdapter) {
+            ((SimpleAdapter) contenedorAdjuntos.getAdapter()).removeView(viewAudio);
+        }
+        listaRutasAudios.remove(rutaAudio);
+        eliminarArchivoFisico(rutaAudio);
+    });
+}
+
+// Auxiliar para liberar memoria del audio
+private void liberarMediaPlayer() {
+    if (mediaPlayer != null) {
+        mediaPlayer.release();
+        mediaPlayer = null;
     }
+}
+
+private void setupImageAttachmentView(View viewImage, String rutaImagen, String tagInText) {
+    ImageView imgAdjunta = viewImage.findViewById(R.id.miniatura);
+    ImageView btnEliminarFoto = viewImage.findViewById(R.id.btnEliminar);
+
+    // OPTIMIZACIÓN: Cargar imagen de forma segura (Escalada)
+    try {
+        Uri uri = Uri.parse(rutaImagen);
+        // Aquí lo ideal sería usar Glide: Glide.with(this).load(uri).into(imgAdjunta);
+        // Si no usas Glide, al menos usa setImageURI que es más eficiente que decodeStream manual
+        imgAdjunta.setImageURI(uri); 
+    } catch (Exception e) {
+        imgAdjunta.setImageResource(android.R.drawable.ic_menu_gallery);
+    }
+
+    btnEliminarFoto.setOnClickListener(v -> {
+        if (contenedorAdjuntos.getAdapter() instanceof SimpleAdapter) {
+            ((SimpleAdapter) contenedorAdjuntos.getAdapter()).removeView(viewImage);
+        }
+        listaRutasFotos.remove(rutaImagen);
+    });
+}
+
+private void eliminarArchivoFisico(String ruta) {
+    try {
+        if (ruta.startsWith("content://")) {
+            DocumentFile file = DocumentFile.fromSingleUri(this, Uri.parse(ruta));
+            if (file != null) file.delete();
+        } else {
+            File f = new File(ruta);
+            if (f.exists()) f.delete();
+        }
+    } catch (Exception e) {
+        Log.e("EDITOR", "No se pudo borrar el archivo: " + e.getMessage());
+    }
+}
 
 
 
@@ -1671,6 +1689,10 @@ private void compartirComoPDF() {
     }
     
     super.onDestroy();
+    if (handlerAudio != null) {
+        handlerAudio.removeCallbacksAndMessages(null);
+    }
+    liberarMediaPlayer();
     if (mediaPlayer != null) {
         mediaPlayer.release();
         mediaPlayer = null;
