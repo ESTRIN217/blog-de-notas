@@ -7,9 +7,12 @@ constraintlayout = "2.2.1"
 cardview = "1.0.0"
 documentfile = "1.1.0"
 recyclerview = "1.4.0"
+ksp = "1.9.20-1.0.13"
+glide = "5.0.5" 
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
+devtools-ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 
 [libraries]
 androidx-core = { group = "androidx.core", name = "core", version.ref = "core" }
@@ -19,3 +22,4 @@ androidx-constraintlayout = { group = "androidx.constraintlayout", name = "const
 androidx-cardview = { group = "androidx.cardview" , name = "cardview", version.ref = "cardview"}
 androidx-documentfile = { group = "androidx.documentfile", name = "documentfile", version.ref = "documentfile"}
 androidx-recyclerview = { group = "androidx.recyclerview", name = "recyclerview", version.ref = "recyclerview"}
+glide = { group = "com.github.bumptech.glide", name = "glide", version.ref = "glide"}
