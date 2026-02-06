@@ -7,13 +7,16 @@
      android:background="?attr/colorSurfaceContainer"
      android:orientation="vertical"
      android:fitsSystemWindows="true">
-
+    <com.google.android.material.appbar.AppBarLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="?attr/colorSurfaceContainer"
+        app:elevation="0dp">
     <LinearLayout
          android:layout_height="wrap_content"
          android:layout_width="match_parent"
          android:gravity="center_vertical"
-         android:orientation="horizontal"
-         android:background="@drawable/bottom_background">
+         android:orientation="horizontal">
 
         <Button
              android:layout_height="wrap_content"
@@ -32,6 +35,7 @@
              android:textStyle="bold" />
 
     </LinearLayout>
+</com.google.android.material.appbar.AppBarLayout>
 
     <com.google.android.material.card.MaterialCardView
          android:layout_height="wrap_content"

@@ -1,195 +1,202 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout
-     xmlns:android="http://schemas.android.com/apk/res/android"
-     xmlns:app="http://schemas.android.com/apk/res-auto"
-     android:layout_height="match_parent"
-     android:layout_width="match_parent"
-     android:background="?attr/colorSurfaceContainer"
-     android:orientation="vertical"
-     android:fitsSystemWindows="true"
-     android:id="@+id/background">
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_height="match_parent"
+    android:layout_width="match_parent"
+    android:background="?attr/colorSurfaceContainer"
+    android:orientation="vertical"
+    android:fitsSystemWindows="true"
+    android:id="@+id/background">
+    <com.google.android.material.appbar.AppBarLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="?attr/colorSurfaceContainer"
+        app:elevation="0dp">
+        <LinearLayout
+            android:layout_height="wrap_content"
+            android:layout_width="match_parent"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:id="@+id/barraSuperior">
+
+            <Button
+                android:layout_height="wrap_content"
+                android:layout_width="wrap_content"
+                app:icon="@drawable/arrow_back_24px"
+                android:contentDescription="Volver atrás"
+                style="?attr/materialIconButtonStyle"
+                android:id="@+id/btnAtras" />
+
+            <Space
+                android:layout_height="wrap_content"
+                android:layout_width="wrap_content"
+                android:layout_weight="1" />
+
+            <com.google.android.material.button.MaterialButtonGroup
+                android:layout_height="wrap_content"
+                android:layout_width="wrap_content"
+                android:gravity="center"
+                android:spacing="4dp">
+
+                <Button
+                    android:layout_height="wrap_content"
+                    android:layout_width="wrap_content"
+                    app:icon="@drawable/undo_24px"
+                    style="?attr/materialIconButtonFilledStyle"
+                    android:id="@+id/btnDeshacer" />
+
+                <Button
+                    android:layout_height="wrap_content"
+                    android:layout_width="wrap_content"
+                    app:icon="@drawable/redo_24px"
+                    style="?attr/materialIconButtonFilledStyle"
+                    android:id="@+id/btnRehacer" />
+
+                <Button
+                    android:layout_height="wrap_content"
+                    android:layout_width="wrap_content"
+                    app:icon="@drawable/save_24px"
+                    style="?attr/materialIconButtonFilledStyle"
+                    android:id="@+id/btnGuardar" />
+
+                <Button
+                    android:layout_height="wrap_content"
+                    android:layout_width="wrap_content"
+                    app:icon="@drawable/more_vert"
+                    style="?attr/materialIconButtonFilledStyle"
+                    android:id="@+id/menu" />
+
+            </com.google.android.material.button.MaterialButtonGroup>
+
+        </LinearLayout>
+    </com.google.android.material.appbar.AppBarLayout>
 
     <LinearLayout
-         android:layout_height="wrap_content"
-         android:layout_width="match_parent"
-         android:gravity="center_vertical"
-         android:background="@drawable/bottom_background"
-         android:orientation="horizontal"
-         android:id="@+id/barraSuperior">
-
-        <Button
-             android:layout_height="wrap_content"
-             android:layout_width="wrap_content"
-             app:icon="@drawable/arrow_back_24px"
-             android:contentDescription="Volver atrás"
-             style="?attr/materialIconButtonStyle"
-             android:id="@+id/btnAtras" />
-
-        <Space
-             android:layout_height="wrap_content"
-             android:layout_width="wrap_content"
-             android:layout_weight="1" />
-
-        <com.google.android.material.button.MaterialButtonGroup
-             android:layout_height="wrap_content"
-             android:layout_width="wrap_content"
-             android:gravity="center"
-             android:spacing="4dp">
-
-            <Button
-                 android:layout_height="wrap_content"
-                 android:layout_width="wrap_content"
-                 app:icon="@drawable/undo_24px"
-                 style="?attr/materialIconButtonFilledStyle"
-                 android:id="@+id/btnDeshacer" />
-
-            <Button
-                 android:layout_height="wrap_content"
-                 android:layout_width="wrap_content"
-                 app:icon="@drawable/redo_24px"
-                 style="?attr/materialIconButtonFilledStyle"
-                 android:id="@+id/btnRehacer" />
-
-            <Button
-                 android:layout_height="wrap_content"
-                 android:layout_width="wrap_content"
-                 app:icon="@drawable/save_24px"
-                 style="?attr/materialIconButtonFilledStyle"
-                 android:id="@+id/btnGuardar" />
-
-            <Button
-                 android:layout_height="wrap_content"
-                 android:layout_width="wrap_content"
-                 app:icon="@drawable/more_vert"
-                 style="?attr/materialIconButtonFilledStyle"
-                 android:id="@+id/menu" />
-
-        </com.google.android.material.button.MaterialButtonGroup>
-
-    </LinearLayout>
-
-    <LinearLayout
-         android:layout_height="wrap_content"
-         android:layout_width="match_parent"
-         android:padding="16dp"
-         android:orientation="vertical">
+        android:layout_height="wrap_content"
+        android:layout_width="match_parent"
+        android:padding="16dp"
+        android:orientation="vertical">
 
         <com.google.android.material.textfield.TextInputEditText
-             android:layout_height="wrap_content"
-             android:layout_width="match_parent"
-             android:background="@android:color/transparent"
-             android:hint="Título de la nota"
-             android:padding="0dp"
-             android:textColorHint="?attr/colorOnSurfaceVariant"
-             android:textSize="24sp"
-             android:textColor="?attr/colorOnSurface"
-             android:maxLines="2"
-             android:inputType="textCapSentences|textMultiLine"
-             android:id="@+id/txtTitulo"
-             android:textStyle="bold" />
+            android:layout_height="wrap_content"
+            android:layout_width="match_parent"
+            android:background="@android:color/transparent"
+            android:hint="Título de la nota"
+            android:padding="0dp"
+            android:textColorHint="?attr/colorOnSurfaceVariant"
+            android:textSize="24sp"
+            android:textColor="?attr/colorOnSurface"
+            android:maxLines="2"
+            android:inputType="textCapSentences|textMultiLine"
+            android:id="@+id/txtTitulo"
+            android:textStyle="bold" />
 
         <com.google.android.material.textview.MaterialTextView
-             android:layout_height="wrap_content"
-             android:layout_width="wrap_content"
-             android:textSize="13sp"
-             android:textColor="?attr/colorOnSurfaceVariant"
-             android:layout_marginTop="4dp"
-             android:letterSpacing="0.05"
-             android:id="@+id/fecha"
-             android:text="30 de diciembre, 2025" />
+            android:layout_height="wrap_content"
+            android:layout_width="wrap_content"
+            android:textSize="13sp"
+            android:textColor="?attr/colorOnSurfaceVariant"
+            android:layout_marginTop="4dp"
+            android:letterSpacing="0.05"
+            android:id="@+id/fecha"
+            android:text="30 de diciembre, 2025" />
 
         <com.google.android.material.textview.MaterialTextView
-             android:layout_height="wrap_content"
-             android:layout_width="wrap_content"
-             android:textSize="13sp"
-             android:layout_marginTop="4dp"
-             android:id="@+id/lblContador" />
+            android:layout_height="wrap_content"
+            android:layout_width="wrap_content"
+            android:textSize="13sp"
+            android:layout_marginTop="4dp"
+            android:id="@+id/lblContador" />
 
     </LinearLayout>
 
     <androidx.core.widget.NestedScrollView
-         android:layout_height="0dp"
-         android:layout_width="match_parent"
-         android:fillViewport="true"
-         android:layout_weight="1">
+        android:layout_height="0dp"
+        android:layout_width="match_parent"
+        android:fillViewport="true"
+        android:layout_weight="1">
 
         <LinearLayout
-             android:layout_height="wrap_content"
-             android:layout_width="match_parent"
-             android:orientation="vertical">
+            android:layout_height="wrap_content"
+            android:layout_width="match_parent"
+            android:orientation="vertical">
 
             <androidx.recyclerview.widget.RecyclerView
-                 android:layout_height="wrap_content"
-                 android:layout_width="match_parent"
-                 android:scrollbars="vertical"
-                 android:clipToPadding="false"
-                 android:id="@+id/contenedorAdjuntos" />
+                android:layout_height="wrap_content"
+                android:layout_width="match_parent"
+                android:scrollbars="vertical"
+                android:clipToPadding="false"
+                android:id="@+id/contenedorAdjuntos" />
 
             <com.google.android.material.textfield.TextInputEditText
-                 android:layout_height="match_parent"
-                 android:layout_width="match_parent"
-                 android:textSize="18sp"
-                 android:textColor="?attr/colorOnSurface"
-                 android:scrollbars="none"
-                 android:background="@android:color/transparent"
-                 android:gravity="top|start"
-                 android:hint="Comienza a escribir..."
-                 android:minHeight="200dp"
-                 android:textColorHint="?attr/colorOnSurfaceVariant"
-                 android:paddingBottom="100dp"
-                 android:paddingHorizontal="16dp"
-                 android:inputType="textMultiLine|textCapSentences"
-                 android:id="@+id/txtNota" />
+                android:layout_height="match_parent"
+                android:layout_width="match_parent"
+                android:textSize="18sp"
+                android:textColor="?attr/colorOnSurface"
+                android:scrollbars="none"
+                android:background="@android:color/transparent"
+                android:gravity="top|start"
+                android:hint="Comienza a escribir..."
+                android:minHeight="200dp"
+                android:textColorHint="?attr/colorOnSurfaceVariant"
+                android:paddingBottom="100dp"
+                android:paddingHorizontal="16dp"
+                android:inputType="textMultiLine|textCapSentences"
+                android:id="@+id/txtNota" />
 
         </LinearLayout>
 
     </androidx.core.widget.NestedScrollView>
+    <com.google.android.material.dockedtoolbar.DockedToolbarLayout
+        android:id="@+id/docked_toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
+        app:layout_behavior="com.google.android.material.behavior.HideViewOnScrollBehavior">
+        <LinearLayout
+            android:layout_height="wrap_content"
+            android:layout_width="match_parent"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
 
-    <LinearLayout
-         android:layout_height="wrap_content"
-         android:layout_width="match_parent"
-         android:gravity="center_vertical"
-         android:background="@drawable/bottom_background"
-         android:elevation="8dp"
-         android:padding="10dp"
-         android:orientation="horizontal">
+            <com.google.android.material.button.MaterialButtonGroup
+                android:layout_height="wrap_content"
+                android:layout_width="wrap_content"
+                android:gravity="center"
+                android:spacing="4dp">
 
-        <com.google.android.material.button.MaterialButtonGroup
-             android:layout_height="wrap_content"
-             android:layout_width="wrap_content"
-             android:gravity="center"
-             android:spacing="4dp">
+                <Button
+                    android:layout_height="wrap_content"
+                    android:layout_width="wrap_content"
+                    app:icon="@drawable/outline_add_box"
+                    style="?attr/materialIconButtonFilledStyle"
+                    android:id="@+id/añadir" />
 
-            <Button
-                 android:layout_height="wrap_content"
-                 android:layout_width="wrap_content"
-                 app:icon="@drawable/outline_add_box"
-                 style="?attr/materialIconButtonFilledStyle"
-                 android:id="@+id/añadir" />
+                <Button
+                    android:layout_height="wrap_content"
+                    android:layout_width="wrap_content"
+                    app:icon="@drawable/outline_palette"
+                    style="?attr/materialIconButtonFilledStyle"
+                    android:id="@+id/paleta" />
 
-            <Button
-                 android:layout_height="wrap_content"
-                 android:layout_width="wrap_content"
-                 app:icon="@drawable/outline_palette"
-                 style="?attr/materialIconButtonFilledStyle"
-                 android:id="@+id/paleta" />
+                <Button
+                    android:layout_height="wrap_content"
+                    android:layout_width="wrap_content"
+                    app:icon="@drawable/text_format"
+                    style="?attr/materialIconButtonFilledStyle"
+                    android:id="@+id/text_style" />
 
-            <Button
-                 android:layout_height="wrap_content"
-                 android:layout_width="wrap_content"
-                 app:icon="@drawable/text_format"
-                 style="?attr/materialIconButtonFilledStyle"
-                 android:id="@+id/text_style" />
+                <Button
+                    android:layout_height="wrap_content"
+                    android:layout_width="wrap_content"
+                    app:icon="@drawable/text_to_speech_24px"
+                    style="?attr/materialIconButtonFilledStyle"
+                    android:id="@+id/text_to_speech" />
 
-            <Button
-                 android:layout_height="wrap_content"
-                 android:layout_width="wrap_content"
-                 app:icon="@drawable/text_to_speech_24px"
-                 style="?attr/materialIconButtonFilledStyle"
-                 android:id="@+id/text_to_speech" />
+            </com.google.android.material.button.MaterialButtonGroup>
 
-        </com.google.android.material.button.MaterialButtonGroup>
-
-    </LinearLayout>
+        </LinearLayout>
+    </com.google.android.material.dockedtoolbar.DockedToolbarLayout>
 
 </LinearLayout>
