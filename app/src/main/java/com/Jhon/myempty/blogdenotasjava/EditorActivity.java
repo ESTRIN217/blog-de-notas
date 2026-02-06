@@ -205,8 +205,8 @@ private final ActivityResultLauncher<Intent> launcherPermisoOverlay = registerFo
     TextView txtEstado = view.findViewById(R.id.txtEstadoGrabacion);
     Chronometer cronometro = view.findViewById(R.id.cronometro);
     FloatingActionButton fabGrabar = view.findViewById(R.id.fabGrabar);
-    ImageView btnCancelar = view.findViewById(R.id.btnCancelarAudio);
-    ImageView btnGuardar = view.findViewById(R.id.btnGuardarAudio);
+    MaterialButton btnCancelar = view.findViewById(R.id.btnCancelarAudio);
+    MaterialButton btnGuardar = view.findViewById(R.id.btnGuardarAudio);
 
     // 2. Lógica del Botón Principal (Grabar/Parar)
     fabGrabar.setOnClickListener(v -> {

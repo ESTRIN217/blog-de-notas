@@ -44,6 +44,7 @@
              android:layout_height="wrap_content"
              android:layout_width="wrap_content"
              app:icon="@drawable/close_24px"
+             app:iconTint="?attr/colorError"
              style="?attr/materialIconButtonStyle"
              android:id="@+id/btnEliminarCheck" />
 

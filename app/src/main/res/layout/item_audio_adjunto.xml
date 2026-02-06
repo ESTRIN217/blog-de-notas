@@ -5,8 +5,6 @@
      android:layout_height="wrap_content"
      android:layout_width="match_parent"
      android:layout_marginVertical="4dp"
-     app:cardElevation="0dp"
-     app:strokeWidth="0dp"
      app:cardBackgroundColor="?attr/colorSurfaceContainerHigh"
      app:cardCornerRadius="12dp">
 
@@ -14,17 +12,14 @@
          android:layout_height="wrap_content"
          android:layout_width="match_parent"
          android:gravity="center_vertical"
-         android:padding="8dp"
          android:orientation="horizontal">
-
-        <ImageView
-             android:layout_height="40dp"
-             android:layout_width="40dp"
-             android:src="@drawable/play_circle_outline"
-             android:background="?attr/selectableItemBackgroundBorderless"
-             android:padding="8dp"
-             app:tint="?attr/colorPrimary"
-             android:id="@+id/btnPlayAudio" />
+        
+        <Button
+             android:layout_height="wrap_content"
+             android:layout_width="wrap_content"
+             app:icon="@drawable/play_circle_outline"
+             android:id="@+id/btnPlayAudio"
+             style="?attr/materialIconButtonStyle"/>
 
         <ProgressBar
              android:layout_height="wrap_content"
@@ -44,15 +39,14 @@
              android:id="@+id/txtDuracion"
              android:text="00:00" />
 
-        <ImageView
-             android:layout_height="32dp"
-             android:layout_width="32dp"
-             android:src="@drawable/close_24px"
-             android:background="?attr/selectableItemBackgroundBorderless"
-             android:padding="6dp"
-             app:tint="?attr/colorError"
+        <Button
+             android:layout_height="wrap_content"
+             android:layout_width="wrap_content"
+             app:icon="@drawable/close_24px"
+             app:iconTint="?attr/colorError"
              android:layout_marginStart="8dp"
-             android:id="@+id/btnEliminarAudio" />
+             android:id="@+id/btnEliminarAudio" 
+             style="?attr/materialIconButtonStyle"/>
 
     </LinearLayout>
 

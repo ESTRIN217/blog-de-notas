@@ -193,7 +193,7 @@ public class SimpleAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
 
     // --- VIEWHOLDER PARA AUDIO ---
     class AudioViewHolder extends RecyclerView.ViewHolder {
-        ImageView btnPlay, btnEliminar;
+        MaterialButton btnPlay, btnEliminar;
         ProgressBar progressBar;
 
         AudioViewHolder(View v) {
@@ -213,11 +213,11 @@ public class SimpleAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
     }
 
     // --- LÓGICA DE AUDIO (Centralizada en el Adapter) ---
-    private void gestionarAudio(String ruta, ImageView btnPlay, ProgressBar pb) {
+    private void gestionarAudio(String ruta, MaterialButton btnPlay, ProgressBar pb) {
         try {
             if (mediaPlayer != null && mediaPlayer.isPlaying()) {
                 mediaPlayer.pause();
-                btnPlay.setImageResource(R.drawable.play_circle_outline);
+                btnPlay.setIconResource(R.drawable.play_circle_outline);
                 return;
             }
 
@@ -228,14 +228,14 @@ public class SimpleAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
                 
                 mediaPlayer.prepare();
                 mediaPlayer.setOnCompletionListener(mp -> {
-                    btnPlay.setImageResource(R.drawable.play_circle_outline);
+                    btnPlay.setIconResource(R.drawable.play_circle_outline);
                     pb.setProgress(0);
                     liberarMediaPlayer();
                 });
             }
 
             mediaPlayer.start();
-            btnPlay.setImageResource(R.drawable.pause_circle_outline);
+            btnPlay.setIconResource(R.drawable.pause_circle_outline);
             actualizarProgreso(pb);
         } catch (Exception e) {
             Toast.makeText(context, "Error de audio", Toast.LENGTH_SHORT).show();

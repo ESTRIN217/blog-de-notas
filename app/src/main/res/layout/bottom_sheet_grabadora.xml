@@ -33,15 +33,12 @@
          android:gravity="center"
          android:orientation="horizontal"
          android:layout_marginTop="16dp">
-
-        <ImageView
-             android:layout_height="48dp"
-             android:layout_width="48dp"
-             android:src="@drawable/close_24px"
-             android:background="?attr/selectableItemBackgroundBorderless"
-             android:padding="12dp"
-             app:tint="?attr/colorError"
-             android:id="@+id/btnCancelarAudio" />
+            <Button
+                android:id="@+id/btnCancelarAudio"
+                style="?attr/materialIconButtonStyle"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                app:icon="@drawable/close_24px"/>
 
         <com.google.android.material.floatingactionbutton.FloatingActionButton
              android:layout_height="wrap_content"
@@ -50,14 +47,12 @@
              android:layout_marginHorizontal="32dp"
              android:id="@+id/fabGrabar" />
 
-        <ImageView
+        <Button
              android:layout_height="48dp"
              android:layout_width="48dp"
-             android:src="@drawable/round_check"
-             android:background="?attr/selectableItemBackgroundBorderless"
-             android:padding="12dp"
-             app:tint="?attr/colorPrimary"
-             android:id="@+id/btnGuardarAudio" />
+             app:icon="@drawable/round_check"
+             android:id="@+id/btnGuardarAudio"
+             style="?attr/materialIconButtonStyle"/>
 
     </LinearLayout>
 

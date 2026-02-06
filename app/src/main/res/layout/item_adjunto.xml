@@ -24,20 +24,19 @@
              android:orientation="horizontal"
              android:layout_gravity="top|end">
 
-            <ImageView
+            <Button
                  android:layout_height="48dp"
                  android:layout_width="48dp"
-                 android:src="@drawable/round_edit"
-                 android:background="?attr/selectableItemBackgroundBorderless"
-                 android:padding="12dp"
+                 app:icon="@drawable/round_edit"
+                 style="?attr/materialIconButtonStyle"
                  android:id="@+id/btnEditar" />
 
-            <ImageView
+            <Button
                  android:layout_height="48dp"
                  android:layout_width="48dp"
-                 android:src="@drawable/delete_24px"
-                 android:background="?attr/selectableItemBackgroundBorderless"
-                 android:padding="12dp"
+                 app:icon="@drawable/delete_24px"
+                 app:iconTint="?attr/colorError"
+                 style="?attr/materialIconButtonStyle"
                  android:id="@+id/btnEliminar" />
 
         </LinearLayout>
