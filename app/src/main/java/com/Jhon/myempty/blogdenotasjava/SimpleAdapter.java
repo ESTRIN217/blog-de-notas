@@ -1,89 +1,69 @@
 package com.Jhon.myempty.blogdenotasjava;
 
 import android.content.Context;
-import android.graphics.Paint;
+import android.content.Intent;
 import android.media.MediaPlayer;
 import android.net.Uri;
-import android.text.Editable;
-import android.text.TextWatcher;
+import android.os.Handler;
+import android.os.Looper;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.EditText;
 import android.widget.ImageView;
-import android.widget.CheckBox;
+import android.widget.ProgressBar;
 import android.widget.Toast;
-
 import androidx.annotation.NonNull;
+import androidx.documentfile.provider.DocumentFile;
 import androidx.recyclerview.widget.RecyclerView;
-import com.bumptech.glide.Glide; // Recomendado para imágenes, si no usas Glide usa setImageURI
-
+import com.google.android.material.checkbox.MaterialCheckBox;
+import com.google.android.material.textfield.TextInputEditText;
+import com.google.android.material.color.MaterialColors;
+import com.google.android.material.button.MaterialButton;
+import java.io.File;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
+import java.util.Collections;
+import android.graphics.Paint;
+import android.graphics.Color;
+import androidx.annotation.NonNull;
+import android.text.TextWatcher;
 
 public class SimpleAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
     private List<ItemAdjunto> listaDatos;
     private Context context;
+    private MediaPlayer mediaPlayer;
+    private Handler handlerAudio = new Handler(Looper.getMainLooper());
 
     public SimpleAdapter(Context context) {
         this.context = context;
         this.listaDatos = new ArrayList<>();
     }
 
-    // --- MÉTODOS DE GESTIÓN DE LISTA ---
     public void agregarItem(ItemAdjunto item) {
         listaDatos.add(item);
         notifyItemInserted(listaDatos.size() - 1);
     }
 
-    // NEW METHOD to add a View directly (for dynamically created views like Checkboxes)
-    public void addView(View view) {
-        // This method will need to parse the view to create an ItemAdjunto
-        // For simplicity here, we assume it's a Checkbox item
-        CheckBox checkBox = view.findViewById(R.id.chkEstado);
-        EditText editText = view.findViewById(R.id.txtCheckCuerpo);
-        if (checkBox != null && editText != null) {
-            ItemAdjunto newItem = new ItemAdjunto(editText.getText().toString(), checkBox.isChecked());
-            agregarItem(newItem);
+    // Eliminar un ítem de la lista y notificar
+    public void removeView(int position) {
+        if (position >= 0 && position < listaDatos.size()) {
+            ItemAdjunto item = listaDatos.get(position);
+            eliminarArchivoFisico(item.getContenido());
+            listaDatos.remove(position);
+            notifyItemRemoved(position);
         }
     }
-
-    public List<ItemAdjunto> getViews() {
-        return listaDatos;
-    }
-
-    public void removeView(View view) {
-        int position = -1;
-        // Find the position of the view in the adapter's list
-        for (int i = 0; i < listaDatos.size(); i++) {
-            // This comparison might need adjustment based on how views are uniquely identified
-            // For now, assuming the content of the ItemAdjunto is unique enough or we are removing the last instance
-            // A better approach might be to store the ItemAdjunto reference when adding the view
-            // For simplicity, we'll rely on the position passed from the listener.
-            // If this method is called directly without a position, a more robust lookup is needed.
-            // For this correction, we'll rely on the caller providing the correct view reference and assume its position
-            // NOTE: This part might need refinement if multiple identical items exist.
-            // A robust solution would involve storing ItemAdjunto references tied to the views.
-        }
-        // Since this method is called from within the adapter's context, we can rely on adapter position
-        // However, if called externally, the index needs to be determined correctly.
-        // The current usage in EditorActivity seems to be within the adapter's scope.
-    }
-
-
-    public void moverItem(int fromPosition, int toPosition) {
-        if (fromPosition < 0 || toPosition < 0 || fromPosition >= listaDatos.size() || toPosition >= listaDatos.size()) return;
-        Collections.swap(listaDatos, fromPosition, toPosition);
-        notifyItemMoved(fromPosition, toPosition);
-    }
-
+    
     public List<ItemAdjunto> getListaDatos() {
-        return listaDatos;
+    return listaDatos;
     }
 
-    // --- DETERMINAR EL TIPO DE VISTA ---
+    public void moverItem(int from, int to) {
+    Collections.swap(listaDatos, from, to);
+    notifyItemMoved(from, to);
+    }
+
     @Override
     public int getItemViewType(int position) {
         return listaDatos.get(position).getTipo();
@@ -92,149 +72,220 @@ public class SimpleAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
     @NonNull
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        LayoutInflater inflater = LayoutInflater.from(parent.getContext());
-
-        if (viewType == ItemAdjunto.TIPO_CHECK) {
-            View v = inflater.inflate(R.layout.item_check, parent, false);
-            return new CheckViewHolder(v);
-        }
-        else if (viewType == ItemAdjunto.TIPO_AUDIO) {
-            View v = inflater.inflate(R.layout.item_audio_adjunto, parent, false); // Crea este XML
-            return new AudioViewHolder(v);
-        }
-        else {
-            // TIPO_IMAGEN o TIPO_DIBUJO (usan el mismo layout visual)
-            View v = inflater.inflate(R.layout.item_adjunto, parent, false); // Crea este XML
-            return new ImagenViewHolder(v);
+        LayoutInflater inflater = LayoutInflater.from(context);
+        if (viewType == ItemAdjunto.TIPO_AUDIO) {
+            return new AudioViewHolder(inflater.inflate(R.layout.item_audio_adjunto, parent, false));
+        } else if (viewType == ItemAdjunto.TIPO_CHECK) {
+        return new CheckViewHolder(inflater.inflate(R.layout.item_check, parent, false));
+        }else {
+            return new ImagenViewHolder(inflater.inflate(R.layout.item_adjunto, parent, false));
         }
     }
 
     @Override
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
-        ItemAdjunto item = listaDatos.get(position);
+    ItemAdjunto item = listaDatos.get(position);
 
-        if (holder instanceof CheckViewHolder) {
-            ((CheckViewHolder) holder).bind(item);
-        } else if (holder instanceof AudioViewHolder) {
-            ((AudioViewHolder) holder).bind(item);
-        } else if (holder instanceof ImagenViewHolder) {
-            ((ImagenViewHolder) holder).bind(item);
-        }
+    if (holder instanceof AudioViewHolder) {
+        ((AudioViewHolder) holder).bind(item);
+    } 
+    else if (holder instanceof CheckViewHolder) { // <-- Aquí faltaba la condición
+        ((CheckViewHolder) holder).bind(item);
+    } 
+    else if (holder instanceof ImagenViewHolder) {
+        ((ImagenViewHolder) holder).bind(item);
+    }
     }
 
     @Override
-    public int getItemCount() {
-        return listaDatos.size();
+    public int getItemCount() { return listaDatos.size(); }
+
+// --- VIEWHOLDER PARA CHECKBOXES ---
+    class CheckViewHolder extends RecyclerView.ViewHolder {
+    MaterialCheckBox checkBox;
+    TextInputEditText editText;
+    MaterialButton btnEliminar, handle;
+
+    CheckViewHolder(View v) {
+        super(v);
+        checkBox = v.findViewById(R.id.chkEstado);
+        editText = v.findViewById(R.id.txtCheckCuerpo);
+        btnEliminar = v.findViewById(R.id.btnEliminarCheck);
+        handle = v.findViewById(R.id.drag);
     }
 
-    // ==========================================
-    // CLASES VIEWHOLDERS (Lógica de cada item)
-    // ==========================================
+    void bind(ItemAdjunto item) {
+    // 1. ELIMINAR cualquier listener previo para evitar conflictos al reciclar
+    if (editText.getTag() instanceof TextWatcher) {
+        editText.removeTextChangedListener((TextWatcher) editText.getTag());
+    }
 
-    // 1. ViewHolder para CHECKS
-    class CheckViewHolder extends RecyclerView.ViewHolder {
-        CheckBox checkBox;
-        EditText editText;
-        ImageView btnEliminar;
+    editText.setText(item.getContenido());
+    checkBox.setChecked(item.isMarcado());
+    actualizarEstiloTachado(item.isMarcado());
 
-        CheckViewHolder(View itemView) {
-            super(itemView);
-            checkBox = itemView.findViewById(R.id.chkEstado);
-            editText = itemView.findViewById(R.id.txtCheckCuerpo);
-            btnEliminar = itemView.findViewById(R.id.btnEliminarCheck);
+    // 2. CREAR el nuevo listener
+    SimpleTextWatcher textWatcher = new SimpleTextWatcher() {
+        @Override
+        public void onTextChanged(CharSequence s, int start, int before, int count) {
+            item.setContenido(s.toString());
+        }
+    };
+
+    // 3. GUARDAR el listener en el Tag y activarlo
+    editText.setTag(textWatcher);
+    editText.addTextChangedListener(textWatcher);
+
+    // Guardar estado del checkbox (limpiar listener anterior primero)
+    checkBox.setOnCheckedChangeListener(null); 
+    checkBox.setChecked(item.isMarcado());
+    checkBox.setOnCheckedChangeListener((v, isChecked) -> {
+        item.setMarcado(isChecked);
+        actualizarEstiloTachado(isChecked);
+    });
+
+    btnEliminar.setOnClickListener(v -> removeView(getAbsoluteAdapterPosition()));
+    }
+
+    private void actualizarEstiloTachado(boolean marcado) {
+        if (marcado) {
+            editText.setPaintFlags(editText.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
+            editText.setTextColor(Color.GRAY);
+        } else {
+            editText.setPaintFlags(editText.getPaintFlags() & (~Paint.STRIKE_THRU_TEXT_FLAG));
+            editText.setTextColor(context.getResources().getColor(com.google.android.material.R.attr.colorOnSurface)); 
+        }
+    }
+    }
+
+    // --- VIEWHOLDER PARA IMÁGENES / DIBUJOS ---
+    class ImagenViewHolder extends RecyclerView.ViewHolder {
+        ImageView miniatura, btnEliminar, btnEditar;
+
+        ImagenViewHolder(View v) {
+            super(v);
+            miniatura = v.findViewById(R.id.miniatura);
+            btnEliminar = v.findViewById(R.id.btnEliminar);
+            btnEditar = v.findViewById(R.id.btnEditar);
         }
 
         void bind(ItemAdjunto item) {
-            // Evitar bucles infinitos al setear valores
-            checkBox.setOnCheckedChangeListener(null);
+            miniatura.setImageURI(Uri.parse(item.getContenido()));
+            
+            btnEliminar.setOnClickListener(v -> removeView(getAbsoluteAdapterPosition()));
 
-            checkBox.setChecked(item.isChecked());
-            editText.setText(item.getContenido());
-            aplicarTachado(item.isChecked());
-
-            // Escuchar cambios en el Check
-            checkBox.setOnCheckedChangeListener((buttonView, isChecked) -> {
-                item.setChecked(isChecked);
-                aplicarTachado(isChecked);
-            });
-
-            // Escuchar cambios en el Texto (Para guardar lo que escribes)
-            editText.addTextChangedListener(new TextWatcher() {
-                @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
-                @Override public void onTextChanged(CharSequence s, int start, int before, int count) {}
-                @Override
-                public void afterTextChanged(Editable s) {
-                    item.setContenido(s.toString());
+            btnEditar.setOnClickListener(v -> {
+                // Lógica de edición enviada a la Activity mediante un Intent
+                Intent intent = new Intent(context, DibujoActivity.class);
+                String clave = (item.getTipo() == ItemAdjunto.TIPO_DIBUJO) ? "uri_dibujo_editar" : "uri_foto_editar";
+                intent.putExtra(clave, item.getContenido());
+                
+                // Como necesitamos startActivityForResult, usamos el context
+                if (context instanceof EditorActivity) {
+                    ((EditorActivity) context).dibujoLauncher.launch(intent);
+                    removeView(getAbsoluteAdapterPosition()); // Eliminar la vieja mientras se edita
                 }
             });
-
-            btnEliminar.setOnClickListener(v -> eliminarItem(getAdapterPosition()));
-        }
-
-        void aplicarTachado(boolean isChecked) {
-            if (isChecked) {
-                editText.setPaintFlags(editText.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
-                editText.setTextColor(android.graphics.Color.GRAY);
-            } else {
-                editText.setPaintFlags(editText.getPaintFlags() & (~Paint.STRIKE_THRU_TEXT_FLAG));
-                // Restaurar color negro o del tema
-                editText.setTextColor(android.graphics.Color.BLACK);
-            }
         }
     }
 
-    // 2. ViewHolder para AUDIOS
+    // --- VIEWHOLDER PARA AUDIO ---
     class AudioViewHolder extends RecyclerView.ViewHolder {
         ImageView btnPlay, btnEliminar;
+        ProgressBar progressBar;
 
-        AudioViewHolder(View itemView) {
-            super(itemView);
-            btnPlay = itemView.findViewById(R.id.btnPlayAudio); // Asegúrate que el ID coincida con tu XML item_audio
-            btnEliminar = itemView.findViewById(R.id.btnEliminarAudio);
+        AudioViewHolder(View v) {
+            super(v);
+            btnPlay = v.findViewById(R.id.btnPlayAudio);
+            btnEliminar = v.findViewById(R.id.btnEliminarAudio);
+            progressBar = v.findViewById(R.id.progressAudio);
         }
 
         void bind(ItemAdjunto item) {
-            btnPlay.setOnClickListener(v -> {
-                try {
-                    MediaPlayer mp = new MediaPlayer();
-                    mp.setDataSource(context, Uri.parse(item.getContenido()));
-                    mp.prepare();
-                    mp.start();
-                    Toast.makeText(context, "Reproduciendo...", Toast.LENGTH_SHORT).show();
-                } catch (Exception e) {
-                    Toast.makeText(context, "Error al reproducir", Toast.LENGTH_SHORT).show();
-                }
+            btnPlay.setOnClickListener(v -> gestionarAudio(item.getContenido(), btnPlay, progressBar));
+            btnEliminar.setOnClickListener(v -> {
+                liberarMediaPlayer();
+                removeView(getAbsoluteAdapterPosition());
             });
-
-            btnEliminar.setOnClickListener(v -> eliminarItem(getAdapterPosition()));
         }
     }
 
-    // 3. ViewHolder para IMAGENES y DIBUJOS
-    class ImagenViewHolder extends RecyclerView.ViewHolder {
-        ImageView imagenView, btnEliminar;
-
-        ImagenViewHolder(View itemView) {
-            super(itemView);
-            imagenView = itemView.findViewById(R.id.miniatura); // ID en item_imagen.xml
-            btnEliminar = itemView.findViewById(R.id.btnEliminar);
-        }
-
-        void bind(ItemAdjunto item) {
-            try {
-                // Cargar imagen con URI
-                imagenView.setImageURI(Uri.parse(item.getContenido()));
-            } catch (Exception e) {
-                // Error visual
+    // --- LÓGICA DE AUDIO (Centralizada en el Adapter) ---
+    private void gestionarAudio(String ruta, ImageView btnPlay, ProgressBar pb) {
+        try {
+            if (mediaPlayer != null && mediaPlayer.isPlaying()) {
+                mediaPlayer.pause();
+                btnPlay.setImageResource(R.drawable.play_circle_outline);
+                return;
             }
-            btnEliminar.setOnClickListener(v -> eliminarItem(getAdapterPosition()));
+
+            if (mediaPlayer == null) {
+                mediaPlayer = new MediaPlayer();
+                if (ruta.startsWith("content://")) mediaPlayer.setDataSource(context, Uri.parse(ruta));
+                else mediaPlayer.setDataSource(ruta);
+                
+                mediaPlayer.prepare();
+                mediaPlayer.setOnCompletionListener(mp -> {
+                    btnPlay.setImageResource(R.drawable.play_circle_outline);
+                    pb.setProgress(0);
+                    liberarMediaPlayer();
+                });
+            }
+
+            mediaPlayer.start();
+            btnPlay.setImageResource(R.drawable.pause_circle_outline);
+            actualizarProgreso(pb);
+        } catch (Exception e) {
+            Toast.makeText(context, "Error de audio", Toast.LENGTH_SHORT).show();
         }
     }
 
-    private void eliminarItem(int position) {
-        if (position != RecyclerView.NO_POSITION) {
-            listaDatos.remove(position);
-            notifyItemRemoved(position);
+    private void actualizarProgreso(ProgressBar pb) {
+        if (mediaPlayer != null && mediaPlayer.isPlaying()) {
+            pb.setProgress((mediaPlayer.getCurrentPosition() * 100) / mediaPlayer.getDuration());
+            handlerAudio.postDelayed(() -> actualizarProgreso(pb), 100);
         }
+    }
+
+    private void liberarMediaPlayer() {
+        if (mediaPlayer != null) {
+            mediaPlayer.release();
+            mediaPlayer = null;
+        }
+    }
+    
+    public void liberarRecursos() {
+    if (handlerAudio != null) {
+        handlerAudio.removeCallbacksAndMessages(null);
+    }
+    if (mediaPlayer != null) {
+        if (mediaPlayer.isPlaying()) {
+            mediaPlayer.stop();
+        }
+        mediaPlayer.release();
+        mediaPlayer = null;
+    }
+    }
+
+    private void eliminarArchivoFisico(String ruta) {
+        try {
+            if (ruta.startsWith("content://")) {
+                DocumentFile file = DocumentFile.fromSingleUri(context, Uri.parse(ruta));
+                if (file != null) file.delete();
+            } else {
+                File f = new File(ruta);
+                if (f.exists()) f.delete();
+            }
+        } catch (Exception e) { e.printStackTrace(); }
+    }
+    public abstract class SimpleTextWatcher implements TextWatcher {
+    @Override 
+    public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+    @Override 
+    public void onTextChanged(CharSequence s, int start, int before, int count) {}
+
+    @Override 
+    public void afterTextChanged(android.text.Editable s) {} // <--- ESTO FALTA
     }
 }

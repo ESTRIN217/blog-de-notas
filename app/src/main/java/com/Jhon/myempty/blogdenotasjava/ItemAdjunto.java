@@ -10,6 +10,10 @@ public class ItemAdjunto {
     private int tipo;
     private String contenido; // URI de la imagen/audio o Texto del Check
     private boolean isChecked; // Solo para checks
+    private boolean marcado = false; // Nuevo campo para los Checkbox
+
+    public boolean isMarcado() { return marcado; }
+    public void setMarcado(boolean marcado) { this.marcado = marcado; }
 
     // Constructor general (Audio, Imagen, Dibujo)
     public ItemAdjunto(int tipo, String uri) {

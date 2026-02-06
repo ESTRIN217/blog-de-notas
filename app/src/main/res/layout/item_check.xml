@@ -14,13 +14,12 @@
          android:orientation="horizontal"
          android:id="@+id/coordinator">
 
-        <ImageView
-             android:layout_height="40dp"
-             android:layout_width="40dp"
+        <Button
+             android:layout_height="wrap_content"
+             android:layout_width="wrap_content"
+             app:icon="@drawable/drag_indicator"
+             style="?attr/materialIconButtonStyle"
              android:contentDescription="Arrastrar"
-             android:src="@drawable/drag_indicator"
-             android:background="?attr/selectableItemBackgroundBorderless"
-             android:padding="8dp"
              android:id="@+id/drag" />
 
         <CheckBox
@@ -28,7 +27,7 @@
              android:layout_width="wrap_content"
              android:id="@+id/chkEstado" />
 
-        <EditText
+        <com.google.android.material.textfield.TextInputEditText
             android:layout_height="wrap_content"
             android:layout_width="0dp"
             android:layout_weight="1"

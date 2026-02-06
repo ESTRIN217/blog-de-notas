@@ -144,24 +144,4 @@ public class NoteIOHelper {
         return false;
     }
     
-    // Generador de Checklist desde Vistas
-    public static String generateChecklistHtml(List<View> checklistViews) {
-        StringBuilder sb = new StringBuilder();
-        if (checklistViews != null) {
-            for (View v : checklistViews) {
-                CheckBox cb = v.findViewById(R.id.chkEstado);
-                EditText et = v.findViewById(R.id.txtCheckCuerpo);
-                if (cb != null && et != null) {
-                    String isChecked = cb.isChecked() ? "true" : "false";
-                    String text = et.getText().toString();
-                    // Escapar caracteres especiales para evitar romper el HTML
-                    text = text.replace("\"", "&quot;").replace("<", "&lt;").replace(">", "&gt;");
-                    
-                    sb.append("<chk state=\"").append(isChecked).append("\">")
-                      .append(text).append("</chk>");
-                }
-            }
-        }
-        return sb.toString();
-    }
 }
