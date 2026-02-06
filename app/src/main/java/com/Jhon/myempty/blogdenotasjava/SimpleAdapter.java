@@ -147,14 +147,16 @@ public class SimpleAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
     btnEliminar.setOnClickListener(v -> removeView(getAbsoluteAdapterPosition()));
     }
 
-    private void actualizarEstiloTachado(boolean marcado) {
-        if (marcado) {
-            editText.setPaintFlags(editText.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
-            editText.setTextColor(Color.GRAY);
-        } else {
-            editText.setPaintFlags(editText.getPaintFlags() & (~Paint.STRIKE_THRU_TEXT_FLAG));
-            editText.setTextColor(context.getResources().getColor(com.google.android.material.R.attr.colorOnSurface)); 
-        }
+    void actualizarEstiloTachado(boolean marcado) {
+    int color = com.google.android.material.color.MaterialColors.getColor(editText, com.google.android.material.R.attr.colorOnSurface);
+    
+    if (marcado) {
+        editText.setPaintFlags(editText.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
+        editText.setTextColor(Color.GRAY); // O un color con transparencia
+    } else {
+        editText.setPaintFlags(editText.getPaintFlags() & (~Paint.STRIKE_THRU_TEXT_FLAG));
+        editText.setTextColor(color);
+    }
     }
     }
 
