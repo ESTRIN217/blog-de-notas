@@ -1,11 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.coordinatorlayout.widget.CoordinatorLayout 
+<androidx.drawerlayout.widget.DrawerLayout 
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/drawer_layout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="?attr/colorSurfaceContainer"
+    >
+<androidx.coordinatorlayout.widget.CoordinatorLayout 
     android:layout_height="match_parent"
     android:layout_width="match_parent"
-    android:background="?attr/colorSurfaceContainer"
-    android:fitsSystemWindows="true">
+android:fitsSystemWindows="true">
 
     <com.google.android.material.appbar.AppBarLayout
         android:layout_width="match_parent"
@@ -21,15 +26,13 @@
             android:gravity="center_vertical"
             android:orientation="horizontal"
             app:layout_scrollFlags="scroll|enterAlways">
-
             <Button
-                android:id="@+id/modoVistaTargeta"
+                android:id="@+id/navegation_menu"
                 style="?attr/materialIconButtonStyle"
                 android:layout_width="48dp"
                 android:layout_height="48dp"
-                app:icon="@drawable/outline_view_agenda"
-                app:iconTint="?attr/colorOnSurface"
-                android:contentDescription="@string/modoVistaTargeta" />
+                app:icon="@drawable/menu_24px" />
+
 
             <com.google.android.material.textfield.TextInputLayout
                 android:layout_width="0dp"
@@ -60,12 +63,13 @@
             </com.google.android.material.textfield.TextInputLayout>
 
             <Button
-                android:id="@+id/btnSettings"
+                android:id="@+id/modoVistaTargeta"
                 style="?attr/materialIconButtonStyle"
                 android:layout_width="48dp"
                 android:layout_height="48dp"
-                app:icon="@drawable/settings_24px"
-                android:contentDescription="Configuración" />
+                app:icon="@drawable/outline_view_agenda"
+                app:iconTint="?attr/colorOnSurface"
+                android:contentDescription="@string/modoVistaTargeta" />
 
         </LinearLayout>
     </com.google.android.material.appbar.AppBarLayout>
@@ -88,3 +92,12 @@
         android:contentDescription="@string/m3_expressive_primary_fab_content_description" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
+<com.google.android.material.navigation.NavigationView
+        android:id="@+id/navigation_view_start"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:layout_gravity="start"
+        app:headerLayout="@layout/navigationdrawer_header"
+        app:menu="@menu/navigationdrawer_menu" />
+
+</androidx.drawerlayout.widget.DrawerLayout>

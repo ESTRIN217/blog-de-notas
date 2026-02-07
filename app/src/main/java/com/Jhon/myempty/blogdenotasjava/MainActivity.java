@@ -22,6 +22,7 @@ import androidx.appcompat.app.AppCompatDelegate;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.core.view.WindowCompat;
+import androidx.core.view.GravityCompat;
 import androidx.documentfile.provider.DocumentFile;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -31,6 +32,9 @@ import com.google.android.material.color.DynamicColors;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
+import com.google.android.material.navigation.NavigationView;
+import androidx.drawerlayout.widget.DrawerLayout;
+
 
 import java.io.BufferedReader;
 import java.io.InputStream;
@@ -48,7 +52,9 @@ public class MainActivity extends AppCompatActivity {
     private RecyclerView recyclerNotas;
     private FloatingActionButton btnNuevaNota;
     private EditText buscar;
-    private MaterialButton btnSettings, modoVistaTargeta;
+    private MaterialButton modoVistaTargeta, btnMenu;
+    private DrawerLayout drawerLayout;
+    private NavigationView navigationView;
 
     private List<Nota> listaDeNotasCompleta;
     private NotaAdapter adaptador;
@@ -114,15 +120,15 @@ public class MainActivity extends AppCompatActivity {
         recyclerNotas = findViewById(R.id.recyclerNotas);
         btnNuevaNota = findViewById(R.id.btnNuevaNota);
         buscar = findViewById(R.id.buscar);
-        btnSettings = findViewById(R.id.btnSettings);
         modoVistaTargeta = findViewById(R.id.modoVistaTargeta);
         listaDeNotasCompleta = new ArrayList<>();
+        drawerLayout = findViewById(R.id.drawer_layout);
+        navigationView = findViewById(R.id.navigation_view_start);
+        btnMenu = findViewById(R.id.navegation_menu);
     }
 
     private void configurarListeners() {
         btnNuevaNota.setOnClickListener(v -> abrirEditor(""));
-
-        btnSettings.setOnClickListener(v -> startActivity(new Intent(this, SettingsActivity.class)));
 
         modoVistaTargeta.setOnClickListener(v -> {
             esModoCuadricula = !esModoCuadricula;
@@ -136,6 +142,21 @@ public class MainActivity extends AppCompatActivity {
             }
             @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
             @Override public void afterTextChanged(Editable s) {}
+        });
+        btnMenu.setOnClickListener(v -> {
+    drawerLayout.openDrawer(GravityCompat.START);
+        });
+        // Manejar clics en los items del menú lateral
+        navigationView.setNavigationItemSelectedListener(item -> {
+    int id = item.getItemId();
+    
+    if (id == R.id.settings) {
+        // Tu lógica()
+        startActivity(new Intent(this, SettingsActivity.class));
+    }
+    
+    drawerLayout.closeDrawer(GravityCompat.START);
+    return true;
         });
     }
 

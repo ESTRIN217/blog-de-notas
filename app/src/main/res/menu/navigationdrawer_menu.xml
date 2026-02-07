@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item
+      android:id="@+id/main_item">
+      <menu>
+        <item
+          android:id="@+id/nav_notas"
+          android:icon="@drawable/note"
+          android:title="Nota"
+          app:showAsAction="ifRoom"/>
+        <item
+          android:id="@+id/favorito"
+          android:checkable="true"
+          app:showAsAction="ifRoom"/>
+        <item
+          android:id="@+id/accelerator_item"
+          android:checkable="true"
+          app:showAsAction="ifRoom"/>
+        <item
+          android:id="@+id/dashboard_item"
+          app:showAsAction="ifRoom"/>
+      </menu>
+    </item>
+    <item
+      android:id="@+id/labels_item"
+      android:title="@string/opciones_de_configuración">
+      <menu>
+        <item
+          android:id="@+id/settings"
+          android:icon="@drawable/settings_24px"
+          android:title="@string/opciones_de_configuración"
+          app:showAsAction="ifRoom"/>
+      </menu>
+    </item>
+</menu>
