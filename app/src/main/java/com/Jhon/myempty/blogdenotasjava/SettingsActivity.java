@@ -21,7 +21,7 @@ public class SettingsActivity extends AppCompatActivity {
     private RadioGroup grupoTema;
     private RadioButton rbClaro, rbOscuro, rbSistema;
     private MaterialSwitch switchMaterialTheme;
-    private MaterialButton novedades, btnAtras;
+    private MaterialButton novedades, btnAtras, sobre;
 
     // Preferencias
     private SharedPreferences prefs;
@@ -69,6 +69,7 @@ public class SettingsActivity extends AppCompatActivity {
         rbSistema = findViewById(R.id.rbSistema);
         switchMaterialTheme = findViewById(R.id.switchMaterialTheme);
         novedades = findViewById(R.id.novedades);
+        sobre = findViewById(R.id.sobre);
     }
 
     private void cargarPreferencias() {
@@ -116,6 +117,9 @@ public class SettingsActivity extends AppCompatActivity {
 
         novedades.setOnClickListener(v -> {
             startActivity(new Intent(this, ChangelogActivity.class));
+        });
+        sobre.setOnClickListener(v -> {
+            startActivity(new Intent(this, SobreActivity.class));
         });
     }
 

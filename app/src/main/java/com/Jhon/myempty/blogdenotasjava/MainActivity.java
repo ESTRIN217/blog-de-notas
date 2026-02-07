@@ -33,6 +33,7 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.navigation.NavigationView;
+import com.google.android.material.bottomsheet.BottomSheetDialog;
 import androidx.drawerlayout.widget.DrawerLayout;
 
 
@@ -52,7 +53,7 @@ public class MainActivity extends AppCompatActivity {
     private RecyclerView recyclerNotas;
     private FloatingActionButton btnNuevaNota;
     private EditText buscar;
-    private MaterialButton modoVistaTargeta, btnMenu;
+    private MaterialButton modoVistaTargeta, btnMenu, orden;
     private DrawerLayout drawerLayout;
     private NavigationView navigationView;
 
@@ -66,6 +67,8 @@ public class MainActivity extends AppCompatActivity {
     private SharedPreferences sharedPreferences;
     private boolean esModoCuadricula = false;
     private String carpetaUriString;
+    // Valores: 0 = Modificación, 1 = Creación, 2 = Nombre
+    private int criterioOrdenActual = 0;
 
     // 1. LAUNCHERS MODERNOS (Reemplazan a onActivityResult)
     private final ActivityResultLauncher<Intent> launcherSelectorCarpeta = registerForActivityResult(
@@ -125,6 +128,7 @@ public class MainActivity extends AppCompatActivity {
         drawerLayout = findViewById(R.id.drawer_layout);
         navigationView = findViewById(R.id.navigation_view_start);
         btnMenu = findViewById(R.id.navegation_menu);
+        orden = findViewById(R.id.orden);
     }
 
     private void configurarListeners() {
@@ -158,6 +162,9 @@ public class MainActivity extends AppCompatActivity {
     drawerLayout.closeDrawer(GravityCompat.START);
     return true;
         });
+        orden.setOnClickListener(v -> {
+            ordenarPor();
+        });
     }
 
     private void checkStoragePermissions() {
@@ -183,7 +190,18 @@ public class MainActivity extends AppCompatActivity {
             DocumentFile[] archivos = root.listFiles();
 
             // Ordenar por fecha (Más reciente primero)
-            Arrays.sort(archivos, (f1, f2) -> Long.compare(f2.lastModified(), f1.lastModified()));
+            Arrays.sort(archivos, (f1, f2) -> {
+                switch (criterioOrdenActual) {
+                    case 0: // Fecha Modificación (Más reciente primero)
+                        return Long.compare(f2.lastModified(), f1.lastModified());
+                    case 1: // Fecha Creación (Más antigua primero / orden SAF)
+                        return Long.compare(f1.lastModified(), f2.lastModified());
+                    case 2: // Nombre (A-Z)
+                        return f1.getName().toLowerCase().compareTo(f2.getName().toLowerCase());
+                    default:
+                        return Long.compare(f2.lastModified(), f1.lastModified());
+                }
+            });
 
             SimpleDateFormat sdf = new SimpleDateFormat("dd MMM yyyy", Locale.getDefault());
 
@@ -520,4 +538,36 @@ private void compartirNotaDesdeLista(Nota nota) {
             return "";
         }
     }
+    private void ordenarPor() {
+    BottomSheetDialog bottomSheetDialog = new BottomSheetDialog(this);
+    View view = getLayoutInflater().inflate(R.layout.button_sheet_orden, null);
+    bottomSheetDialog.setContentView(view);
+
+    // 1. Referencias
+    MaterialButton btnModificacion = view.findViewById(R.id.fecha_de_modificacion);
+    MaterialButton btnCreacion = view.findViewById(R.id.fecha_de_creacion);
+    MaterialButton btnNombre = view.findViewById(R.id.personalizado);
+
+    // 2. Lógica de clics
+    btnModificacion.setOnClickListener(v -> {
+        criterioOrdenActual = 0;
+        cargarNotas(); // Recarga los archivos con el nuevo orden
+        bottomSheetDialog.dismiss();
+    });
+
+    btnCreacion.setOnClickListener(v -> {
+        criterioOrdenActual = 1;
+        cargarNotas();
+        bottomSheetDialog.dismiss();
+    });
+
+    btnNombre.setOnClickListener(v -> {
+        criterioOrdenActual = 2;
+        cargarNotas();
+        bottomSheetDialog.dismiss();
+    });
+
+    bottomSheetDialog.show();
+    }
+
 }

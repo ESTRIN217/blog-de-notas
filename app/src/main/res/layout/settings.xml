@@ -48,12 +48,6 @@
             android:padding="12dp"
             android:orientation="vertical">
 
-            <Button
-                android:layout_height="wrap_content"
-                android:layout_width="match_parent"
-                android:id="@+id/novedades"
-                android:text="@string/novedades"
-                android:textStyle="bold" />
 
             <com.google.android.material.textview.MaterialTextView
                 android:layout_height="wrap_content"
@@ -166,7 +160,31 @@
                 </LinearLayout>
 
             </com.google.android.material.card.MaterialCardView>
+<com.google.android.material.textview.MaterialTextView
+                android:layout_height="wrap_content"
+                android:layout_width="wrap_content"
+                android:textSize="14sp"
+                android:textColor="?attr/colorPrimary"
+                android:layout_marginTop="16dp"
+                android:text="Información" /> 
 
+            <Button
+            style="@style/Widget.Material3.Button.Icon"
+                android:layout_height="wrap_content"
+                android:layout_width="match_parent"
+                android:id="@+id/novedades"
+                android:text="@string/novedades"
+                android:textStyle="bold"
+                app:icon="@drawable/update_24px" />
+                
+            <Button
+            style="@style/Widget.Material3.Button.Icon"
+                android:layout_height="wrap_content"
+                android:layout_width="match_parent"
+                android:id="@+id/sobre"
+                android:text="Sobre"
+                android:textStyle="bold"
+                app:icon="@drawable/info" />
             <View
                 android:layout_height="50dp"
                 android:layout_width="match_parent" />

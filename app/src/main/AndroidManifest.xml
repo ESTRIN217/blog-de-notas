@@ -47,6 +47,7 @@
             android:resource="@xml/file_paths" />
             </provider>
         <activity android:name=".DibujoActivity" />
+        <activity android:name=".SobreActivity" />
 
     </application>
     
