@@ -72,44 +72,6 @@
         </LinearLayout>
     </com.google.android.material.appbar.AppBarLayout>
 
-    <LinearLayout
-        android:layout_height="wrap_content"
-        android:layout_width="match_parent"
-        android:padding="16dp"
-        android:orientation="vertical">
-
-        <com.google.android.material.textfield.TextInputEditText
-            android:layout_height="wrap_content"
-            android:layout_width="match_parent"
-            android:background="@android:color/transparent"
-            android:hint="Título de la nota"
-            android:padding="0dp"
-            android:textColorHint="?attr/colorOnSurfaceVariant"
-            android:textSize="24sp"
-            android:textColor="?attr/colorOnSurface"
-            android:maxLines="2"
-            android:inputType="textCapSentences|textMultiLine"
-            android:id="@+id/txtTitulo"
-            android:textStyle="bold" />
-
-        <com.google.android.material.textview.MaterialTextView
-            android:layout_height="wrap_content"
-            android:layout_width="wrap_content"
-            android:textSize="13sp"
-            android:textColor="?attr/colorOnSurfaceVariant"
-            android:layout_marginTop="4dp"
-            android:letterSpacing="0.05"
-            android:id="@+id/fecha"
-            android:text="30 de diciembre, 2025" />
-
-        <com.google.android.material.textview.MaterialTextView
-            android:layout_height="wrap_content"
-            android:layout_width="wrap_content"
-            android:textSize="13sp"
-            android:layout_marginTop="4dp"
-            android:id="@+id/lblContador" />
-
-    </LinearLayout>
 
     <androidx.core.widget.NestedScrollView
         android:layout_height="0dp"
@@ -121,7 +83,38 @@
             android:layout_height="wrap_content"
             android:layout_width="match_parent"
             android:orientation="vertical">
+        <com.google.android.material.textfield.TextInputEditText
+            android:layout_height="wrap_content"
+            android:layout_width="match_parent"
+            android:background="@android:color/transparent"
+            android:hint="Título de la nota"
+            android:textColorHint="?attr/colorOnSurfaceVariant"
+            android:textSize="24sp"
+            android:textColor="?attr/colorOnSurface"
+            android:maxLines="2"
+            android:inputType="textCapSentences|textMultiLine"
+            android:id="@+id/txtTitulo"
+            android:textStyle="bold" 
+            android:paddingHorizontal="16dp"/>
 
+        <com.google.android.material.textview.MaterialTextView
+            android:layout_height="wrap_content"
+            android:layout_width="wrap_content"
+            android:textSize="13sp"
+            android:textColor="?attr/colorOnSurfaceVariant"
+            android:layout_marginTop="4dp"
+            android:letterSpacing="0.05"
+            android:id="@+id/fecha"
+            android:text="30 de diciembre, 2025"
+            android:paddingHorizontal="16dp"/>
+
+        <com.google.android.material.textview.MaterialTextView
+            android:layout_height="wrap_content"
+            android:layout_width="wrap_content"
+            android:textSize="13sp"
+            android:layout_marginTop="4dp"
+            android:id="@+id/lblContador" 
+            android:paddingHorizontal="16dp"/>
             <androidx.recyclerview.widget.RecyclerView
                 android:layout_height="wrap_content"
                 android:layout_width="match_parent"

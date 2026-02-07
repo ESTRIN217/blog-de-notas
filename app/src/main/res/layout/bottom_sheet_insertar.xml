@@ -8,117 +8,90 @@
      android:padding="16dp"
      android:orientation="vertical">
 
-    <com.google.android.material.bottomsheet.BottomSheetDragHandleView
-      android:id="@+id/drag_handle"
-      android:layout_width="match_parent"
-      android:layout_height="wrap_content"/>
+    <com.google.android.material.textview.MaterialTextView
+         android:layout_height="wrap_content"
+         android:layout_width="wrap_content"
+         android:text="Bloques basicos" />
 
     <LinearLayout
-         android:layout_height="48dp"
+         android:layout_height="wrap_content"
          android:layout_width="match_parent"
-         android:gravity="center_vertical"
-         android:orientation="horizontal"
-         android:id="@+id/ins_foto">
+         android:gravity="center_horizontal"
+         android:orientation="horizontal">
 
-        <ImageView
-             android:layout_height="48dp"
-             android:layout_width="48dp"
-             android:src="@drawable/outline_image"
-             android:padding="12dp" />
-
-        <com.google.android.material.textview.MaterialTextView
+        <Button
              android:layout_height="wrap_content"
              android:layout_width="wrap_content"
-             android:textColor="?attr/colorOnSurface"
-             android:paddingLeft="10dp"
+             app:icon="@drawable/check_box_24px"
+             style="?attr/materialButtonElevatedStyle"
+             android:layout_weight="1"
+             android:text="@string/casilla_de_verificacion"
+             android:id="@+id/check_box" />
+
+    </LinearLayout>
+
+    <com.google.android.material.textview.MaterialTextView
+         android:layout_height="wrap_content"
+         android:layout_width="wrap_content"
+         android:text="Contenido Multimedia" />
+
+    <LinearLayout
+         android:layout_height="wrap_content"
+         android:layout_width="match_parent"
+         android:gravity="center_horizontal"
+         android:orientation="horizontal">
+
+        <Button
+             android:layout_height="wrap_content"
+             android:layout_width="wrap_content"
+             app:icon="@drawable/outline_image"
+             style="?attr/materialButtonElevatedStyle"
+             android:layout_weight="1"
+             android:id="@+id/ins_foto"
              android:text="@string/añadir_imagen" />
 
-    </LinearLayout>
+        <Space
+             android:layout_height="wrap_content"
+             android:layout_width="6dp" />
 
-    <LinearLayout
-         android:layout_height="48dp"
-         android:layout_width="match_parent"
-         android:gravity="center_vertical"
-         android:orientation="horizontal"
-         android:id="@+id/ins_camara">
-
-        <ImageView
-             android:layout_height="48dp"
-             android:layout_width="48dp"
-             android:src="@drawable/outline_photo_camera"
-             android:padding="12dp" />
-
-        <com.google.android.material.textview.MaterialTextView
+        <Button
              android:layout_height="wrap_content"
              android:layout_width="wrap_content"
-             android:textColor="?attr/colorOnSurface"
-             android:paddingLeft="10dp"
-             android:text="@string/tomar_foto" />
-
-    </LinearLayout>
-
-    <LinearLayout
-         android:layout_height="48dp"
-         android:layout_width="match_parent"
-         android:gravity="center_vertical"
-         android:orientation="horizontal"
-         android:id="@+id/ins_audio">
-
-        <ImageView
-             android:layout_height="48dp"
-             android:layout_width="48dp"
-             android:src="@drawable/round_mic"
-             android:padding="12dp" />
-
-        <com.google.android.material.textview.MaterialTextView
-             android:layout_height="wrap_content"
-             android:layout_width="wrap_content"
-             android:textColor="?attr/colorOnSurface"
-             android:paddingLeft="10dp"
-             android:text="@string/grabar_audio" />
-
-    </LinearLayout>
-
-    <LinearLayout
-         android:layout_height="48dp"
-         android:layout_width="match_parent"
-         android:gravity="center_vertical"
-         android:orientation="horizontal"
-         android:id="@+id/ins_dibujo">
-
-        <ImageView
-             android:layout_height="48dp"
-             android:layout_width="48dp"
-             android:src="@drawable/outline_gesture"
-             android:padding="12dp" />
-
-        <com.google.android.material.textview.MaterialTextView
-             android:layout_height="wrap_content"
-             android:layout_width="wrap_content"
-             android:textColor="?attr/colorOnSurface"
-             android:paddingLeft="10dp"
-             android:text="@string/dibujo" />
+             app:icon="@drawable/outline_photo_camera"
+             style="?attr/materialButtonElevatedStyle"
+             android:layout_weight="1"
+             android:text="@string/tomar_foto"
+             android:id="@+id/ins_camara" />
 
     </LinearLayout>
 
     <LinearLayout
          android:layout_height="wrap_content"
          android:layout_width="match_parent"
-         android:gravity="center_vertical"
-         android:orientation="horizontal"
-         android:id="@+id/check_box">
+         android:gravity="center_horizontal"
+         android:orientation="horizontal">
 
-        <ImageView
-             android:layout_height="48dp"
-             android:layout_width="48dp"
-             android:layout_marginEnd="10dp"
-             android:src="@drawable/check_box_24px"
-             android:padding="12dp" />
-
-        <TextView
+        <Button
              android:layout_height="wrap_content"
              android:layout_width="wrap_content"
-             android:text="@string/casilla_de_verificacion" />
+             app:icon="@drawable/round_mic"
+             style="?attr/materialButtonElevatedStyle"
+             android:layout_weight="1"
+             android:text="@string/grabar_audio"
+             android:id="@+id/ins_audio" />
+
+        <Space
+             android:layout_height="wrap_content"
+             android:layout_width="6dp" />
+
+        <Button
+             android:layout_height="wrap_content"
+             android:layout_width="wrap_content"
+             app:icon="@drawable/outline_gesture"
+             style="?attr/materialButtonElevatedStyle"
+             android:layout_weight="1"
+             android:text="@string/dibujo"
+             android:id="@+id/ins_dibujo" />
 
     </LinearLayout>
 

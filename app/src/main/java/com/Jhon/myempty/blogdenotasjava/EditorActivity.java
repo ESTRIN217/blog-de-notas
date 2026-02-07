@@ -492,11 +492,11 @@ private final ActivityResultLauncher<Intent> launcherPermisoOverlay = registerFo
     View layout = getLayoutInflater().inflate(R.layout.bottom_sheet_insertar, null);
     bottomSheetInsertar.setContentView(layout);
     
-    View btnFoto = layout.findViewById(R.id.ins_foto);
-    View btnCamara = layout.findViewById(R.id.ins_camara);
-    View btnAudio = layout.findViewById(R.id.ins_audio);
-    View btnDibujo = layout.findViewById(R.id.ins_dibujo);
-    View btnCheck = layout.findViewById(R.id.check_box);//
+    MaterialButton btnFoto = layout.findViewById(R.id.ins_foto);
+    MaterialButton btnCamara = layout.findViewById(R.id.ins_camara);
+    MaterialButton btnAudio = layout.findViewById(R.id.ins_audio);
+    MaterialButton btnDibujo = layout.findViewById(R.id.ins_dibujo);
+    MaterialButton btnCheck = layout.findViewById(R.id.check_box);//
     // 3. Configurar Listeners
 
     // --- FOTO ---

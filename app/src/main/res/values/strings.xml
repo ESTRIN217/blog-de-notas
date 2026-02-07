@@ -16,9 +16,9 @@
     <string name="alto_contraste">Alto Contraste (Negro puro)</string>
     <string name="texto_de_ejemplo">Texto de ejemplo (16sp)</string>
     <string name="novedades">Novedades</string>
-    <string name="añadir_imagen">Agregar Imagen</string>
-    <string name="tomar_foto">Tomar una foto</string>
-    <string name="grabar_audio">Grabar Audio</string>
+    <string name="añadir_imagen">Imagen</string>
+    <string name="tomar_foto">Camara</string>
+    <string name="grabar_audio">Audio</string>
     <string name="dibujo">Dibujo</string>
     <string name="insertar_hora">Insertar hora</string>
     <string name="vaciar_nota">Vaciar nota</string>
@@ -33,6 +33,6 @@
     <string name="mostrar_cuadricula">Mostrar cuadrícula</string>
     <string name="m3_expressive_primary_fab_content_description">Nueva Nota</string>
     <string name="modoVistaTargeta">Modo de vista de la targeta</string>
-    <string name="casilla_de_verificacion">Añadir casillas de verificación</string>
+    <string name="casilla_de_verificacion">Lista de tareas</string>
     <string name="tema_oscuro">Tema oscuro</string>
 </resources>
