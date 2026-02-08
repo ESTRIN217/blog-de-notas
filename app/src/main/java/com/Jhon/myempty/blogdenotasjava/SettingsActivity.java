@@ -14,6 +14,7 @@ import androidx.appcompat.app.AppCompatDelegate;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.color.DynamicColors;
 import com.google.android.material.materialswitch.MaterialSwitch;
+import com.google.android.material.appbar.MaterialToolbar;
 
 public class SettingsActivity extends AppCompatActivity {
 
@@ -21,7 +22,8 @@ public class SettingsActivity extends AppCompatActivity {
     private RadioGroup grupoTema;
     private RadioButton rbClaro, rbOscuro, rbSistema;
     private MaterialSwitch switchMaterialTheme;
-    private MaterialButton novedades, btnAtras, sobre;
+    private MaterialButton novedades, sobre;
+    private MaterialToolbar toolbar;
 
     // Preferencias
     private SharedPreferences prefs;
@@ -62,7 +64,7 @@ public class SettingsActivity extends AppCompatActivity {
     }
 
     private void inicializarVistas() {
-        btnAtras = findViewById(R.id.btnAtrasSettings);
+        toolbar = findViewById(R.id.topAppBar);
         grupoTema = findViewById(R.id.grupoTema);
         rbClaro = findViewById(R.id.rbClaro);
         rbOscuro = findViewById(R.id.rbOscuro);
@@ -82,7 +84,7 @@ public class SettingsActivity extends AppCompatActivity {
     } // <-- Aquí estaba el error (había una llave extra cerrando la clase)
 
     private void configurarListeners() {
-        btnAtras.setOnClickListener(v -> finish());
+        toolbar.setNavigationOnClickListener(v -> onBackPressed());
 
         grupoTema.setOnCheckedChangeListener((group, checkedId) -> {
             int modoSeleccionado;

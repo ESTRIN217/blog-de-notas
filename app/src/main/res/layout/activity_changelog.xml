@@ -1,65 +1,66 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
+<androidx.coordinatorlayout.widget.CoordinatorLayout
      xmlns:android="http://schemas.android.com/apk/res/android"
      xmlns:app="http://schemas.android.com/apk/res-auto"
      android:layout_height="match_parent"
      android:layout_width="match_parent"
      android:background="?attr/colorSurfaceContainer"
-     android:orientation="vertical"
      android:fitsSystemWindows="true">
+
     <com.google.android.material.appbar.AppBarLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="?attr/colorSurfaceContainer"
-        app:elevation="0dp">
-    <LinearLayout
          android:layout_height="wrap_content"
          android:layout_width="match_parent"
-         android:gravity="center_vertical"
-         android:orientation="horizontal">
+         android:background="?attr/colorSurfaceContainer"
+         app:elevation="0dp">
 
-        <Button
-             android:layout_height="wrap_content"
-             android:layout_width="wrap_content"
-             app:icon="@drawable/arrow_back_24px"
-             android:contentDescription="Volver atrás"
-             style="?attr/materialIconButtonStyle"
-             android:id="@+id/btnAtrasSettings" />
+        <com.google.android.material.appbar.MaterialToolbar
+             android:layout_height="?attr/actionBarSize"
+             android:layout_width="match_parent"
+             app:title="Registro de cambios"
+             app:navigationIcon="@drawable/arrow_back_24px"
+             app:navigationContentDescription="Volver atrás"
+             android:id="@+id/topAppBar">
+</com.google.android.material.appbar.MaterialToolbar>
 
-        <com.google.android.material.textview.MaterialTextView
-             android:layout_height="wrap_content"
-             android:layout_width="wrap_content"
-             android:textSize="20sp"
-             android:textColor="?attr/colorOnSurface"
-             android:text="Registro de cambios"
-             android:textStyle="bold" />
+    </com.google.android.material.appbar.AppBarLayout>
 
-    </LinearLayout>
-</com.google.android.material.appbar.AppBarLayout>
-
-    <com.google.android.material.card.MaterialCardView
-         android:layout_height="wrap_content"
-         android:layout_width="match_parent"
-         app:cardBackgroundColor="?attr/colorPrimaryContainer"
-         android:layout_margin="8dp"
-         app:contentPadding="16dp"
-         app:cardElevation="1dp"
-         app:cardCornerRadius="16dp">
-
-        <com.google.android.material.textview.MaterialTextView
-             android:layout_height="wrap_content"
-             android:layout_width="wrap_content"
-             android:textColor="?attr/colorOnPrimaryContainer"
-             android:id="@+id/txtVersionActualInfo"
-             android:text="Cargando versión..."
-             android:textStyle="bold" />
-
-    </com.google.android.material.card.MaterialCardView>
-
-    <androidx.recyclerview.widget.RecyclerView
+    <androidx.core.widget.NestedScrollView
          android:layout_height="match_parent"
          android:layout_width="match_parent"
-         android:clipToPadding="false"
-         android:id="@+id/recyclerChangelog" />
+         app:layout_behavior="com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior">
 
-</LinearLayout>
+        <LinearLayout
+             android:layout_height="match_parent"
+             android:layout_width="match_parent"
+             android:orientation="vertical">
+
+            <com.google.android.material.card.MaterialCardView
+                 android:layout_height="wrap_content"
+                 android:layout_width="match_parent"
+                 android:layout_margin="8dp"
+                 app:cardElevation="1dp"
+                 app:cardBackgroundColor="?attr/colorPrimaryContainer"
+                 app:contentPadding="16dp"
+                 app:cardCornerRadius="16dp">
+
+                <com.google.android.material.textview.MaterialTextView
+                     android:layout_height="wrap_content"
+                     android:layout_width="wrap_content"
+                     android:textColor="?attr/colorOnPrimaryContainer"
+                     android:id="@+id/txtVersionActualInfo"
+                     android:text="Cargando versión..."
+                     android:textStyle="bold" />
+
+            </com.google.android.material.card.MaterialCardView>
+
+            <androidx.recyclerview.widget.RecyclerView
+                 android:layout_height="match_parent"
+                 android:layout_width="match_parent"
+                 android:clipToPadding="false"
+                 android:id="@+id/recyclerChangelog" />
+
+        </LinearLayout>
+
+    </androidx.core.widget.NestedScrollView>
+
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

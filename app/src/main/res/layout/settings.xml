@@ -1,198 +1,181 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
+<androidx.coordinatorlayout.widget.CoordinatorLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_height="match_parent"
     android:layout_width="match_parent"
-    android:background="?attr/colorSurfaceContainer"
-    android:orientation="vertical"
-    android:fitsSystemWindows="true">
+    android:id="@+id/coordinator"
+    android:fitsSystemWindows="true"
+    android:background="?attr/colorSurfaceContainer">
     <com.google.android.material.appbar.AppBarLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-         app:layout_behavior="com.google.android.material.appbar.AppBarLayout$Behavior"
+        app:layout_behavior="com.google.android.material.appbar.AppBarLayout$Behavior"
         android:background="?attr/colorSurfaceContainer"
         app:elevation="0dp">
-    <LinearLayout
-        android:layout_height="wrap_content"
-        android:layout_width="match_parent"
-        android:gravity="center_vertical"
-        android:orientation="horizontal">
-
-        <Button
-            android:layout_height="wrap_content"
-            android:layout_width="wrap_content"
-            android:contentDescription="Volver atrás"
-            app:icon="@drawable/arrow_back_24px"
-            style="?attr/materialIconButtonStyle"
-            android:id="@+id/btnAtrasSettings" />
-
-        <com.google.android.material.textview.MaterialTextView
-            android:layout_height="wrap_content"
-            android:layout_width="wrap_content"
-            android:textSize="22sp"
-            android:textColor="?attr/colorOnSurface"
-            android:id="@+id/tituloSettings"
-            android:text="@string/opciones_de_configuración"
-            android:textStyle="bold" />
-
-    </LinearLayout>
-</com.google.android.material.appbar.AppBarLayout>
-
-    <androidx.core.widget.NestedScrollView
-        android:layout_height="match_parent"
-        android:layout_width="match_parent"
-        app:layout_behavior="com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior">
-
-        <LinearLayout
-            android:layout_height="wrap_content"
+                <com.google.android.material.appbar.MaterialToolbar
+            android:id="@+id/topAppBar"
             android:layout_width="match_parent"
-            android:padding="12dp"
-            android:orientation="vertical">
+            android:layout_height="?attr/actionBarSize"
+            app:title="@string/opciones_de_configuración"
+            app:navigationIcon="@drawable/arrow_back_24px"
+            app:navigationContentDescription="Volver atrás" />
+    </com.google.android.material.appbar.AppBarLayout>
 
+        <androidx.core.widget.NestedScrollView
+            android:layout_height="match_parent"
+            android:layout_width="match_parent"
+            app:layout_behavior="com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior">
 
-            <com.google.android.material.textview.MaterialTextView
-                android:layout_height="wrap_content"
-                android:layout_width="wrap_content"
-                android:textSize="14sp"
-                android:textColor="?attr/colorPrimary"
-                android:layout_marginTop="16dp"
-                android:id="@+id/lblTemaApp"
-                android:text="@string/opciones_de_apariencia"
-                android:textStyle="bold" />
-
-            <com.google.android.material.card.MaterialCardView
+            <LinearLayout
                 android:layout_height="wrap_content"
                 android:layout_width="match_parent"
-                android:layout_margin="8dp"
-                app:cardElevation="1dp"
-                app:cardCornerRadius="12dp"
-                app:contentPadding="16dp">
+                android:padding="12dp"
+                android:orientation="vertical">
 
-                <LinearLayout
+
+                <com.google.android.material.textview.MaterialTextView
+                    android:layout_height="wrap_content"
+                    android:layout_width="wrap_content"
+                    android:textSize="14sp"
+                    android:textColor="?attr/colorPrimary"
+                    android:layout_marginTop="16dp"
+                    android:id="@+id/lblTemaApp"
+                    android:text="@string/opciones_de_apariencia"
+                    android:textStyle="bold" />
+
+                <com.google.android.material.card.MaterialCardView
                     android:layout_height="wrap_content"
                     android:layout_width="match_parent"
-                    android:orientation="horizontal"
-                >
-                    <ImageView
-                        android:layout_height="48dp"
-                        android:layout_width="48dp"
-                        android:padding="12dp"
-                        android:background="@drawable/bottom_background"
-                        android:src="@drawable/outline_palette" />
-
-                    <com.google.android.material.materialswitch.MaterialSwitch
-                        android:layout_height="wrap_content"
-                        android:layout_width="match_parent"
-                        android:textSize="18sp"
-                        android:textColor="?attr/colorOnSurface"
-                        android:textStyle="bold"
-                        android:layout_marginStart="10dp"
-                        android:id="@+id/switchMaterialTheme"
-                        app:thumbIcon="@drawable/round_check"
-                        android:text="@string/material_you" />
-                </LinearLayout>
-
-            </com.google.android.material.card.MaterialCardView>
-
-            <com.google.android.material.card.MaterialCardView
-                android:layout_height="wrap_content"
-                android:layout_width="match_parent"
-                app:cardCornerRadius="12dp"
-                app:cardElevation="1dp"
-                android:layout_margin="8dp"
-                app:contentPadding="16dp">
-                <LinearLayout
-                    android:layout_height="wrap_content"
-                    android:layout_width="match_parent"
-                    android:orientation="vertical">
+                    android:layout_margin="8dp"
+                    app:cardElevation="1dp"
+                    app:cardCornerRadius="12dp"
+                    app:contentPadding="16dp">
 
                     <LinearLayout
                         android:layout_height="wrap_content"
                         android:layout_width="match_parent"
-                        android:gravity="center_vertical"
-                        android:orientation="horizontal">
-
+                        android:orientation="horizontal"
+                    >
                         <ImageView
                             android:layout_height="48dp"
                             android:layout_width="48dp"
                             android:padding="12dp"
-                            android:src="@drawable/bedtime_24px"
-                            android:background="@drawable/bottom_background" />
+                            android:background="@drawable/bottom_background"
+                            android:src="@drawable/outline_palette" />
 
-                        <TextView
+                        <com.google.android.material.materialswitch.MaterialSwitch
                             android:layout_height="wrap_content"
-                            android:layout_width="wrap_content"
-                            android:layout_marginStart="10dp"
+                            android:layout_width="match_parent"
+                            android:textSize="18sp"
+                            android:textColor="?attr/colorOnSurface"
                             android:textStyle="bold"
-                            android:text="@string/tema_oscuro" />
-
+                            android:layout_marginStart="10dp"
+                            android:id="@+id/switchMaterialTheme"
+                            app:thumbIcon="@drawable/round_check"
+                            android:text="@string/material_you" />
                     </LinearLayout>
 
+                </com.google.android.material.card.MaterialCardView>
 
-                    <RadioGroup
+                <com.google.android.material.card.MaterialCardView
+                    android:layout_height="wrap_content"
+                    android:layout_width="match_parent"
+                    app:cardCornerRadius="12dp"
+                    app:cardElevation="1dp"
+                    android:layout_margin="8dp"
+                    app:contentPadding="16dp">
+                    <LinearLayout
                         android:layout_height="wrap_content"
                         android:layout_width="match_parent"
-                        android:id="@+id/grupoTema">
+                        android:orientation="vertical">
 
-                        <RadioButton
+                        <LinearLayout
                             android:layout_height="wrap_content"
                             android:layout_width="match_parent"
-                            android:paddingVertical="12dp"
-                            android:textColor="?attr/colorOnSurface"
-                            android:id="@+id/rbClaro"
-                            android:text="@string/claro" />
+                            android:gravity="center_vertical"
+                            android:orientation="horizontal">
 
-                        <RadioButton
+                            <ImageView
+                                android:layout_height="48dp"
+                                android:layout_width="48dp"
+                                android:padding="12dp"
+                                android:src="@drawable/bedtime_24px"
+                                android:background="@drawable/bottom_background" />
+
+                            <TextView
+                                android:layout_height="wrap_content"
+                                android:layout_width="wrap_content"
+                                android:layout_marginStart="10dp"
+                                android:textStyle="bold"
+                                android:text="@string/tema_oscuro" />
+
+                        </LinearLayout>
+
+
+                        <RadioGroup
                             android:layout_height="wrap_content"
                             android:layout_width="match_parent"
-                            android:paddingVertical="12dp"
-                            android:textColor="?attr/colorOnSurface"
-                            android:id="@+id/rbOscuro"
-                            android:text="@string/oscuro" />
+                            android:id="@+id/grupoTema">
 
-                        <RadioButton
-                            android:layout_height="wrap_content"
-                            android:layout_width="match_parent"
-                            android:paddingVertical="12dp"
-                            android:textColor="?attr/colorOnSurface"
-                            android:id="@+id/rbSistema"
-                            android:text="@string/usar_configuración_del_sistema" />
+                            <RadioButton
+                                android:layout_height="wrap_content"
+                                android:layout_width="match_parent"
+                                android:paddingVertical="12dp"
+                                android:textColor="?attr/colorOnSurface"
+                                android:id="@+id/rbClaro"
+                                android:text="@string/claro" />
 
-                    </RadioGroup>
-                </LinearLayout>
+                            <RadioButton
+                                android:layout_height="wrap_content"
+                                android:layout_width="match_parent"
+                                android:paddingVertical="12dp"
+                                android:textColor="?attr/colorOnSurface"
+                                android:id="@+id/rbOscuro"
+                                android:text="@string/oscuro" />
 
-            </com.google.android.material.card.MaterialCardView>
-<com.google.android.material.textview.MaterialTextView
-                android:layout_height="wrap_content"
-                android:layout_width="wrap_content"
-                android:textSize="14sp"
-                android:textColor="?attr/colorPrimary"
-                android:layout_marginTop="16dp"
-                android:textStyle="bold"
-                android:text="Información" /> 
+                            <RadioButton
+                                android:layout_height="wrap_content"
+                                android:layout_width="match_parent"
+                                android:paddingVertical="12dp"
+                                android:textColor="?attr/colorOnSurface"
+                                android:id="@+id/rbSistema"
+                                android:text="@string/usar_configuración_del_sistema" />
 
-            <Button
-            style="?attr/materialButtonOutlinedStyle"
-                android:layout_height="wrap_content"
-                android:layout_width="match_parent"
-                android:id="@+id/novedades"
-                android:text="@string/novedades"
-                app:icon="@drawable/update_24px" />
-                
-            <Button
-            style="?attr/materialButtonOutlinedStyle"
-                android:layout_height="wrap_content"
-                android:layout_width="match_parent"
-                android:id="@+id/sobre"
-                android:text="Sobre"
-                app:icon="@drawable/info" />
-            <View
-                android:layout_height="50dp"
-                android:layout_width="match_parent" />
+                        </RadioGroup>
+                    </LinearLayout>
 
-        </LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
+                <com.google.android.material.textview.MaterialTextView
+                    android:layout_height="wrap_content"
+                    android:layout_width="wrap_content"
+                    android:textSize="14sp"
+                    android:textColor="?attr/colorPrimary"
+                    android:layout_marginTop="16dp"
+                    android:textStyle="bold"
+                    android:text="Información" />
 
-    </androidx.core.widget.NestedScrollView>
+                <Button
+                    style="?attr/materialButtonOutlinedStyle"
+                    android:layout_height="wrap_content"
+                    android:layout_width="match_parent"
+                    android:id="@+id/novedades"
+                    android:text="@string/novedades"
+                    app:icon="@drawable/update_24px" />
 
-</LinearLayout>
+                <Button
+                    style="?attr/materialButtonOutlinedStyle"
+                    android:layout_height="wrap_content"
+                    android:layout_width="match_parent"
+                    android:id="@+id/sobre"
+                    android:text="Sobre"
+                    app:icon="@drawable/info" />
+                <View
+                    android:layout_height="50dp"
+                    android:layout_width="match_parent" />
+
+            </LinearLayout>
+
+        </androidx.core.widget.NestedScrollView>
+
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

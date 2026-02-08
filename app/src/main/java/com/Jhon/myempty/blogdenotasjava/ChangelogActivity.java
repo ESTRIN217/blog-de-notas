@@ -6,7 +6,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.activity.EdgeToEdge;
 import com.google.android.material.textview.MaterialTextView;
-import com.google.android.material.button.MaterialButton;
+import com.google.android.material.appbar.MaterialToolbar;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import com.Jhon.myempty.blogdenotasjava.Cambio;
@@ -15,7 +15,7 @@ import java.util.ArrayList;
 
 public class ChangelogActivity extends AppCompatActivity {
 
-    private MaterialButton btnAtras;
+    private MaterialToolbar toolbar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -148,11 +148,9 @@ public class ChangelogActivity extends AppCompatActivity {
         // Usas un adaptador sencillo (puedes crear uno rápido)
         ChangelogAdapter adaptador = new ChangelogAdapter(listaCambios);
         rv.setAdapter(adaptador);
-        btnAtras = findViewById(R.id.btnAtrasSettings);
+        toolbar = findViewById(R.id.topAppBar);
         
-        btnAtras.setOnClickListener(v -> {
-            finish();
-        });
+        toolbar.setNavigationOnClickListener(v -> onBackPressed());
         // 1. Referenciar el TextView
         MaterialTextView txtVersion = findViewById(R.id.txtVersionActualInfo);
         try {
