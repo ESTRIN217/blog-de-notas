@@ -1,68 +1,86 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.coordinatorlayout.widget.CoordinatorLayout
-     xmlns:android="http://schemas.android.com/apk/res/android"
-     xmlns:app="http://schemas.android.com/apk/res-auto"
-     android:layout_height="match_parent"
-     android:layout_width="match_parent"
-     android:id="@+id/coordinator">
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_height="match_parent"
+    android:layout_width="match_parent"
+    android:id="@+id/coordinator">
 
     <LinearLayout
-         android:layout_height="match_parent"
-         android:layout_width="match_parent"
-         android:gravity="center"
-         android:orientation="vertical">
+        android:layout_height="match_parent"
+        android:layout_width="match_parent"
+        android:gravity="center"
+        android:padding="24dp"
+        android:orientation="vertical">
 
         <com.google.android.material.textview.MaterialTextView
-             android:layout_height="wrap_content"
-             android:layout_width="wrap_content"
-             android:text="Apruebe los permisos necesarios para utilizar esta app" />
-
-        <Space
-             android:layout_height="10dp"
-             android:layout_width="wrap_content" />
+            android:layout_height="wrap_content"
+            android:layout_width="wrap_content"
+            android:text="Configuración de Permisos"
+            android:textAppearance="?attr/textAppearanceHeadlineSmall"
+            android:layout_marginBottom="24dp" />
 
         <com.google.android.material.materialswitch.MaterialSwitch
-             android:layout_height="wrap_content"
-             android:layout_width="wrap_content"
-             android:text="Permiso de notificación" />
+            android:id="@+id/swNotificaciones"
+            android:layout_height="wrap_content"
+            android:layout_width="match_parent"
+            android:text="Notificaciones"
+            app:thumbIcon="@drawable/round_check"/>
 
         <com.google.android.material.materialswitch.MaterialSwitch
-             android:layout_height="wrap_content"
-             android:layout_width="wrap_content"
-             android:text="Permiso de micrófono" />
+            android:id="@+id/swMicrofono"
+            android:layout_height="wrap_content"
+            android:layout_width="match_parent"
+            android:text="Micrófono (para audio)" 
+            app:thumbIcon="@drawable/round_check"/>
 
         <com.google.android.material.materialswitch.MaterialSwitch
-             android:layout_height="wrap_content"
-             android:layout_width="wrap_content"
-             android:text="Permiso de cámara" />
+            android:id="@+id/swCamara"
+            android:layout_height="wrap_content"
+            android:layout_width="match_parent"
+            android:text="Cámara (para imágenes)"
+            app:thumbIcon="@drawable/round_check"/>
 
-        <Space
-             android:layout_height="10dp"
-             android:layout_width="wrap_content" />
+        <com.google.android.material.divider.MaterialDivider
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginVertical="24dp"/>
 
         <com.google.android.material.textview.MaterialTextView
-             android:layout_height="wrap_content"
-             android:layout_width="wrap_content"
-             android:text="Seleccione la carpeta dónde se guardarán sus notas" />
+            android:layout_height="wrap_content"
+            android:layout_width="match_parent"
+            android:text="Ubicación de notas"
+            android:textAppearance="?attr/textAppearanceTitleMedium" />
+
+        <com.google.android.material.textview.MaterialTextView
+            android:layout_height="wrap_content"
+            android:layout_width="match_parent"
+            android:text="Seleccione la carpeta donde se guardarán sus archivos .txt"
+            android:textAppearance="?attr/textAppearanceBodyMedium"
+            android:layout_marginBottom="16dp" />
 
         <Button
-             android:layout_height="wrap_content"
-             android:layout_width="wrap_content"
-             android:text="Selecionar carpeta" />
+            style="?attr/materialButtonTonalStyle"
+            android:id="@+id/btnSeleccionarCarpeta"
+            android:layout_height="wrap_content"
+            android:layout_width="wrap_content"
+            android:text="Seleccionar carpeta" 
+            app:icon="@drawable/folder_open"/>
 
     </LinearLayout>
 
-    <com.google.android.material.dockedtoolbar.DockedToolbarLayout
-         android:layout_height="wrap_content"
-         android:layout_width="match_parent"
-         android:id="@+id/docked_toolbar"
-         android:layout_gravity="bottom">
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
+        android:padding="16dp">
 
         <Button
-             android:layout_height="wrap_content"
-             android:layout_width="wrap_content"
-             android:text="Siguiente" />
-
-    </com.google.android.material.dockedtoolbar.DockedToolbarLayout>
+            android:id="@+id/btnSiguiente"
+            android:layout_height="wrap_content"
+            android:layout_width="match_parent"
+            android:text="Comenzar"
+            style="?attr/materialButtonStyle" />
+    </FrameLayout>
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

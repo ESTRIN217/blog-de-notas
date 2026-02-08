@@ -559,7 +559,9 @@ private final ActivityResultLauncher<Intent> launcherPermisoOverlay = registerFo
     // 1. Botón "Default" usando el contenedor estándar de Material 3
     btnDefault.setOnClickListener(view -> {
         int colorSistema = MaterialColors.getColor(view, com.google.android.material.R.attr.colorSurfaceContainer);
+        
         aplicarColorFondoDinamico(colorSistema);
+        aplicarImagenFondoDinamico(null);
         bottomSheetPaleta.dismiss();
     });
 

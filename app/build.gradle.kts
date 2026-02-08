@@ -12,8 +12,8 @@ android {
         applicationId = "com.Jhon.myempty.blogdenotasjava"
         minSdk = 23
         targetSdk = 36
-        versionCode = 1100
-        versionName = "1.10.0"
+        versionCode = 1110
+        versionName = "1.11.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }

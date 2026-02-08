@@ -4,8 +4,6 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.widget.ImageView;
-import android.widget.RadioButton;
-import android.widget.RadioGroup;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -15,12 +13,12 @@ import com.google.android.material.button.MaterialButton;
 import com.google.android.material.color.DynamicColors;
 import com.google.android.material.materialswitch.MaterialSwitch;
 import com.google.android.material.appbar.MaterialToolbar;
+import com.google.android.material.button.MaterialButtonToggleGroup;
 
 public class SettingsActivity extends AppCompatActivity {
 
     // Vistas
-    private RadioGroup grupoTema;
-    private RadioButton rbClaro, rbOscuro, rbSistema;
+    private MaterialButtonToggleGroup toggleGrupoTema;
     private MaterialSwitch switchMaterialTheme;
     private MaterialButton novedades, sobre;
     private MaterialToolbar toolbar;
@@ -65,10 +63,7 @@ public class SettingsActivity extends AppCompatActivity {
 
     private void inicializarVistas() {
         toolbar = findViewById(R.id.topAppBar);
-        grupoTema = findViewById(R.id.grupoTema);
-        rbClaro = findViewById(R.id.rbClaro);
-        rbOscuro = findViewById(R.id.rbOscuro);
-        rbSistema = findViewById(R.id.rbSistema);
+        toggleGrupoTema = findViewById(R.id.toggleGrupoTema);
         switchMaterialTheme = findViewById(R.id.switchMaterialTheme);
         novedades = findViewById(R.id.novedades);
         sobre = findViewById(R.id.sobre);
@@ -76,9 +71,13 @@ public class SettingsActivity extends AppCompatActivity {
 
     private void cargarPreferencias() {
         int temaGuardado = prefs.getInt(KEY_THEME, AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM);
-        if (temaGuardado == AppCompatDelegate.MODE_NIGHT_NO) rbClaro.setChecked(true);
-        else if (temaGuardado == AppCompatDelegate.MODE_NIGHT_YES) rbOscuro.setChecked(true);
-        else rbSistema.setChecked(true);
+if (temaGuardado == AppCompatDelegate.MODE_NIGHT_NO) {
+    toggleGrupoTema.check(R.id.btnTemaClaro);
+} else if (temaGuardado == AppCompatDelegate.MODE_NIGHT_YES) {
+    toggleGrupoTema.check(R.id.btnTemaOscuro);
+} else {
+    toggleGrupoTema.check(R.id.btnTemaSistema);
+}
 
         switchMaterialTheme.setChecked(prefs.getBoolean(KEY_MATERIAL_SWITCH, false));
     } // <-- Aquí estaba el error (había una llave extra cerrando la clase)
@@ -86,18 +85,27 @@ public class SettingsActivity extends AppCompatActivity {
     private void configurarListeners() {
         toolbar.setNavigationOnClickListener(v -> onBackPressed());
 
-        grupoTema.setOnCheckedChangeListener((group, checkedId) -> {
-            int modoSeleccionado;
-            if (checkedId == R.id.rbClaro) modoSeleccionado = AppCompatDelegate.MODE_NIGHT_NO;
-            else if (checkedId == R.id.rbOscuro) modoSeleccionado = AppCompatDelegate.MODE_NIGHT_YES;
-            else modoSeleccionado = AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM;
+        toggleGrupoTema.addOnButtonCheckedListener((group, checkedId, isChecked) -> {
+    // Es importante verificar isChecked para que la lógica solo corra una vez
+    if (isChecked) {
+        int modoSeleccionado;
+        
+        if (checkedId == R.id.btnTemaClaro) {
+            modoSeleccionado = AppCompatDelegate.MODE_NIGHT_NO;
+        } else if (checkedId == R.id.btnTemaOscuro) {
+            modoSeleccionado = AppCompatDelegate.MODE_NIGHT_YES;
+        } else {
+            modoSeleccionado = AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM;
+        }
 
-            if (prefs.getInt(KEY_THEME, -1) != modoSeleccionado) {
-                prefs.edit().putInt(KEY_THEME, modoSeleccionado).apply();
-                AppCompatDelegate.setDefaultNightMode(modoSeleccionado);
-                Toast.makeText(this, getThemeToastMessage(modoSeleccionado), Toast.LENGTH_SHORT).show();
-            }
-        });
+        // Aplicar cambio si es diferente al actual
+        if (prefs.getInt(KEY_THEME, -1) != modoSeleccionado) {
+            prefs.edit().putInt(KEY_THEME, modoSeleccionado).apply();
+            AppCompatDelegate.setDefaultNightMode(modoSeleccionado);
+            Toast.makeText(this, getThemeToastMessage(modoSeleccionado), Toast.LENGTH_SHORT).show();
+        }
+    }
+    });
 
         switchMaterialTheme.setOnCheckedChangeListener((buttonView, isChecked) -> {
     // 1. Verificar si el valor es realmente diferente al guardado

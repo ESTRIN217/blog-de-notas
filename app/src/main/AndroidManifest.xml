@@ -48,6 +48,7 @@
             </provider>
         <activity android:name=".DibujoActivity" />
         <activity android:name=".SobreActivity" />
+        <activity android:name=".InicioActivity" />
 
     </application>
     

@@ -70,23 +70,6 @@ public class MainActivity extends AppCompatActivity {
     // Valores: 0 = Modificación, 1 = Creación, 2 = Nombre
     private int criterioOrdenActual = 0;
 
-    // 1. LAUNCHERS MODERNOS (Reemplazan a onActivityResult)
-    private final ActivityResultLauncher<Intent> launcherSelectorCarpeta = registerForActivityResult(
-            new ActivityResultContracts.StartActivityForResult(),
-            result -> {
-                if (result.getResultCode() == RESULT_OK && result.getData() != null) {
-                    Uri uri = result.getData().getData();
-                    if (uri != null) {
-                        final int takeFlags = result.getData().getFlags() & (Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
-                        getContentResolver().takePersistableUriPermission(uri, takeFlags);
-
-                        sharedPreferences.edit().putString("carpeta_uri", uri.toString()).apply();
-                        carpetaUriString = uri.toString();
-                        cargarNotas(); // Recargar lista
-                    }
-                }
-            }
-    );
 
     private final ActivityResultLauncher<Intent> activityLauncherEditor = registerForActivityResult(
             new ActivityResultContracts.StartActivityForResult(),
@@ -115,8 +98,15 @@ public class MainActivity extends AppCompatActivity {
         carpetaUriString = sharedPreferences.getString("carpeta_uri", null);
         esModoCuadricula = sharedPreferences.getBoolean(KEY_VISTA_GRID, false);
         
+        if (carpetaUriString == null) {
+        // Por seguridad, si llega aquí sin carpeta, lo devolvemos al inicio
+        startActivity(new Intent(this, InicioActivity.class));
+        finish();
+        } else {
+        cargarNotas();
+        }
+        
         aplicarModoVista(); // Aplicar diseño inicial
-        checkStoragePermissions();
     }
 
     private void inicializarVistas() {
@@ -167,15 +157,6 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    private void checkStoragePermissions() {
-        if (carpetaUriString == null) {
-            Toast.makeText(this, "Selecciona una carpeta para tus notas", Toast.LENGTH_LONG).show();
-            Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT_TREE);
-            launcherSelectorCarpeta.launch(intent);
-        } else {
-            cargarNotas();
-        }
-    }
 
     // --- MÉTODO PRINCIPAL DE CARGA (OPTIMIZADO CON HILO Y ORDENAMIENTO) ---
     private void cargarNotas() {

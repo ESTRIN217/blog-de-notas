@@ -29,6 +29,16 @@ public class ChangelogActivity extends AppCompatActivity {
         List<Cambio> listaCambios = new ArrayList<>();
         
         // AQUÍ AGREGAS TUS VERSIONES
+        listaCambios.add(new Cambio("1.11.0 General", "08 de febrero de 2026", "1. REVISIÓN VISUALES GENERALES.\n" + 
+        "2. SE REVISO EL ICONO MONOCROMÁTICO.\n" +
+        "3. SE MEJORO LA CARGA DE ARCHIVOS Y EL GUARDADO DE ESTOS.\n" +
+        "4. AHORA SE PUEDE SELECCIONAR UNA IMAGEN DE FONDO.\n" +
+        "5. SE AGREGO SELECCIÓN VISUAL A LAS NOTAS.\n" +
+        "6. CORRECCIONES DE ERRORES.\n" +
+        "7. SE AÑADIÓ UN MENÚ DESLIZANTE A LA PANTALLA PRINCIPAL.\n" +
+        "8. SE AÑADIÓ UN BOTÓN PARA CAMBIAR EL ORDEN DE LA LISTA.\n" +
+        "9. SE AÑADIÓ UNA PANTALLA SOBRE EN CONFIGURACIÓN.\n" +
+        "10. SE AÑADIÓ UNA PANTALLA DE INICIÓ"));
         listaCambios.add(new Cambio("1.10.0 General", "30 de enero de 2026", "1. Mejoras visuales generales.\n" + 
         "2. Se agrupó botones cercanos en un material button group.\n" + 
         "3. Mejoras visuales y generales a dibujo activity.\n" + 
