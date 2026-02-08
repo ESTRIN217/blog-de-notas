@@ -729,7 +729,16 @@ private final ActivityResultLauncher<Intent> launcherPermisoOverlay = registerFo
     try {
         String fullContent = NoteIOHelper.readContent(this, uriArchivoActual);
 
-        // ... (Pasos 3 y 4: Color y Fondo se mantienen igual) ...
+        // 3. Aplicar Color y Nombre de Fondo
+        int color = NoteIOHelper.extractColor(fullContent);
+        currentBackgroundName = NoteIOHelper.extractBackgroundName(fullContent);
+        aplicarColorFondoDinamico(color);
+
+        // 4. Aplicar Imagen de Fondo (si existe)
+        currentBackgroundUri = NoteIOHelper.extractBackgroundImageUri(fullContent);
+        if (currentBackgroundUri != null && !currentBackgroundUri.isEmpty()) {
+            aplicarImagenFondoDinamico(Uri.parse(currentBackgroundUri));
+        }
 
         // 5. Cargar Checklist al Adaptador
         String checklistData = NoteIOHelper.extractChecklistData(fullContent);
