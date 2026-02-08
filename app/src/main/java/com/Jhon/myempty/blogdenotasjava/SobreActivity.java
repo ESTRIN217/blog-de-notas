@@ -13,11 +13,13 @@ import androidx.appcompat.app.AppCompatDelegate;
 
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.color.DynamicColors;
+import com.google.android.material.appbar.MaterialToolbar;
 
 public class SobreActivity extends AppCompatActivity {
 
     private MaterialButton btnAtras, github;
     private TextView version;
+    private MaterialToolbar toolbar;
 
 
     @Override
@@ -36,13 +38,13 @@ public class SobreActivity extends AppCompatActivity {
     }
 
     private void inicializarVistas() {
-        btnAtras = findViewById(R.id.btnAtras);
+        toolbar = findViewById(R.id.topAppBar);
         version = findViewById(R.id.version);
         github = findViewById(R.id.github);
     }
 
     private void configurarListeners() {
-        btnAtras.setOnClickListener(v -> finish());
+        toolbar.setNavigationOnClickListener(v -> onBackPressed());
         try {
             // 2. Obtener la información del paquete
             String nombreVersion = getPackageManager()

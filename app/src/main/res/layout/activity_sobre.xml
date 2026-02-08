@@ -1,113 +1,115 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.coordinatorlayout.widget.CoordinatorLayout
-     xmlns:android="http://schemas.android.com/apk/res/android"
-     xmlns:app="http://schemas.android.com/apk/res-auto"
-     android:layout_height="match_parent"
-     android:layout_width="match_parent"
-     android:fitsSystemWindows="true"
-     android:id="@+id/coordinator">
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fitsSystemWindows="true">
 
     <com.google.android.material.appbar.AppBarLayout
-         android:layout_height="wrap_content"
-         android:layout_width="match_parent"
-         app:layout_behavior="com.google.android.material.appbar.AppBarLayout$Behavior"
-         android:id="@+id/appbar">
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
 
-        <LinearLayout
-             android:layout_height="wrap_content"
-             android:layout_width="match_parent"
-             android:gravity="center_vertical"
-             android:orientation="horizontal">
-
-            <Button
-                 android:layout_height="wrap_content"
-                 android:layout_width="wrap_content"
-                 app:icon="@drawable/arrow_back_24px"
-                 android:contentDescription="Volver atrás"
-                 style="?attr/materialIconButtonStyle"
-                 android:id="@+id/btnAtras" />
-
-            <com.google.android.material.textview.MaterialTextView
-                 android:layout_height="wrap_content"
-                 android:layout_width="wrap_content"
-                 android:textSize="22sp"
-                 android:textColor="?attr/colorOnSurface"
-                 android:text="Sobre"
-                 android:textStyle="bold" />
-
-        </LinearLayout>
+        <com.google.android.material.appbar.MaterialToolbar
+            android:id="@+id/topAppBar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            app:title="Sobre"
+            app:navigationIcon="@drawable/arrow_back_24px"
+            app:navigationContentDescription="Volver atrás" />
 
     </com.google.android.material.appbar.AppBarLayout>
 
     <androidx.core.widget.NestedScrollView
-         android:layout_height="match_parent"
-         android:layout_width="match_parent"
-         app:layout_behavior="com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior"
-         android:id="@+id/nested_scroll_view">
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
         <LinearLayout
-             android:layout_height="match_parent"
-             android:layout_width="match_parent"
-             android:gravity="center"
-             android:padding="10dp"
-             android:orientation="vertical">
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:padding="24dp"
+            android:orientation="vertical">
 
-            <ImageView
-                 android:layout_height="200dp"
-                 android:layout_width="200dp"
-                 android:src="@mipmap/ic_launcher" />
-
-            <Space
-                 android:layout_height="4dp"
-                 android:layout_width="wrap_content" />
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="150dp"
+                android:layout_height="150dp"
+                app:cardCornerRadius="75dp"
+                app:strokeWidth="0dp"
+                android:layout_marginBottom="16dp">
+                <ImageView
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:scaleType="centerCrop"
+                    android:src="@mipmap/ic_launcher_round" />
+            </com.google.android.material.card.MaterialCardView>
 
             <com.google.android.material.textview.MaterialTextView
-                 android:layout_height="wrap_content"
-                 android:layout_width="wrap_content"
-                 android:textSize="15sp"
-                 android:text="@string/app_name"
-                 android:textStyle="bold" />
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/app_name"
+                android:textAppearance="?attr/textAppearanceHeadlineMedium"
+                android:textStyle="bold" />
 
             <LinearLayout
-                 android:layout_height="wrap_content"
-                 android:layout_width="wrap_content"
-                 android:orientation="horizontal">
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:orientation="horizontal">
 
                 <com.google.android.material.textview.MaterialTextView
-                     android:layout_height="wrap_content"
-                     android:layout_width="wrap_content"
-                     android:id="@+id/version" />
-
-                <Space
-                     android:layout_height="wrap_content"
-                     android:layout_width="10dp" />
+                    android:id="@+id/version"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="v1.0.0"
+                    android:textAppearance="?attr/textAppearanceLabelLarge" />
 
                 <com.google.android.material.textview.MaterialTextView
-                     android:layout_height="wrap_content"
-                     android:layout_width="wrap_content"
-                     android:text="Universal" />
-
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:text="• Universal"
+                    android:textAppearance="?attr/textAppearanceLabelLarge"
+                    android:textColor="?attr/colorSecondary" />
             </LinearLayout>
 
-            <com.google.android.material.textview.MaterialTextView
-                 android:layout_height="wrap_content"
-                 android:layout_width="wrap_content"
-                 android:text="Esta app es un Blog de notas creado con la ayuda de Google Gemini una inteligencia artificial creada por Google, utilizando el material design que proporciona Google, esta app es compilada con un dispositivo de gama baja Android con una peculiar app llamada Android Code Studio disponible en GitHub" />
+            <com.google.android.material.divider.MaterialDivider
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginVertical="24dp" />
 
             <com.google.android.material.textview.MaterialTextView
-                 android:layout_height="wrap_content"
-                 android:layout_width="wrap_content"
-                 android:text="ESTRIN217" />
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Esta app es un Blog de notas creado con la ayuda de Google Gemini, utilizando Material Design 3. Compilada en un dispositivo móvil mediante Android Code Studio."
+                android:textAlignment="center"
+                android:textAppearance="?attr/textAppearanceBodyLarge"
+                android:lineSpacingExtra="4dp" />
+
+            <com.google.android.material.textview.MaterialTextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="24dp"
+                android:text="Desarrollado por"
+                android:textAppearance="?attr/textAppearanceLabelMedium" />
+
+            <com.google.android.material.textview.MaterialTextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="ESTRIN217"
+                android:textStyle="bold"
+                android:textAppearance="?attr/textAppearanceTitleLarge" />
 
             <Button
-                 android:layout_height="wrap_content"
-                 android:layout_width="wrap_content"
-                 app:icon="@drawable/round_language"
-                 style="?attr/materialIconButtonStyle"
-                 android:id="@+id/github" />
+                android:id="@+id/github"
+                style="?attr/materialButtonOutlinedStyle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:text="Ver en GitHub"
+                app:icon="@drawable/round_language" />
 
         </LinearLayout>
-
     </androidx.core.widget.NestedScrollView>
-
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
