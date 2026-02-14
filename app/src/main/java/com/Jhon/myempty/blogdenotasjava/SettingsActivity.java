@@ -37,7 +37,7 @@ public class SettingsActivity extends AppCompatActivity {
     int temaGuardado = prefs.getInt(KEY_THEME, AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM);
     AppCompatDelegate.setDefaultNightMode(temaGuardado);
 
-    if (prefs.getBoolean(KEY_MATERIAL_SWITCH, false)) {
+    if (prefs.getBoolean(KEY_MATERIAL_SWITCH, true)) {
         DynamicColors.applyToActivityIfAvailable(this);
     }
     
@@ -51,7 +51,7 @@ public class SettingsActivity extends AppCompatActivity {
     inicializarVistas(); 
 
     // 3. Configurar el estado del Switch después de inicializarlo
-    boolean isMaterial = prefs.getBoolean(KEY_MATERIAL_SWITCH, false);
+    boolean isMaterial = prefs.getBoolean(KEY_MATERIAL_SWITCH, true);
     if (switchMaterialTheme != null) { // Verificación de seguridad
         switchMaterialTheme.setChecked(isMaterial);
         switchMaterialTheme.setThumbIconResource(isMaterial ? R.drawable.round_check : R.drawable.close_24px);
@@ -79,7 +79,7 @@ if (temaGuardado == AppCompatDelegate.MODE_NIGHT_NO) {
     toggleGrupoTema.check(R.id.btnTemaSistema);
 }
 
-        switchMaterialTheme.setChecked(prefs.getBoolean(KEY_MATERIAL_SWITCH, false));
+        switchMaterialTheme.setChecked(prefs.getBoolean(KEY_MATERIAL_SWITCH, true));
     } // <-- Aquí estaba el error (había una llave extra cerrando la clase)
 
     private void configurarListeners() {
@@ -110,7 +110,7 @@ if (temaGuardado == AppCompatDelegate.MODE_NIGHT_NO) {
         switchMaterialTheme.setOnCheckedChangeListener((buttonView, isChecked) -> {
     // 1. Verificar si el valor es realmente diferente al guardado
     // Esto evita que recreate() se dispare cuando el onCreate inicializa el switch
-    boolean valorActual = prefs.getBoolean(KEY_MATERIAL_SWITCH, false);
+    boolean valorActual = prefs.getBoolean(KEY_MATERIAL_SWITCH, true);
     if (isChecked == valorActual) return; 
 
     // 2. Guardar preferencia

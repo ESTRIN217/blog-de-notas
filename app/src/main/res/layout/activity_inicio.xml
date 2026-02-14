@@ -16,7 +16,7 @@
         <com.google.android.material.textview.MaterialTextView
             android:layout_height="wrap_content"
             android:layout_width="wrap_content"
-            android:text="Configuración de Permisos"
+            android:text="@string/configuración_de_permisos"
             android:textAppearance="?attr/textAppearanceHeadlineSmall"
             android:layout_marginBottom="24dp" />
 
@@ -24,22 +24,23 @@
             android:id="@+id/swNotificaciones"
             android:layout_height="wrap_content"
             android:layout_width="match_parent"
-            android:text="Notificaciones"
-            app:thumbIcon="@drawable/round_check"/>
+            android:text="@string/notificaciones"
+            app:thumbIcon="@drawable/close_24px"/>
 
         <com.google.android.material.materialswitch.MaterialSwitch
             android:id="@+id/swMicrofono"
             android:layout_height="wrap_content"
             android:layout_width="match_parent"
-            android:text="Micrófono (para audio)" 
-            app:thumbIcon="@drawable/round_check"/>
+            android:text="@string/microfono"
+            app:thumbIcon="@drawable/close_24px"
+            />
 
         <com.google.android.material.materialswitch.MaterialSwitch
             android:id="@+id/swCamara"
             android:layout_height="wrap_content"
             android:layout_width="match_parent"
-            android:text="Cámara (para imágenes)"
-            app:thumbIcon="@drawable/round_check"/>
+            android:text="@string/camara"
+            app:thumbIcon="@drawable/close_24px"/>
 
         <com.google.android.material.divider.MaterialDivider
             android:layout_width="match_parent"
@@ -49,13 +50,13 @@
         <com.google.android.material.textview.MaterialTextView
             android:layout_height="wrap_content"
             android:layout_width="match_parent"
-            android:text="Ubicación de notas"
+            android:text="@string/ubicacion_de_notas"
             android:textAppearance="?attr/textAppearanceTitleMedium" />
 
         <com.google.android.material.textview.MaterialTextView
             android:layout_height="wrap_content"
             android:layout_width="match_parent"
-            android:text="Seleccione la carpeta donde se guardarán sus archivos .txt"
+            android:text="@string/seleccione_la_carpeta"
             android:textAppearance="?attr/textAppearanceBodyMedium"
             android:layout_marginBottom="16dp" />
 
@@ -64,7 +65,7 @@
             android:id="@+id/btnSeleccionarCarpeta"
             android:layout_height="wrap_content"
             android:layout_width="wrap_content"
-            android:text="Seleccionar carpeta" 
+            android:text="@string/seleccionar_carpeta" 
             app:icon="@drawable/folder_open"/>
 
     </LinearLayout>
@@ -79,7 +80,7 @@
             android:id="@+id/btnSiguiente"
             android:layout_height="wrap_content"
             android:layout_width="match_parent"
-            android:text="Comenzar"
+            android:text="@string/comenzar"
             style="?attr/materialButtonStyle" />
     </FrameLayout>
 

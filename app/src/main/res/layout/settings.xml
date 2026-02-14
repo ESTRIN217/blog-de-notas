@@ -69,8 +69,8 @@
                             android:layout_width="match_parent"
                             android:textSize="18sp"
                             android:textColor="?attr/colorOnSurface"
-                            android:textStyle="bold"
                             android:layout_marginStart="10dp"
+                            android:checkable="true"
                             android:id="@+id/switchMaterialTheme"
                             app:thumbIcon="@drawable/round_check"
                             android:text="@string/material_you" />
@@ -107,7 +107,6 @@
                                 android:layout_height="wrap_content"
                                 android:layout_width="wrap_content"
                                 android:layout_marginStart="10dp"
-                                android:textStyle="bold"
                                 android:text="@string/tema_oscuro" />
 
                         </LinearLayout>
@@ -152,7 +151,7 @@
                     android:textColor="?attr/colorPrimary"
                     android:layout_marginTop="16dp"
                     android:textStyle="bold"
-                    android:text="Información" />
+                    android:text="@string/informacion" />
 
                 <Button
                     style="?attr/materialButtonOutlinedStyle"
@@ -167,7 +166,7 @@
                     android:layout_height="wrap_content"
                     android:layout_width="match_parent"
                     android:id="@+id/sobre"
-                    android:text="Sobre"
+                    android:text="@string/sobre"
                     app:icon="@drawable/info" />
                 <View
                     android:layout_height="50dp"

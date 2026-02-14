@@ -14,7 +14,7 @@ public class MyApplication extends Application {
         SharedPreferences prefs = getSharedPreferences("MisPreferencias", MODE_PRIVATE);
         
         // Si el usuario tiene activo el switch de Material You, se aplica a toda la app
-        if (prefs.getBoolean("material_theme_activado", false)) {
+        if (prefs.getBoolean("material_theme_activado", true)) {
             DynamicColors.applyToActivitiesIfAvailable(this);
         }
     }

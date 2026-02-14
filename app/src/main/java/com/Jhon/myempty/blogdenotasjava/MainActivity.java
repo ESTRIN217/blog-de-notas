@@ -4,6 +4,7 @@ import android.Manifest;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.content.UriPermission;
 import android.net.Uri;
 import android.util.Log;
 import android.os.Bundle;
@@ -36,7 +37,6 @@ import com.google.android.material.navigation.NavigationView;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 import androidx.drawerlayout.widget.DrawerLayout;
 
-
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -50,203 +50,260 @@ import java.io.File;
 
 public class MainActivity extends AppCompatActivity {
 
-    private RecyclerView recyclerNotas;
-    private FloatingActionButton btnNuevaNota;
-    private EditText buscar;
-    private MaterialButton modoVistaTargeta, btnMenu, orden;
-    private DrawerLayout drawerLayout;
-    private NavigationView navigationView;
+  private RecyclerView recyclerNotas;
+  private FloatingActionButton btnNuevaNota;
+  private EditText buscar;
+  private MaterialButton modoVistaTargeta, btnMenu, orden;
+  private DrawerLayout drawerLayout;
+  private NavigationView navigationView;
 
-    private List<Nota> listaDeNotasCompleta;
-    private NotaAdapter adaptador;
+  private List<Nota> listaDeNotasCompleta;
+  private NotaAdapter adaptador;
 
-    private static final String PREFS_NAME = "MisPreferencias";
-    private static final String KEY_THEME = "tema_elegido";
-    private static final String KEY_VISTA_GRID = "vista_en_cuadricula";
+  private static final String PREFS_NAME = "MisPreferencias";
+  private static final String KEY_THEME = "tema_elegido";
+  private static final String KEY_VISTA_GRID = "vista_en_cuadricula";
 
-    private SharedPreferences sharedPreferences;
-    private boolean esModoCuadricula = false;
-    private String carpetaUriString;
-    // Valores: 0 = Modificación, 1 = Creación, 2 = Nombre
-    private int criterioOrdenActual = 0;
+  private SharedPreferences sharedPreferences;
+  private boolean esModoCuadricula = false;
+  private String carpetaUriString;
+  // Valores: 0 = Modificación, 1 = Creación, 2 = Nombre
+  private int criterioOrdenActual = 0;
 
+  private final ActivityResultLauncher<Intent> activityLauncherEditor =
+      registerForActivityResult(
+          new ActivityResultContracts.StartActivityForResult(),
+          result -> cargarNotas() // Al volver del editor, recargamos la lista
+          );
 
-    private final ActivityResultLauncher<Intent> activityLauncherEditor = registerForActivityResult(
-            new ActivityResultContracts.StartActivityForResult(),
-            result -> cargarNotas() // Al volver del editor, recargamos la lista
-    );
+  @Override
+  protected void onCreate(Bundle savedInstanceState) {
+    // 1. Configuración de Temas (Debe ir ANTES de super.onCreate)
+    sharedPreferences = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
+    if (sharedPreferences.getBoolean("material_theme_activado", true)) {
+      DynamicColors.applyToActivityIfAvailable(this);
+    }
+    int temaGuardado =
+        sharedPreferences.getInt(KEY_THEME, AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM);
+    AppCompatDelegate.setDefaultNightMode(temaGuardado);
 
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        // Configuración previa a la UI
-        sharedPreferences = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
-        
-        if (sharedPreferences.getBoolean("material_theme_activado", false)) {
-            DynamicColors.applyToActivityIfAvailable(this);
-        }
-        int temaGuardado = sharedPreferences.getInt(KEY_THEME, AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM);
-        AppCompatDelegate.setDefaultNightMode(temaGuardado);
+    super.onCreate(savedInstanceState);
 
-        super.onCreate(savedInstanceState);
-        WindowCompat.setDecorFitsSystemWindows(getWindow(), false);
-        setContentView(R.layout.activity_main);
-
-        inicializarVistas();
-        configurarListeners();
-
-        // Recuperar URI y Modo Vista
+    // 2. Configuración de Pantalla Completa (Edge-to-Edge)
+    WindowCompat.setDecorFitsSystemWindows(getWindow(), false);
+    String uriDesdeExtra = getIntent().getStringExtra("extra_carpeta_uri");
+    
+    if (uriDesdeExtra != null) {
+        // Guardamos la URI que nos enviaron
+        sharedPreferences.edit().putString("carpeta_uri", uriDesdeExtra).apply();
+        carpetaUriString = uriDesdeExtra;
+    } else {
+        // Si no hay extra, cargamos la que ya estaba guardada
         carpetaUriString = sharedPreferences.getString("carpeta_uri", null);
-        esModoCuadricula = sharedPreferences.getBoolean(KEY_VISTA_GRID, false);
-        
-        if (carpetaUriString == null) {
-        // Por seguridad, si llega aquí sin carpeta, lo devolvemos al inicio
-        startActivity(new Intent(this, InicioActivity.class));
+    }
+
+    // 3. Validación de seguridad para evitar entrar sin carpeta
+    if (carpetaUriString == null) {
+        Log.e("ERROR", "No hay URI ni en extra ni en Prefs, redirigiendo...");
+        Intent intent = new Intent(this, InicioActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        startActivity(intent);
         finish();
-        } else {
-        cargarNotas();
-        }
-        
-        aplicarModoVista(); // Aplicar diseño inicial
+        return;
+    }
+    setContentView(R.layout.activity_main);
+
+    // 3. Inicializar componentes
+    inicializarVistas();
+    configurarListeners();
+
+    // 4. Recuperar URI y Preferencias
+    carpetaUriString = sharedPreferences.getString("carpeta_uri", null);
+    esModoCuadricula = sharedPreferences.getBoolean(KEY_VISTA_GRID, false);
+
+cargarNotas();
+  }
+
+  /** Verifica si el permiso persistente sigue siendo válido antes de cargar */
+  private void verificarYCargarNotas() {
+    Uri folderUri = Uri.parse(carpetaUriString);
+    boolean tienePermiso = false;
+
+    // Revisar la lista de permisos otorgados por el sistema
+    for (UriPermission permission : getContentResolver().getPersistedUriPermissions()) {
+      if (permission.getUri().equals(folderUri) && permission.isReadPermission()) {
+        tienePermiso = true;
+        break;
+      }
     }
 
-    private void inicializarVistas() {
-        recyclerNotas = findViewById(R.id.recyclerNotas);
-        btnNuevaNota = findViewById(R.id.btnNuevaNota);
-        buscar = findViewById(R.id.buscar);
-        modoVistaTargeta = findViewById(R.id.modoVistaTargeta);
-        listaDeNotasCompleta = new ArrayList<>();
-        drawerLayout = findViewById(R.id.drawer_layout);
-        navigationView = findViewById(R.id.navigation_view_start);
-        btnMenu = findViewById(R.id.navegation_menu);
-        orden = findViewById(R.id.orden);
+    if (tienePermiso) {
+      cargarNotas(); // Ahora sí llamamos a la carga
+      aplicarModoVista();
+    } else {
+      // Si el permiso se perdió (por ejemplo, si borraron datos), volver al inicio
+      Toast.makeText(this, "Acceso a carpeta perdido. Re-seleccione.", Toast.LENGTH_LONG).show();
+      startActivity(new Intent(this, InicioActivity.class));
+      finish();
     }
+  }
 
-    private void configurarListeners() {
-        btnNuevaNota.setOnClickListener(v -> abrirEditor(""));
+  private void inicializarVistas() {
+    recyclerNotas = findViewById(R.id.recyclerNotas);
+    btnNuevaNota = findViewById(R.id.btnNuevaNota);
+    buscar = findViewById(R.id.buscar);
+    modoVistaTargeta = findViewById(R.id.modoVistaTargeta);
+    listaDeNotasCompleta = new ArrayList<>();
+    drawerLayout = findViewById(R.id.drawer_layout);
+    navigationView = findViewById(R.id.navigation_view_start);
+    btnMenu = findViewById(R.id.navegation_menu);
+    orden = findViewById(R.id.orden);
+  }
 
-        modoVistaTargeta.setOnClickListener(v -> {
-            esModoCuadricula = !esModoCuadricula;
-            sharedPreferences.edit().putBoolean(KEY_VISTA_GRID, esModoCuadricula).apply();
-            aplicarModoVista();
+  private void configurarListeners() {
+    btnNuevaNota.setOnClickListener(v -> abrirEditor(""));
+
+    modoVistaTargeta.setOnClickListener(
+        v -> {
+          esModoCuadricula = !esModoCuadricula;
+          sharedPreferences.edit().putBoolean(KEY_VISTA_GRID, esModoCuadricula).apply();
+          aplicarModoVista();
         });
 
-        buscar.addTextChangedListener(new TextWatcher() {
-            @Override public void onTextChanged(CharSequence s, int start, int before, int count) {
-                filtrarLista(s.toString());
-            }
-            @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
-            @Override public void afterTextChanged(Editable s) {}
+    buscar.addTextChangedListener(
+        new TextWatcher() {
+          @Override
+          public void onTextChanged(CharSequence s, int start, int before, int count) {
+            filtrarLista(s.toString());
+          }
+
+          @Override
+          public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+          @Override
+          public void afterTextChanged(Editable s) {}
         });
-        btnMenu.setOnClickListener(v -> {
-    drawerLayout.openDrawer(GravityCompat.START);
+    btnMenu.setOnClickListener(
+        v -> {
+          drawerLayout.openDrawer(GravityCompat.START);
         });
-        // Manejar clics en los items del menú lateral
-        navigationView.setNavigationItemSelectedListener(item -> {
-    int id = item.getItemId();
-    
-    if (id == R.id.settings) {
-        // Tu lógica()
-        startActivity(new Intent(this, SettingsActivity.class));
+    // Manejar clics en los items del menú lateral
+    navigationView.setNavigationItemSelectedListener(
+        item -> {
+          int id = item.getItemId();
+
+          if (id == R.id.settings) {
+            // Tu lógica()
+            startActivity(new Intent(this, SettingsActivity.class));
+          }
+
+          drawerLayout.closeDrawer(GravityCompat.START);
+          return true;
+        });
+    orden.setOnClickListener(
+        v -> {
+          ordenarPor();
+        });
+  }
+
+  // --- MÉTODO PRINCIPAL DE CARGA (OPTIMIZADO CON HILO Y ORDENAMIENTO) ---
+  private void cargarNotas() {
+    if (carpetaUriString == null) {
+      Log.d("DEBUG", "URI es nula");
+      return;
     }
-    
-    drawerLayout.closeDrawer(GravityCompat.START);
-    return true;
-        });
-        orden.setOnClickListener(v -> {
-            ordenarPor();
-        });
-    }
-
-
-    // --- MÉTODO PRINCIPAL DE CARGA (OPTIMIZADO CON HILO Y ORDENAMIENTO) ---
-    private void cargarNotas() {
-    if (carpetaUriString == null) return;
 
     Uri treeUri = Uri.parse(carpetaUriString);
     DocumentFile root = DocumentFile.fromTreeUri(this, treeUri);
 
     if (root != null && root.canRead()) {
-        new Thread(() -> {
-            List<Nota> notasTemp = new ArrayList<>();
-            DocumentFile[] archivos = root.listFiles();
+      new Thread(
+              () -> {
+                List<Nota> notasTemp = new ArrayList<>();
+                DocumentFile[] archivos = root.listFiles();
 
-            // Ordenar por fecha (Más reciente primero)
-            Arrays.sort(archivos, (f1, f2) -> {
-                switch (criterioOrdenActual) {
-                    case 0: // Fecha Modificación (Más reciente primero)
-                        return Long.compare(f2.lastModified(), f1.lastModified());
-                    case 1: // Fecha Creación (Más antigua primero / orden SAF)
-                        return Long.compare(f1.lastModified(), f2.lastModified());
-                    case 2: // Nombre (A-Z)
-                        return f1.getName().toLowerCase().compareTo(f2.getName().toLowerCase());
-                    default:
-                        return Long.compare(f2.lastModified(), f1.lastModified());
-                }
-            });
+                Log.d("DEBUG", "Archivos encontrados: " + (archivos != null ? archivos.length : 0));
+                // Ordenar por fecha (Más reciente primero)
+                Arrays.sort(
+                    archivos,
+                    (f1, f2) -> {
+                      switch (criterioOrdenActual) {
+                        case 0: // Fecha Modificación (Más reciente primero)
+                          return Long.compare(f2.lastModified(), f1.lastModified());
+                        case 1: // Fecha Creación (Más antigua primero / orden SAF)
+                          return Long.compare(f1.lastModified(), f2.lastModified());
+                        case 2: // Nombre (A-Z)
+                          return f1.getName().toLowerCase().compareTo(f2.getName().toLowerCase());
+                        default:
+                          return Long.compare(f2.lastModified(), f1.lastModified());
+                      }
+                    });
 
-            SimpleDateFormat sdf = new SimpleDateFormat("dd MMM yyyy", Locale.getDefault());
+                SimpleDateFormat sdf = new SimpleDateFormat("dd MMM yyyy", Locale.getDefault());
 
-            for (DocumentFile file : archivos) {
-                if (file.isFile() && file.getName() != null && file.getName().endsWith(".txt")) {
+                for (DocumentFile file : archivos) {
+                  if (file.isFile() && file.getName() != null && file.getName().endsWith(".txt")) {
                     String titulo = file.getName().replace(".txt", "");
-                    
+
                     // Obtener el resumen limpio usando el Helper
                     String extracto = obtenerResumenSAF(file.getUri());
                     String fecha = sdf.format(new Date(file.lastModified()));
                     String fullContent = NoteIOHelper.readContent(this, file.getUri());
-                       int color = NoteIOHelper.extractColor(fullContent);
+                    int color = NoteIOHelper.extractColor(fullContent);
 
                     // Creamos el objeto Nota
                     Nota nota = new Nota(titulo, extracto, fecha, color, file.getUri().toString());
-                    
-                    
 
                     notasTemp.add(nota);
+                  }
                 }
-            }
 
-            // Actualizar UI en el hilo principal
-            runOnUiThread(() -> {
-                listaDeNotasCompleta.clear();
-                listaDeNotasCompleta.addAll(notasTemp);
+                // Actualizar UI en el hilo principal
+                runOnUiThread(
+                    () -> {
+                      Log.d("DEBUG", "Notas procesadas para mostrar: " + notasTemp.size());
+                      listaDeNotasCompleta.clear();
+                      listaDeNotasCompleta.addAll(notasTemp);
 
-                if (adaptador == null) {
+                      if (adaptador == null) {
 
-adaptador = new NotaAdapter(listaDeNotasCompleta,
-    // Click Normal
-    nota -> {
-        // Si hay items seleccionados, el click normal funciona para seleccionar/deseleccionar (Multiselect)
-        if (adaptador.haySeleccion()) {
-            adaptador.toggleSeleccion(nota);
-        } else {
-            // Si no hay selección, comportamiento normal (abrir editor)
-            abrirEditor(nota.getUri());
-        }
-    },
-    // Click Largo
-    (view, nota, position) -> {
-        // 1. Marcamos visualmente la nota
-        adaptador.toggleSeleccion(nota);
-        
-        // 2. Opcional: Si quieres seguir mostrando el menú popup al mismo tiempo:
-        mostrarMenuOpciones(view, nota);
-        
+                        adaptador =
+                            new NotaAdapter(
+                                listaDeNotasCompleta,
+                                // Click Normal
+                                nota -> {
+                                  // Si hay items seleccionados, el click normal funciona para
+                                  // seleccionar/deseleccionar (Multiselect)
+                                  if (adaptador.haySeleccion()) {
+                                    adaptador.toggleSeleccion(nota);
+                                  } else {
+                                    // Si no hay selección, comportamiento normal (abrir editor)
+                                    abrirEditor(nota.getUri());
+                                  }
+                                },
+                                // Click Largo
+                                (view, nota, position) -> {
+                                  // 1. Marcamos visualmente la nota
+                                  adaptador.toggleSeleccion(nota);
+                                  mostrarMenuOpciones(view, nota);
+                                });
+                        recyclerNotas.setAdapter(adaptador);
+                        aplicarModoVista();
+                      } else {
+                        adaptador.actualizarLista(listaDeNotasCompleta);
+                      }
+                    });
+              })
+          .start();
+    } else {
+      Log.e("DEBUG", "Error de acceso: root es nulo o no se puede leer");
     }
-);
-                    recyclerNotas.setAdapter(adaptador);
-                    aplicarModoVista(); 
-                } else {
-                    adaptador.actualizarLista(listaDeNotasCompleta);
-                }
-            });
-        }).start();
-    }
-    }
+  }
 
-    private String obtenerResumenSAF(Uri fileUri) {
+  private String obtenerResumenSAF(Uri fileUri) {
     // 1. Leemos el contenido completo usando el Helper
     String fullContent = NoteIOHelper.readContent(this, fileUri);
-    
+
     if (fullContent.isEmpty()) return "Nota vacía";
 
     // 2. Limpiamos el HTML (quitamos divs de color y checklist)
@@ -255,82 +312,89 @@ adaptador = new NotaAdapter(listaDeNotasCompleta,
     // 3. Convertimos a texto plano para eliminar etiquetas como <b>, <br>, etc.
     String plainText;
     if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
-        plainText = Html.fromHtml(cleanHtml, Html.FROM_HTML_MODE_LEGACY).toString();
+      plainText = Html.fromHtml(cleanHtml, Html.FROM_HTML_MODE_LEGACY).toString();
     } else {
-        plainText = Html.fromHtml(cleanHtml).toString();
+      plainText = Html.fromHtml(cleanHtml).toString();
     }
 
     if (plainText.length() > 350) {
-        return plainText.substring(0, 100) + "...";
+      return plainText.substring(0, 100) + "...";
     }
-    
+
     return plainText.isEmpty() ? "Nota vacía" : plainText;
+  }
+
+  // --- ACCIONES DEL MENÚ CONTEXTUAL (RESTAURADOS) ---
+  private void mostrarMenuOpciones(View view, Nota nota) {
+    android.widget.PopupMenu popup = new android.widget.PopupMenu(this, view);
+    popup.getMenuInflater().inflate(R.menu.menu_item_nota, popup.getMenu());
+
+    // Truco para mostrar iconos
+    try {
+      java.lang.reflect.Field field = popup.getClass().getDeclaredField("mPopup");
+      field.setAccessible(true);
+      Object menuPopupHelper = field.get(popup);
+      Class<?> classPopupHelper = Class.forName(menuPopupHelper.getClass().getName());
+      java.lang.reflect.Method setForceShowIcon =
+          classPopupHelper.getMethod("setForceShowIcon", boolean.class);
+      setForceShowIcon.invoke(menuPopupHelper, true);
+    } catch (Exception e) {
+      e.printStackTrace();
     }
 
-    // --- ACCIONES DEL MENÚ CONTEXTUAL (RESTAURADOS) ---
-    private void mostrarMenuOpciones(View view, Nota nota) {
-        android.widget.PopupMenu popup = new android.widget.PopupMenu(this, view);
-        popup.getMenuInflater().inflate(R.menu.menu_item_nota, popup.getMenu());
-
-        // Truco para mostrar iconos
-        try {
-            java.lang.reflect.Field field = popup.getClass().getDeclaredField("mPopup");
-            field.setAccessible(true);
-            Object menuPopupHelper = field.get(popup);
-            Class<?> classPopupHelper = Class.forName(menuPopupHelper.getClass().getName());
-            java.lang.reflect.Method setForceShowIcon = classPopupHelper.getMethod("setForceShowIcon", boolean.class);
-            setForceShowIcon.invoke(menuPopupHelper, true);
-        } catch (Exception e) { e.printStackTrace(); }
-
-        popup.setOnMenuItemClickListener(item -> {
-            int id = item.getItemId();
-            if (id == R.id.action_share) {
-                compartirNotaDesdeLista(nota);
-                return true;
-            } else if (id == R.id.action_floating) {
-                abrirNotaFlotante(nota);
-                return true;
-            } else if (id == R.id.action_delete) {
-                eliminarNotaDesdeLista(nota);
-                return true;
-            }
-            return false;
+    popup.setOnMenuItemClickListener(
+        item -> {
+          int id = item.getItemId();
+          if (id == R.id.action_share) {
+            compartirNotaDesdeLista(nota);
+            return true;
+          } else if (id == R.id.action_floating) {
+            abrirNotaFlotante(nota);
+            return true;
+          } else if (id == R.id.action_delete) {
+            eliminarNotaDesdeLista(nota);
+            return true;
+          }
+          return false;
         });
-        popup.setOnDismissListener(menu -> {
-        // Si solo querías resaltar mientras el menú estaba abierto:
-        adaptador.limpiarSeleccion(); 
-    });
-        popup.show();
-    }
+    popup.setOnDismissListener(
+        menu -> {
+          // Si solo querías resaltar mientras el menú estaba abierto:
+          adaptador.limpiarSeleccion();
+        });
+    popup.show();
+  }
 
-    // 1. Este es el método que llamas desde el clic largo o menú de tu lista
-private void compartirNotaDesdeLista(Nota nota) {
+  // 1. Este es el método que llamas desde el clic largo o menú de tu lista
+  private void compartirNotaDesdeLista(Nota nota) {
     String[] opciones = {"Enviar como texto", "Enviar como PDF"};
 
     new com.google.android.material.dialog.MaterialAlertDialogBuilder(this)
-            .setTitle("Compartir: " + nota.getTitulo())
-            .setItems(opciones, (dialog, which) -> {
-                if (which == 0) {
-                    compartirComoTexto(nota);
-                } else {
-                    compartirComoPDF(nota);
-                }
+        .setTitle("Compartir: " + nota.getTitulo())
+        .setItems(
+            opciones,
+            (dialog, which) -> {
+              if (which == 0) {
+                compartirComoTexto(nota);
+              } else {
+                compartirComoPDF(nota);
+              }
             })
-            .show();
-}
+        .show();
+  }
 
-    // 2. Compartir Texto Plano
-    private void compartirComoTexto(Nota nota) {
+  // 2. Compartir Texto Plano
+  private void compartirComoTexto(Nota nota) {
     // 1. Leer y Limpiar
     String fullContent = NoteIOHelper.readContent(this, Uri.parse(nota.getUri()));
     String cleanHtml = NoteIOHelper.cleanHtmlForEditor(fullContent);
-    
+
     // 2. Convertir a Texto plano
     String textoCompartir;
     if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
-        textoCompartir = Html.fromHtml(cleanHtml, Html.FROM_HTML_MODE_LEGACY).toString();
+      textoCompartir = Html.fromHtml(cleanHtml, Html.FROM_HTML_MODE_LEGACY).toString();
     } else {
-        textoCompartir = Html.fromHtml(cleanHtml).toString();
+      textoCompartir = Html.fromHtml(cleanHtml).toString();
     }
 
     // 3. Enviar Intent
@@ -338,36 +402,39 @@ private void compartirNotaDesdeLista(Nota nota) {
     intent.setType("text/plain");
     intent.putExtra(Intent.EXTRA_TEXT, nota.getTitulo() + "\n\n" + textoCompartir);
     startActivity(Intent.createChooser(intent, "Compartir nota vía:"));
-    }
+  }
 
-    // 3. Compartir PDF
-    private void compartirComoPDF(Nota nota) {
+  // 3. Compartir PDF
+  private void compartirComoPDF(Nota nota) {
     // 1. Usar el Helper para obtener el contenido REAL (Limpio de metadatos y checklists)
     String fullContent = NoteIOHelper.readContent(this, Uri.parse(nota.getUri()));
     String htmlLimpio = NoteIOHelper.cleanHtmlForEditor(fullContent);
-    
+
     // 2. Convertir a texto plano para el Canvas del PDF
     String contenidoLimpio;
     if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
-        contenidoLimpio = android.text.Html.fromHtml(htmlLimpio, android.text.Html.FROM_HTML_MODE_LEGACY).toString();
+      contenidoLimpio =
+          android.text.Html.fromHtml(htmlLimpio, android.text.Html.FROM_HTML_MODE_LEGACY)
+              .toString();
     } else {
-        contenidoLimpio = android.text.Html.fromHtml(htmlLimpio).toString();
+      contenidoLimpio = android.text.Html.fromHtml(htmlLimpio).toString();
     }
 
     if (contenidoLimpio.trim().isEmpty()) {
-        Toast.makeText(this, "La nota está vacía", Toast.LENGTH_SHORT).show();
-        return;
+      Toast.makeText(this, "La nota está vacía", Toast.LENGTH_SHORT).show();
+      return;
     }
 
     // --- Generación del PDF ---
     android.graphics.pdf.PdfDocument document = new android.graphics.pdf.PdfDocument();
     // Tamaño A4 (595 x 842 puntos)
-    android.graphics.pdf.PdfDocument.PageInfo pageInfo = new android.graphics.pdf.PdfDocument.PageInfo.Builder(595, 842, 1).create();
+    android.graphics.pdf.PdfDocument.PageInfo pageInfo =
+        new android.graphics.pdf.PdfDocument.PageInfo.Builder(595, 842, 1).create();
     android.graphics.pdf.PdfDocument.Page page = document.startPage(pageInfo);
 
     android.graphics.Canvas canvas = page.getCanvas();
     android.graphics.Paint paint = new android.graphics.Paint();
-    
+
     // Configuración de márgenes y fuente
     int x = 50;
     int y = 60;
@@ -375,151 +442,164 @@ private void compartirNotaDesdeLista(Nota nota) {
 
     // Dibujar Título
     paint.setTextSize(20);
-    paint.setTypeface(android.graphics.Typeface.create(android.graphics.Typeface.DEFAULT, android.graphics.Typeface.BOLD));
+    paint.setTypeface(
+        android.graphics.Typeface.create(
+            android.graphics.Typeface.DEFAULT, android.graphics.Typeface.BOLD));
     canvas.drawText(nota.getTitulo(), x, y, paint);
-    
+
     y += 40; // Espacio después del título
 
     // Configurar cuerpo de texto
     paint.setTextSize(12);
     paint.setTypeface(android.graphics.Typeface.DEFAULT);
-    
+
     // --- LÓGICA DE DIBUJO CON WRAPPING (AJUSTE DE LÍNEA) ---
     // TextPaint permite medir mejor el ancho del texto
     android.text.TextPaint textPaint = new android.text.TextPaint(paint);
-    
+
     for (String parrafo : contenidoLimpio.split("\n")) {
-        // StaticLayout es el truco profesional para que el texto salte de línea automáticamente si es largo
-        android.text.StaticLayout layout = new android.text.StaticLayout(
-                parrafo, textPaint, pageWidth, 
-                android.text.Layout.Alignment.ALIGN_NORMAL, 1.0f, 0.0f, false);
-        
-        canvas.save();
-        canvas.translate(x, y);
-        layout.draw(canvas);
-        canvas.restore();
-        
-        y += layout.getHeight() + 5; // Mover 'y' hacia abajo según el tamaño del párrafo
-        
-        if (y > 800) break; // Límite de la página simple
+      // StaticLayout es el truco profesional para que el texto salte de línea automáticamente si es
+      // largo
+      android.text.StaticLayout layout =
+          new android.text.StaticLayout(
+              parrafo,
+              textPaint,
+              pageWidth,
+              android.text.Layout.Alignment.ALIGN_NORMAL,
+              1.0f,
+              0.0f,
+              false);
+
+      canvas.save();
+      canvas.translate(x, y);
+      layout.draw(canvas);
+      canvas.restore();
+
+      y += layout.getHeight() + 5; // Mover 'y' hacia abajo según el tamaño del párrafo
+
+      if (y > 800) break; // Límite de la página simple
     }
 
     document.finishPage(page);
 
     // --- Guardar y Compartir ---
     try {
-        File cachePath = new File(getCacheDir(), "pdf_temp");
-        if (!cachePath.exists()) cachePath.mkdirs();
-        
-        String nombreSeguro = nota.getTitulo().replaceAll("[^a-zA-Z0-9]", "_") + ".pdf";
-        File file = new File(cachePath, nombreSeguro);
-        
-        try (java.io.FileOutputStream fos = new java.io.FileOutputStream(file)) {
-            document.writeTo(fos);
-        }
-        document.close();
+      File cachePath = new File(getCacheDir(), "pdf_temp");
+      if (!cachePath.exists()) cachePath.mkdirs();
 
-        Uri contentUri = androidx.core.content.FileProvider.getUriForFile(this, 
-                getPackageName() + ".fileprovider", file);
-        
-        Intent intent = new Intent(Intent.ACTION_SEND);
-        intent.setType("application/pdf");
-        intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-        intent.putExtra(Intent.EXTRA_STREAM, contentUri);
-        startActivity(Intent.createChooser(intent, "Compartir nota como PDF"));
+      String nombreSeguro = nota.getTitulo().replaceAll("[^a-zA-Z0-9]", "_") + ".pdf";
+      File file = new File(cachePath, nombreSeguro);
+
+      try (java.io.FileOutputStream fos = new java.io.FileOutputStream(file)) {
+        document.writeTo(fos);
+      }
+      document.close();
+
+      Uri contentUri =
+          androidx.core.content.FileProvider.getUriForFile(
+              this, getPackageName() + ".fileprovider", file);
+
+      Intent intent = new Intent(Intent.ACTION_SEND);
+      intent.setType("application/pdf");
+      intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+      intent.putExtra(Intent.EXTRA_STREAM, contentUri);
+      startActivity(Intent.createChooser(intent, "Compartir nota como PDF"));
 
     } catch (Exception e) {
-        Log.e("PDF_ERROR", e.getMessage());
-        Toast.makeText(this, "Error al generar PDF", Toast.LENGTH_SHORT).show();
+      Log.e("PDF_ERROR", e.getMessage());
+      Toast.makeText(this, "Error al generar PDF", Toast.LENGTH_SHORT).show();
     }
+  }
+
+  private void eliminarNotaDesdeLista(Nota nota) {
+    try {
+      Uri uri = Uri.parse(nota.getUri());
+      DocumentFile archivo = DocumentFile.fromSingleUri(this, uri);
+      if (archivo != null && archivo.delete()) {
+        Toast.makeText(this, "Nota eliminada", Toast.LENGTH_SHORT).show();
+        cargarNotas(); // Recargar lista
+      } else {
+        Toast.makeText(this, "No se pudo eliminar", Toast.LENGTH_SHORT).show();
+      }
+    } catch (Exception e) {
+      Toast.makeText(this, "Error al eliminar", Toast.LENGTH_SHORT).show();
+    }
+  }
+
+  private void abrirNotaFlotante(Nota nota) {
+    String contenido = obtenerTextoDeArchivo(Uri.parse(nota.getUri()));
+    Intent serviceIntent = new Intent(this, FloatingService.class);
+    serviceIntent.putExtra("contenido_nota", contenido);
+    serviceIntent.putExtra("uri_archivo", nota.getUri());
+
+    if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+      startForegroundService(serviceIntent);
+    } else {
+      startService(serviceIntent);
+    }
+    moveTaskToBack(true);
+  }
+
+  // --- MÉTODOS AUXILIARES ---
+  private void abrirEditor(String uriString) {
+    Intent intent = new Intent(this, EditorActivity.class);
+
+    // CORRECCIÓN: Verificamos que no sea NULL antes de ver si está vacío
+    if (uriString != null && !uriString.isEmpty()) {
+      intent.putExtra("uri_archivo", uriString);
     }
 
-    private void eliminarNotaDesdeLista(Nota nota) {
-        try {
-            Uri uri = Uri.parse(nota.getUri());
-            DocumentFile archivo = DocumentFile.fromSingleUri(this, uri);
-            if (archivo != null && archivo.delete()) {
-                Toast.makeText(this, "Nota eliminada", Toast.LENGTH_SHORT).show();
-                cargarNotas(); // Recargar lista
-            } else {
-                Toast.makeText(this, "No se pudo eliminar", Toast.LENGTH_SHORT).show();
-            }
-        } catch (Exception e) {
-            Toast.makeText(this, "Error al eliminar", Toast.LENGTH_SHORT).show();
-        }
-    }
+    activityLauncherEditor.launch(intent);
+  }
 
-    private void abrirNotaFlotante(Nota nota) {
-        String contenido = obtenerTextoDeArchivo(Uri.parse(nota.getUri()));
-        Intent serviceIntent = new Intent(this, FloatingService.class);
-        serviceIntent.putExtra("contenido_nota", contenido);
-        serviceIntent.putExtra("uri_archivo", nota.getUri());
+  private void filtrarLista(String texto) {
+    if (listaDeNotasCompleta == null) return;
+    List<Nota> listaFiltrada = new ArrayList<>();
+    String query = texto.toLowerCase().trim();
+    for (Nota nota : listaDeNotasCompleta) {
+      if (nota.getTitulo().toLowerCase().contains(query)
+          || nota.getContenido().toLowerCase().contains(query)) {
+        listaFiltrada.add(nota);
+      }
+    }
+    if (adaptador != null) {
+      adaptador.actualizarLista(listaFiltrada);
+    }
+  }
 
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
-            startForegroundService(serviceIntent);
-        } else {
-            startService(serviceIntent);
-        }
-        moveTaskToBack(true);
+  private void aplicarModoVista() {
+    if (esModoCuadricula) {
+      recyclerNotas.setLayoutManager(
+          new StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL));
+      modoVistaTargeta.setIconResource(R.drawable.outline_view_agenda);
+    } else {
+      recyclerNotas.setLayoutManager(new LinearLayoutManager(this));
+      modoVistaTargeta.setIconResource(R.drawable.grid_view);
     }
+    if (adaptador != null) adaptador.notifyDataSetChanged();
+  }
 
-    // --- MÉTODOS AUXILIARES ---
-    private void abrirEditor(String uriString) {
-        Intent intent = new Intent(this, EditorActivity.class);
-        
-        // CORRECCIÓN: Verificamos que no sea NULL antes de ver si está vacío
-        if (uriString != null && !uriString.isEmpty()) {
-            intent.putExtra("uri_archivo", uriString); 
-        }
-        
-        activityLauncherEditor.launch(intent);
+  private String obtenerTextoDeArchivo(Uri uri) {
+    StringBuilder stringBuilder = new StringBuilder();
+    try (InputStream inputStream = getContentResolver().openInputStream(uri);
+        BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))) {
+      String line;
+      while ((line = reader.readLine()) != null) {
+        stringBuilder.append(line).append("\n");
+      }
+      // Limpieza HTML básica para compartir/flotante
+      String raw = stringBuilder.toString();
+      if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
+        return Html.fromHtml(raw, Html.FROM_HTML_MODE_LEGACY).toString();
+      } else {
+        return Html.fromHtml(raw).toString();
+      }
+    } catch (Exception e) {
+      return "";
     }
-    private void filtrarLista(String texto) {
-        if (listaDeNotasCompleta == null) return;
-        List<Nota> listaFiltrada = new ArrayList<>();
-        String query = texto.toLowerCase().trim();
-        for (Nota nota : listaDeNotasCompleta) {
-            if (nota.getTitulo().toLowerCase().contains(query) || 
-                nota.getContenido().toLowerCase().contains(query)) {
-                listaFiltrada.add(nota);
-            }
-        }
-        if (adaptador != null) {
-            adaptador.actualizarLista(listaFiltrada);
-        }
-    }
+  }
 
-    private void aplicarModoVista() {
-        if (esModoCuadricula) {
-            recyclerNotas.setLayoutManager(new StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL));
-            modoVistaTargeta.setIconResource(R.drawable.outline_view_agenda);
-        } else {
-            recyclerNotas.setLayoutManager(new LinearLayoutManager(this));
-            modoVistaTargeta.setIconResource(R.drawable.grid_view);
-        }
-        if (adaptador != null) adaptador.notifyDataSetChanged();
-    }
-
-    private String obtenerTextoDeArchivo(Uri uri) {
-        StringBuilder stringBuilder = new StringBuilder();
-        try (InputStream inputStream = getContentResolver().openInputStream(uri);
-             BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))) {
-            String line;
-            while ((line = reader.readLine()) != null) {
-                stringBuilder.append(line).append("\n");
-            }
-            // Limpieza HTML básica para compartir/flotante
-            String raw = stringBuilder.toString();
-            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
-                return Html.fromHtml(raw, Html.FROM_HTML_MODE_LEGACY).toString();
-            } else {
-                return Html.fromHtml(raw).toString();
-            }
-        } catch (Exception e) {
-            return "";
-        }
-    }
-    private void ordenarPor() {
+  private void ordenarPor() {
     BottomSheetDialog bottomSheetDialog = new BottomSheetDialog(this);
     View view = getLayoutInflater().inflate(R.layout.button_sheet_orden, null);
     bottomSheetDialog.setContentView(view);
@@ -530,25 +610,27 @@ private void compartirNotaDesdeLista(Nota nota) {
     MaterialButton btnNombre = view.findViewById(R.id.personalizado);
 
     // 2. Lógica de clics
-    btnModificacion.setOnClickListener(v -> {
-        criterioOrdenActual = 0;
-        cargarNotas(); // Recarga los archivos con el nuevo orden
-        bottomSheetDialog.dismiss();
-    });
+    btnModificacion.setOnClickListener(
+        v -> {
+          criterioOrdenActual = 0;
+          cargarNotas(); // Recarga los archivos con el nuevo orden
+          bottomSheetDialog.dismiss();
+        });
 
-    btnCreacion.setOnClickListener(v -> {
-        criterioOrdenActual = 1;
-        cargarNotas();
-        bottomSheetDialog.dismiss();
-    });
+    btnCreacion.setOnClickListener(
+        v -> {
+          criterioOrdenActual = 1;
+          cargarNotas();
+          bottomSheetDialog.dismiss();
+        });
 
-    btnNombre.setOnClickListener(v -> {
-        criterioOrdenActual = 2;
-        cargarNotas();
-        bottomSheetDialog.dismiss();
-    });
+    btnNombre.setOnClickListener(
+        v -> {
+          criterioOrdenActual = 2;
+          cargarNotas();
+          bottomSheetDialog.dismiss();
+        });
 
     bottomSheetDialog.show();
-    }
-
+  }
 }

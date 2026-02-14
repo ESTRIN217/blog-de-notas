@@ -35,4 +35,14 @@
     <string name="modoVistaTargeta">Modo de vista de la targeta</string>
     <string name="casilla_de_verificacion">Lista de tareas</string>
     <string name="tema_oscuro">Tema oscuro</string>
+    <string name="configuración_de_permisos">Configuración de Permisos</string>
+    <string name="notificaciones">Notificaciones</string>
+    <string name="microfono">Micrófono (para audio)</string> 
+    <string name="camara">Cámara (para imágenes)</string>
+    <string name="ubicacion_de_notas">Ubicación de notas</string>
+    <string name="seleccione_la_carpeta">Seleccione la carpeta donde se guardarán sus archivos .txt</string>
+    <string name="seleccionar_carpeta">Seleccionar carpeta</string>
+    <string name="comenzar">Comenzar</string>
+    <string name="informacion">Información</string>
+    <string name="sobre">Sobre</string>
 </resources>

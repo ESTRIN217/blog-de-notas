@@ -280,7 +280,7 @@ private final ActivityResultLauncher<Intent> launcherPermisoOverlay = registerFo
     AppCompatDelegate.setDefaultNightMode(temaGuardado);
 
     // B. Aplicar Colores Dinámicos
-    if (prefs.getBoolean("material_theme_activado", false)) {
+    if (prefs.getBoolean("material_theme_activado", true)) {
         DynamicColors.applyToActivityIfAvailable(this);
     }
     
