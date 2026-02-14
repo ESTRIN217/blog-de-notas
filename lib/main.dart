@@ -190,7 +190,12 @@ class _MyHomePageState extends State<MyHomePage> {
 
   void _shareSelectedItems() {
     final content = _selectedItems.map((item) => "${item.title}\n${item.summary}").join('\n\n---\n\n');
-    Share.share(content, subject: 'My Notes');
+    SharePlus.instance.share(
+        ShareParams(
+            text: content,
+                subject: 'My Notes',
+                  ),
+                  );
     _exitSelectionMode();
   }
 
