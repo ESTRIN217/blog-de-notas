@@ -45,4 +45,17 @@
     <string name="comenzar">Comenzar</string>
     <string name="informacion">Información</string>
     <string name="sobre">Sobre</string>
+    <string name="titulo_de_la_nota">Título de la nota</string>
+    <string name="comienza_a_escribir">Comienza a escribir...</string>
+    <string name="bloques_basicos">Bloques basicos</string>
+    <string name="contenido_multimedia">Contenido Multimedia</string>
+    <string name="ordenar_notas_por">Ordenar notas por</string>
+    <string name="fecha_de_modificacion">Fecha de modificación</string>
+    <string name="fecha_de_creacion">Fecha de creación</string>
+    <string name="nombre">Nombre (A-Z)</string>
+    <string name="info">Esta app es un Blog de notas creado con la ayuda de Google Gemini, utilizando Material Design 3. Compilada en un dispositivo móvil mediante Android Code Studio.</string>
+    <string name="desarrollado_por">Desarrollado por</string>
+    <string name="ver_en_gitHub">Ver en GitHub</string>
+    <string name="registro_de_cambios">Registro de cambios</string>
+    <string name="permisos">Configuración de permisos</string>
 </resources>

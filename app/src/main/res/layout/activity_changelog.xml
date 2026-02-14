@@ -16,7 +16,7 @@
         <com.google.android.material.appbar.MaterialToolbar
              android:layout_height="?attr/actionBarSize"
              android:layout_width="match_parent"
-             app:title="Registro de cambios"
+             app:title="@string/registro_de_cambios"
              app:navigationIcon="@drawable/arrow_back_24px"
              app:navigationContentDescription="Volver atrás"
              android:id="@+id/topAppBar">

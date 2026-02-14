@@ -13,7 +13,7 @@
          android:layout_width="match_parent"
          android:textAppearance="?attr/textAppearanceTitleMedium"
          android:paddingBottom="10dp"
-         android:text="Ordenar notas por" />
+         android:text="@string/ordenar_notas_por" />
 
     <Button
          android:layout_height="wrap_content"
@@ -22,7 +22,7 @@
          app:icon="@drawable/round_history"
          style="?attr/materialButtonOutlinedStyle"
          android:id="@+id/fecha_de_modificacion"
-         android:text="Fecha de modificación" />
+         android:text="@string/fecha_de_modificacion" />
 
     <Button
          android:layout_height="wrap_content"
@@ -31,7 +31,7 @@
          app:icon="@drawable/calendar_today"
          style="?attr/materialButtonOutlinedStyle"
          android:id="@+id/fecha_de_creacion"
-         android:text="Fecha de creación" />
+         android:text="@string/fecha_de_creacion" />
 
     <Button
          android:layout_height="wrap_content"
@@ -39,6 +39,6 @@
          app:icon="@drawable/sort_by_alpha"
          style="?attr/materialButtonOutlinedStyle"
          android:id="@+id/personalizado"
-         android:text="Nombre (A-Z)" />
+         android:text="@string/nombre" />
 
 </LinearLayout>

@@ -9,19 +9,20 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AppCompatDelegate;
 
-import com.google.android.material.button.MaterialButton;
+import com.Jhon.myempty.blogdenotasjava.InicioActivity;
 import com.google.android.material.color.DynamicColors;
 import com.google.android.material.materialswitch.MaterialSwitch;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.button.MaterialButtonToggleGroup;
+import com.google.android.material.card.MaterialCardView;
 
 public class SettingsActivity extends AppCompatActivity {
 
     // Vistas
     private MaterialButtonToggleGroup toggleGrupoTema;
     private MaterialSwitch switchMaterialTheme;
-    private MaterialButton novedades, sobre;
     private MaterialToolbar toolbar;
+    private MaterialCardView novedades, sobre, setup;
 
     // Preferencias
     private SharedPreferences prefs;
@@ -67,6 +68,7 @@ public class SettingsActivity extends AppCompatActivity {
         switchMaterialTheme = findViewById(R.id.switchMaterialTheme);
         novedades = findViewById(R.id.novedades);
         sobre = findViewById(R.id.sobre);
+        setup = findViewById(R.id.setup);
     }
 
     private void cargarPreferencias() {
@@ -130,6 +132,9 @@ if (temaGuardado == AppCompatDelegate.MODE_NIGHT_NO) {
         });
         sobre.setOnClickListener(v -> {
             startActivity(new Intent(this, SobreActivity.class));
+        });
+        setup.setOnClickListener(v -> {
+            startActivity(new Intent(this, InicioActivity.class));
         });
     }
 

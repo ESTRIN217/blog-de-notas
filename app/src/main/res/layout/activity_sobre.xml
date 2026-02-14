@@ -16,7 +16,7 @@
         <com.google.android.material.appbar.MaterialToolbar
              android:layout_height="?attr/actionBarSize"
              android:layout_width="match_parent"
-             app:title="Sobre"
+             app:title="@string/sobre"
              app:navigationIcon="@drawable/arrow_back_24px"
              app:navigationContentDescription="Volver atrás"
              android:id="@+id/topAppBar">
@@ -93,14 +93,14 @@
                  android:textAlignment="center"
                  android:textAppearance="?attr/textAppearanceBodyLarge"
                  android:lineSpacingExtra="4dp"
-                 android:text="Esta app es un Blog de notas creado con la ayuda de Google Gemini, utilizando Material Design 3. Compilada en un dispositivo móvil mediante Android Code Studio." />
+                 android:text="@string/info" />
 
             <com.google.android.material.textview.MaterialTextView
                  android:layout_height="wrap_content"
                  android:layout_width="wrap_content"
                  android:textAppearance="?attr/textAppearanceLabelMedium"
                  android:layout_marginTop="24dp"
-                 android:text="Desarrollado por" />
+                 android:text="@string/desarrollado_por" />
 
             <com.google.android.material.textview.MaterialTextView
                  android:layout_height="wrap_content"
@@ -116,7 +116,7 @@
                  style="?attr/materialButtonOutlinedStyle"
                  android:layout_marginTop="16dp"
                  android:id="@+id/github"
-                 android:text="Ver en GitHub" />
+                 android:text="@string/ver_en_gitHub" />
 
         </LinearLayout>
 

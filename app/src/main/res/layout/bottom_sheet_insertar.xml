@@ -11,7 +11,7 @@
     <com.google.android.material.textview.MaterialTextView
          android:layout_height="wrap_content"
          android:layout_width="wrap_content"
-         android:text="Bloques basicos" />
+         android:text="@string/bloques_basicos" />
 
     <LinearLayout
          android:layout_height="wrap_content"
@@ -33,7 +33,7 @@
     <com.google.android.material.textview.MaterialTextView
          android:layout_height="wrap_content"
          android:layout_width="wrap_content"
-         android:text="Contenido Multimedia" />
+         android:text="@string/contenido_multimedia" />
 
     <LinearLayout
          android:layout_height="wrap_content"
