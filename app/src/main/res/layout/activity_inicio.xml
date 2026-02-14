@@ -20,32 +20,48 @@
             android:textAppearance="?attr/textAppearanceHeadlineSmall"
             android:layout_marginBottom="24dp" />
 
-        <com.google.android.material.materialswitch.MaterialSwitch
-            android:id="@+id/swNotificaciones"
+        <com.google.android.material.card.MaterialCardView
             android:layout_height="wrap_content"
-            android:layout_width="match_parent"
-            android:text="@string/notificaciones"
-            app:thumbIcon="@drawable/close_24px"/>
+                android:layout_width="match_parent"
+                android:layout_margin="8dp"
+                app:cardElevation="1dp"
+                app:cardCornerRadius="12dp"
+                app:contentPadding="16dp">
+            <LinearLayout
+                android:layout_height="wrap_content"
+                android:layout_width="match_parent"
+                android:padding="24dp"
+                android:orientation="vertical">
+                <com.google.android.material.materialswitch.MaterialSwitch
+                    android:id="@+id/swNotificaciones"
+                    android:layout_height="wrap_content"
+                    android:layout_width="match_parent"
+                    android:text="@string/notificaciones"
+                    app:thumbIcon="@drawable/close_24px" />
 
-        <com.google.android.material.materialswitch.MaterialSwitch
-            android:id="@+id/swMicrofono"
-            android:layout_height="wrap_content"
-            android:layout_width="match_parent"
-            android:text="@string/microfono"
-            app:thumbIcon="@drawable/close_24px"
-            />
+                <com.google.android.material.materialswitch.MaterialSwitch
+                    android:id="@+id/swMicrofono"
+                    android:layout_height="wrap_content"
+                    android:layout_width="match_parent"
+                    android:text="@string/microfono"
+                    app:thumbIcon="@drawable/close_24px"
+                />
 
-        <com.google.android.material.materialswitch.MaterialSwitch
-            android:id="@+id/swCamara"
-            android:layout_height="wrap_content"
-            android:layout_width="match_parent"
-            android:text="@string/camara"
-            app:thumbIcon="@drawable/close_24px"/>
+                <com.google.android.material.materialswitch.MaterialSwitch
+                    android:id="@+id/swCamara"
+                    android:layout_height="wrap_content"
+                    android:layout_width="match_parent"
+                    android:text="@string/camara"
+                    app:thumbIcon="@drawable/close_24px" />
+            </LinearLayout>
+
+        </com.google.android.material.card.MaterialCardView>
+
 
         <com.google.android.material.divider.MaterialDivider
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginVertical="24dp"/>
+            android:layout_marginVertical="24dp" />
 
         <com.google.android.material.textview.MaterialTextView
             android:layout_height="wrap_content"
@@ -65,8 +81,8 @@
             android:id="@+id/btnSeleccionarCarpeta"
             android:layout_height="wrap_content"
             android:layout_width="wrap_content"
-            android:text="@string/seleccionar_carpeta" 
-            app:icon="@drawable/folder_open"/>
+            android:text="@string/seleccionar_carpeta"
+            app:icon="@drawable/folder_open" />
 
     </LinearLayout>
 

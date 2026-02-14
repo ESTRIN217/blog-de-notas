@@ -216,44 +216,6 @@
 
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
-            <com.google.android.material.textview.MaterialTextView
-                android:layout_height="wrap_content"
-                android:layout_width="wrap_content"
-                android:textSize="14sp"
-                android:textColor="?attr/colorPrimary"
-                android:layout_marginTop="16dp"
-                android:textStyle="bold"
-                android:text="@string/permisos" />
-            <com.google.android.material.card.MaterialCardView
-                android:layout_height="wrap_content"
-                android:layout_width="match_parent"
-                app:cardCornerRadius="12dp"
-                app:cardElevation="1dp"
-                android:layout_margin="8dp"
-                app:contentPadding="16dp"
-                android:id="@+id/setup">
-                <LinearLayout
-                    android:layout_height="wrap_content"
-                    android:layout_width="match_parent"
-                    android:gravity="center_vertical"
-                    android:orientation="horizontal">
-
-                    <ImageView
-                        android:layout_height="48dp"
-                        android:layout_width="48dp"
-                        android:padding="12dp"
-                        android:src="@drawable/bedtime_24px"
-                        android:tint="?attr/colorPrimary"
-                        android:background="@drawable/bottom_background" />
-
-                    <com.google.android.material.textview.MaterialTextView
-                        android:layout_height="wrap_content"
-                        android:layout_width="wrap_content"
-                        android:layout_marginStart="10dp"
-                        android:text="@string/permisos" />
-
-                </LinearLayout>
-            </com.google.android.material.card.MaterialCardView>
 
             <View
                 android:layout_height="50dp"
