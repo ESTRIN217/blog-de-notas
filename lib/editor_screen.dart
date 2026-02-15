@@ -449,35 +449,38 @@ class _EditorScreenState extends State<EditorScreen> {
     final controller = _checklistControllers[item.id];
     if (controller == null) return Container(key: ValueKey(item.id));
 
-    final checklistItem = Row(
-      key: ValueKey(item.id),
-      children: [
-        Checkbox(
-          value: item.isChecked,
-          onChanged: (bool? value) {
-            if (value != null) {
-              setState(() {
-                item.isChecked = value;
-                _recordState();
-              });
-            }
-          },
-          activeColor: textColor,
-          checkColor: _backgroundColorValue != null ? Color(_backgroundColorValue!) : null,
-        ),
-        Expanded(
-          child: TextField(
-            controller: controller,
-            decoration: const InputDecoration(border: InputBorder.none, hintText: 'List item'),
-            style: TextStyle(
-              color: textColor,
-              decoration: item.isChecked ? TextDecoration.lineThrough : TextDecoration.none,
+    final checklistItem = Material(
+      color: Colors.transparent,
+      child: Row(
+        key: ValueKey(item.id),
+        children: [
+          Checkbox(
+            value: item.isChecked,
+            onChanged: (bool? value) {
+              if (value != null) {
+                setState(() {
+                  item.isChecked = value;
+                  _recordState();
+                });
+              }
+            },
+            activeColor: textColor,
+            checkColor: _backgroundColorValue != null ? Color(_backgroundColorValue!) : null,
+          ),
+          Expanded(
+            child: TextField(
+              controller: controller,
+              decoration: const InputDecoration(border: InputBorder.none, hintText: 'List item'),
+              style: TextStyle(
+                color: textColor,
+                decoration: item.isChecked ? TextDecoration.lineThrough : TextDecoration.none,
+              ),
             ),
           ),
-        ),
-        IconButton(icon: Icon(Icons.clear, color: textColor), onPressed: () => _deleteChecklistItem(item.id)),
-        ReorderableDragStartListener(index: index, child: const Icon(Icons.drag_handle)),
-      ],
+          IconButton(icon: Icon(Icons.clear, color: textColor), onPressed: () => _deleteChecklistItem(item.id)),
+          ReorderableDragStartListener(index: index, child: const Icon(Icons.drag_handle)),
+        ],
+      ),
     );
 
     return LongPressDraggable<ChecklistItem>(
