@@ -5,49 +5,50 @@
      android:layout_height="wrap_content"
      android:layout_width="match_parent"
      android:layout_marginBottom="8dp"
-     android:checkable="true"
      android:clickable="true"
      android:layout_marginHorizontal="4dp"
      android:layout_marginTop="4dp"
      app:cardCornerRadius="16dp"
+     app:contentPadding="10dp"
      android:focusable="true"
-     android:id="@+id/nota_background"
-     >
-      <LinearLayout
-          android:layout_width="match_parent"
-          android:layout_height="wrap_content"
-          android:orientation="vertical"
-          android:padding="16dp">
-    <com.google.android.material.textview.MaterialTextView
+     android:id="@+id/nota_background">
+
+    <LinearLayout
          android:layout_height="wrap_content"
          android:layout_width="match_parent"
-         android:ellipsize="end"
-         android:textSize="12sp"
-         android:textColor="?attr/colorOnSurface"
-         android:maxLines="1"
-         android:id="@+id/txtTituloNota"
-         android:text="Título de la nota"
-         android:textStyle="bold" />
+         android:orientation="vertical">
 
-    <com.google.android.material.textview.MaterialTextView
-         android:layout_height="wrap_content"
-         android:layout_width="match_parent"
-         android:textSize="12sp"
-         android:textColor="?attr/colorOnSurfaceVariant"
-         android:layout_marginTop="4dp"
-         android:id="@+id/txtContenidoNota"
-         android:text="Resumen..." />
+        <com.google.android.material.textview.MaterialTextView
+             android:layout_height="wrap_content"
+             android:layout_width="match_parent"
+             android:ellipsize="end"
+             android:textSize="12sp"
+             android:textColor="?attr/colorOnSurface"
+             android:maxLines="1"
+             android:id="@+id/txtTituloNota"
+             android:text="Título de la nota"
+             android:textStyle="bold" />
 
-    <com.google.android.material.textview.MaterialTextView
-         android:layout_height="wrap_content"
-         android:layout_width="match_parent"
-         android:gravity="end"
-         android:textSize="12sp"
-         android:textColor="?attr/colorPrimary"
-         android:layout_marginTop="4dp"
-         android:id="@+id/txtFechaNota"
-         android:text="30 dic. 2025"
-         android:textStyle="italic" />
+        <com.google.android.material.textview.MaterialTextView
+             android:layout_height="wrap_content"
+             android:layout_width="match_parent"
+             android:textSize="12sp"
+             android:textColor="?attr/colorOnSurfaceVariant"
+             android:layout_marginTop="4dp"
+             android:id="@+id/txtContenidoNota"
+             android:text="Resumen..." />
 
-</LinearLayout>
+        <com.google.android.material.textview.MaterialTextView
+             android:layout_height="wrap_content"
+             android:layout_width="match_parent"
+             android:gravity="end"
+             android:textSize="12sp"
+             android:textColor="?attr/colorPrimary"
+             android:layout_marginTop="4dp"
+             android:id="@+id/txtFechaNota"
+             android:text="30 dic. 2025"
+             android:textStyle="italic" />
+
+    </LinearLayout>
+
 </com.google.android.material.card.MaterialCardView>

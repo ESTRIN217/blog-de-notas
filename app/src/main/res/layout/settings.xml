@@ -19,7 +19,7 @@
             android:layout_height="?attr/actionBarSize"
             app:title="@string/opciones_de_configuración"
             app:navigationIcon="@drawable/arrow_back_24px"
-            app:navigationContentDescription="Volver atrás" />
+            app:navigationContentDescription="@string/volver_atras"/>
     </com.google.android.material.appbar.AppBarLayout>
 
     <androidx.core.widget.NestedScrollView
@@ -39,7 +39,6 @@
                 android:layout_width="wrap_content"
                 android:textSize="14sp"
                 android:textColor="?attr/colorPrimary"
-                android:layout_marginTop="16dp"
                 android:id="@+id/lblTemaApp"
                 android:text="@string/opciones_de_apariencia"
                 android:textStyle="bold" />
@@ -47,10 +46,10 @@
             <com.google.android.material.card.MaterialCardView
                 android:layout_height="wrap_content"
                 android:layout_width="match_parent"
-                android:layout_margin="8dp"
+                android:layout_marginBottom="8dp"
                 app:cardElevation="1dp"
                 app:cardCornerRadius="12dp"
-                app:contentPadding="16dp">
+                app:contentPadding="10dp">
 
                 <LinearLayout
                     android:layout_height="wrap_content"
@@ -84,8 +83,8 @@
                 android:layout_width="match_parent"
                 app:cardCornerRadius="12dp"
                 app:cardElevation="1dp"
-                android:layout_margin="8dp"
-                app:contentPadding="16dp">
+        
+                app:contentPadding="10dp">
                 <LinearLayout
                     android:layout_height="wrap_content"
                     android:layout_width="match_parent"
@@ -109,7 +108,8 @@
                             android:layout_height="wrap_content"
                             android:layout_width="wrap_content"
                             android:layout_marginStart="10dp"
-                            android:text="@string/tema_oscuro" />
+                            android:text="@string/tema_oscuro" 
+                            android:textAppearance="?attr/textAppearanceBodyMedium" />
 
                     </LinearLayout>
 
@@ -160,8 +160,8 @@
                 android:layout_width="match_parent"
                 app:cardCornerRadius="12dp"
                 app:cardElevation="1dp"
-                android:layout_margin="8dp"
-                app:contentPadding="16dp"
+                android:layout_marginBottom="8dp"
+                app:contentPadding="10dp"
                 android:id="@+id/novedades">
                 <LinearLayout
                     android:layout_height="wrap_content"
@@ -181,7 +181,8 @@
                         android:layout_height="wrap_content"
                         android:layout_width="wrap_content"
                         android:layout_marginStart="10dp"
-                        android:text="@string/novedades" />
+                        android:text="@string/novedades"
+                        android:textAppearance="?attr/textAppearanceBodyMedium" />
 
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
@@ -191,8 +192,7 @@
                 android:layout_width="match_parent"
                 app:cardCornerRadius="12dp"
                 app:cardElevation="1dp"
-                android:layout_margin="8dp"
-                app:contentPadding="16dp"
+                app:contentPadding="10dp"
                 android:id="@+id/sobre">
                 <LinearLayout
                     android:layout_height="wrap_content"
@@ -212,7 +212,8 @@
                         android:layout_height="wrap_content"
                         android:layout_width="wrap_content"
                         android:layout_marginStart="10dp"
-                        android:text="@string/sobre" />
+                        android:text="@string/sobre"
+                        android:textAppearance="?attr/textAppearanceBodyMedium" />
 
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>

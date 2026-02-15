@@ -29,7 +29,7 @@
                 android:layout_height="wrap_content"
                 android:layout_width="wrap_content"
                 app:icon="@drawable/arrow_back_24px"
-                android:contentDescription="Volver atrás"
+                android:contentDescription="@string/volver_atras"
                 style="?attr/materialIconButtonStyle"
                 android:id="@+id/back" />
 
@@ -42,28 +42,31 @@
                 android:layout_height="wrap_content"
                 android:layout_width="wrap_content"
                 app:icon="@drawable/undo_24px"
-                style="?attr/materialIconButtonFilledStyle"
+                android:contentDescription="@string/deshacer"
+                style="?attr/materialIconButtonStyle"
                 android:id="@+id/undo" />
 
             <Button
                 android:layout_height="wrap_content"
                 android:layout_width="wrap_content"
                 app:icon="@drawable/redo_24px"
-                style="?attr/materialIconButtonFilledStyle"
+                android:contentDescription="@string/rehacer"
+                style="?attr/materialIconButtonStyle"
                 android:id="@+id/redo" />
 
             <Button
                 android:layout_height="wrap_content"
                 android:layout_width="wrap_content"
                 app:icon="@drawable/outline_done"
-                style="?attr/materialIconButtonFilledStyle"
+                style="?attr/materialIconButtonStyle"
                 android:id="@+id/btnDone" />
 
             <Button
                 android:layout_height="wrap_content"
                 android:layout_width="wrap_content"
                 app:icon="@drawable/more_vert"
-                style="?attr/materialIconButtonFilledStyle"
+                android:contentDescription="@string/mas_opciones"
+                style="?attr/materialIconButtonStyle"
                 android:id="@+id/more" />
 
         </LinearLayout>

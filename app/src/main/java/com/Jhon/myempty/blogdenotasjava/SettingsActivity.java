@@ -22,7 +22,7 @@ public class SettingsActivity extends AppCompatActivity {
     private MaterialButtonToggleGroup toggleGrupoTema;
     private MaterialSwitch switchMaterialTheme;
     private MaterialToolbar toolbar;
-    private MaterialCardView novedades, sobre, setup;
+    private MaterialCardView novedades, sobre;
 
     // Preferencias
     private SharedPreferences prefs;
@@ -68,7 +68,6 @@ public class SettingsActivity extends AppCompatActivity {
         switchMaterialTheme = findViewById(R.id.switchMaterialTheme);
         novedades = findViewById(R.id.novedades);
         sobre = findViewById(R.id.sobre);
-        setup = findViewById(R.id.setup);
     }
 
     private void cargarPreferencias() {
@@ -132,9 +131,6 @@ if (temaGuardado == AppCompatDelegate.MODE_NIGHT_NO) {
         });
         sobre.setOnClickListener(v -> {
             startActivity(new Intent(this, SobreActivity.class));
-        });
-        setup.setOnClickListener(v -> {
-            startActivity(new Intent(this, InicioActivity.class));
         });
     }
 

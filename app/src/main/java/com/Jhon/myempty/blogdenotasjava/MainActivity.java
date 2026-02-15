@@ -124,29 +124,6 @@ public class MainActivity extends AppCompatActivity {
 cargarNotas();
   }
 
-  /** Verifica si el permiso persistente sigue siendo válido antes de cargar */
-  private void verificarYCargarNotas() {
-    Uri folderUri = Uri.parse(carpetaUriString);
-    boolean tienePermiso = false;
-
-    // Revisar la lista de permisos otorgados por el sistema
-    for (UriPermission permission : getContentResolver().getPersistedUriPermissions()) {
-      if (permission.getUri().equals(folderUri) && permission.isReadPermission()) {
-        tienePermiso = true;
-        break;
-      }
-    }
-
-    if (tienePermiso) {
-      cargarNotas(); // Ahora sí llamamos a la carga
-      aplicarModoVista();
-    } else {
-      // Si el permiso se perdió (por ejemplo, si borraron datos), volver al inicio
-      Toast.makeText(this, "Acceso a carpeta perdido. Re-seleccione.", Toast.LENGTH_LONG).show();
-      startActivity(new Intent(this, InicioActivity.class));
-      finish();
-    }
-  }
 
   private void inicializarVistas() {
     recyclerNotas = findViewById(R.id.recyclerNotas);
@@ -275,7 +252,7 @@ cargarNotas();
                                   // Si hay items seleccionados, el click normal funciona para
                                   // seleccionar/deseleccionar (Multiselect)
                                   if (adaptador.haySeleccion()) {
-                                    adaptador.toggleSeleccion(nota);
+                                    adaptador.toggleSeleccion(nota, 0);
                                   } else {
                                     // Si no hay selección, comportamiento normal (abrir editor)
                                     abrirEditor(nota.getUri());
@@ -284,7 +261,7 @@ cargarNotas();
                                 // Click Largo
                                 (view, nota, position) -> {
                                   // 1. Marcamos visualmente la nota
-                                  adaptador.toggleSeleccion(nota);
+                                  adaptador.toggleSeleccion(nota,position);
                                   mostrarMenuOpciones(view, nota);
                                 });
                         recyclerNotas.setAdapter(adaptador);

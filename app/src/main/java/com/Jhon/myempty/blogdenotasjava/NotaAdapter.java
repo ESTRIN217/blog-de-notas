@@ -64,13 +64,14 @@ public class NotaAdapter extends RecyclerView.Adapter<NotaAdapter.NotaViewHolder
 
     // --- MÉTODOS NUEVOS PARA GESTIONAR LA SELECCIÓN ---
     
-    public void toggleSeleccion(Nota nota) {
-        if (itemsSeleccionados.contains(nota)) {
-            itemsSeleccionados.remove(nota);
-        } else {
-            itemsSeleccionados.add(nota);
-        }
-        notifyDataSetChanged(); // Refresca la vista para mostrar el borde
+    public void toggleSeleccion(Nota nota, int position) {
+    if (itemsSeleccionados.contains(nota)) {
+        itemsSeleccionados.remove(nota);
+    } else {
+        itemsSeleccionados.add(nota);
+    }
+    // Solo refresca el item que cambió
+    notifyItemChanged(position); 
     }
 
     public void limpiarSeleccion() {
@@ -105,11 +106,9 @@ public class NotaAdapter extends RecyclerView.Adapter<NotaAdapter.NotaViewHolder
                 // Borde grueso y de color (ej. Azul o el acento del sistema)
                 background.setStrokeWidth(4); 
                 background.setStrokeColor(Color.parseColor("#FF6200EE")); // O usa ContextCompat.getColor(...)
-                background.setAlpha(0.8f); // Opcional: un poco transparente
             } else {
                 // (estado normal)
                 background.setStrokeWidth(1);
-                background.setAlpha(1.0f);
             }
 
             // Click Normal

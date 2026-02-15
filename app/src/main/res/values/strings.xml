@@ -57,4 +57,9 @@
     <string name="desarrollado_por">Desarrollado por</string>
     <string name="ver_en_gitHub">Ver en GitHub</string>
     <string name="registro_de_cambios">Registro de cambios</string>
+    <string name="deshacer">Deshacer</string>
+    <string name="volver_atras">Volver atrás</string>
+    <string name="rehacer">Rehacer</string>
+    <string name="guardar_nota">Guardar nota</string>
+    <string name="mas_opciones">Más opciones</string>
 </resources>

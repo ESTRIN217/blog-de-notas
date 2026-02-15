@@ -7,71 +7,69 @@
      android:background="?attr/colorSurfaceContainer"
      android:fitsSystemWindows="true">
 
-    <com.google.android.material.appbar.AppBarLayout
-         android:layout_height="wrap_content"
-         android:layout_width="match_parent"
-         android:background="?attr/colorSurfaceContainer"
-         app:elevation="0dp">
+<com.google.android.material.appbar.AppBarLayout
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="?attr/colorSurfaceContainer"
+    app:elevation="0dp">
 
-        <LinearLayout
-             android:layout_height="wrap_content"
-             android:layout_width="match_parent"
-             android:gravity="center_vertical"
-             android:orientation="horizontal"
-             android:id="@+id/barraSuperior">
+    <LinearLayout
+        android:id="@+id/barraSuperior"
+        android:layout_width="match_parent"
+        android:layout_height="64dp" 
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingHorizontal="8dp"
+        app:layout_scrollFlags="scroll|enterAlways">
 
-            <Button
-                 android:layout_height="wrap_content"
-                 android:layout_width="wrap_content"
-                 app:icon="@drawable/arrow_back_24px"
-                 android:contentDescription="Volver atrás"
-                 style="?attr/materialIconButtonStyle"
-                 android:id="@+id/btnAtras" />
+        <Button
+            android:id="@+id/btnAtras"
+            style="?attr/materialIconButtonStyle"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:contentDescription="@string/volver_atras"
+            app:icon="@drawable/arrow_back_24px" />
 
-            <Space
-                 android:layout_height="wrap_content"
-                 android:layout_width="wrap_content"
-                 android:layout_weight="1" />
+        <Space
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1" />
 
-            <com.google.android.material.button.MaterialButtonGroup
-                 android:layout_height="wrap_content"
-                 android:layout_width="wrap_content"
-                 android:gravity="center"
-                 android:spacing="4dp">
+        <Button
+            android:id="@+id/btnDeshacer"
+            style="?attr/materialIconButtonStyle"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:contentDescription="@string/deshacer"
+            app:icon="@drawable/undo_24px" />
 
-                <Button
-                     android:layout_height="wrap_content"
-                     android:layout_width="wrap_content"
-                     app:icon="@drawable/undo_24px"
-                     style="?attr/materialIconButtonFilledStyle"
-                     android:id="@+id/btnDeshacer" />
+        <Button
+            android:id="@+id/btnRehacer"
+            style="?attr/materialIconButtonStyle"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:contentDescription="@string/rehacer"
+            app:icon="@drawable/redo_24px" />
 
-                <Button
-                     android:layout_height="wrap_content"
-                     android:layout_width="wrap_content"
-                     app:icon="@drawable/redo_24px"
-                     style="?attr/materialIconButtonFilledStyle"
-                     android:id="@+id/btnRehacer" />
+        <Button
+            android:id="@+id/btnGuardar"
+            style="?attr/materialIconButtonStyle"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:contentDescription="@string/guardar_nota"
+            app:icon="@drawable/save_24px" />
 
-                <Button
-                     android:layout_height="wrap_content"
-                     android:layout_width="wrap_content"
-                     app:icon="@drawable/save_24px"
-                     style="?attr/materialIconButtonFilledStyle"
-                     android:id="@+id/btnGuardar" />
+        <Button
+            android:id="@+id/menu"
+            style="?attr/materialIconButtonStyle"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:contentDescription="@string/mas_opciones"
+            app:icon="@drawable/more_vert" />
 
-                <Button
-                     android:layout_height="wrap_content"
-                     android:layout_width="wrap_content"
-                     app:icon="@drawable/more_vert"
-                     style="?attr/materialIconButtonFilledStyle"
-                     android:id="@+id/menu" />
+    </LinearLayout>
 
-            </com.google.android.material.button.MaterialButtonGroup>
-
-        </LinearLayout>
-
-    </com.google.android.material.appbar.AppBarLayout>
+</com.google.android.material.appbar.AppBarLayout>
 
     <androidx.core.widget.NestedScrollView
          android:layout_height="match_parent"
@@ -145,57 +143,61 @@
 
     </androidx.core.widget.NestedScrollView>
 
-    <com.google.android.material.dockedtoolbar.DockedToolbarLayout
-         android:layout_height="wrap_content"
-         android:layout_width="match_parent"
-         app:layout_behavior="com.google.android.material.behavior.HideViewOnScrollBehavior"
-         android:id="@+id/docked_toolbar"
-         android:layout_gravity="bottom">
+<com.google.android.material.bottomappbar.BottomAppBar
+    android:id="@+id/bottom_toolbar"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_gravity="bottom"
+    android:backgroundTint="?attr/colorSurfaceContainer"
+    app:elevation="3dp"
+    app:layout_behavior="com.google.android.material.behavior.HideViewOnScrollBehavior">
 
-        <LinearLayout
-             android:layout_height="wrap_content"
-             android:layout_width="match_parent"
-             android:gravity="center_vertical"
-             android:orientation="horizontal">
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingHorizontal="4dp">
 
-            <com.google.android.material.button.MaterialButtonGroup
-                 android:layout_height="wrap_content"
-                 android:layout_width="wrap_content"
-                 android:gravity="center"
-                 android:spacing="4dp">
+        <Button
+            android:id="@+id/añadir"
+            style="?attr/materialIconButtonStyle"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:contentDescription="Añadir elemento"
+            app:icon="@drawable/outline_add_box" />
 
-                <Button
-                     android:layout_height="wrap_content"
-                     android:layout_width="wrap_content"
-                     app:icon="@drawable/outline_add_box"
-                     style="?attr/materialIconButtonFilledStyle"
-                     android:id="@+id/añadir" />
+        <Button
+            android:id="@+id/paleta"
+            style="?attr/materialIconButtonStyle"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:contentDescription="Cambiar color"
+            app:icon="@drawable/outline_palette" />
 
-                <Button
-                     android:layout_height="wrap_content"
-                     android:layout_width="wrap_content"
-                     app:icon="@drawable/outline_palette"
-                     style="?attr/materialIconButtonFilledStyle"
-                     android:id="@+id/paleta" />
+        <Button
+            android:id="@+id/text_style"
+            style="?attr/materialIconButtonStyle"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:contentDescription="Formato de texto"
+            app:icon="@drawable/text_format" />
 
-                <Button
-                     android:layout_height="wrap_content"
-                     android:layout_width="wrap_content"
-                     app:icon="@drawable/text_format"
-                     style="?attr/materialIconButtonFilledStyle"
-                     android:id="@+id/text_style" />
+        <Button
+            android:id="@+id/text_to_speech"
+            style="?attr/materialIconButtonStyle"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:contentDescription="Leer texto"
+            app:icon="@drawable/text_to_speech_24px" />
 
-                <Button
-                     android:layout_height="wrap_content"
-                     android:layout_width="wrap_content"
-                     app:icon="@drawable/text_to_speech_24px"
-                     style="?attr/materialIconButtonFilledStyle"
-                     android:id="@+id/text_to_speech" />
-
-            </com.google.android.material.button.MaterialButtonGroup>
+        <Space
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1" />
 
         </LinearLayout>
 
-    </com.google.android.material.dockedtoolbar.DockedToolbarLayout>
+</com.google.android.material.bottomappbar.BottomAppBar>
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
