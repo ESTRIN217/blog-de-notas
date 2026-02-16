@@ -1,6 +1,5 @@
 import 'dart:convert';
 import 'package:flutter_quill/flutter_quill.dart';
-import 'checklist_item.dart';
 
 enum SortMethod { custom, alphabetical, byDate }
 
@@ -9,7 +8,6 @@ class ListItem {
   final String title;
   final String summary;
   final DateTime lastModified;
-  final List<ChecklistItem> checklist;
   final int? backgroundColor;
   final String? backgroundImagePath;
 
@@ -18,7 +16,6 @@ class ListItem {
     required this.title,
     required this.summary,
     required this.lastModified,
-    this.checklist = const [],
     this.backgroundColor,
     this.backgroundImagePath,
   });
@@ -29,10 +26,6 @@ class ListItem {
       title: json['title'],
       summary: json['summary'] ?? '',
       lastModified: DateTime.parse(json['lastModified']),
-      checklist: (json['checklist'] as List?)
-              ?.map((item) => ChecklistItem.fromJson(item))
-              .toList() ??
-          [],
       backgroundColor: json['backgroundColor'],
       backgroundImagePath: json['backgroundImagePath'],
     );
@@ -44,7 +37,6 @@ class ListItem {
       'title': title,
       'summary': summary,
       'lastModified': lastModified.toIso8601String(),
-      'checklist': checklist.map((item) => item.toJson()).toList(),
       'backgroundColor': backgroundColor,
       'backgroundImagePath': backgroundImagePath,
     };

@@ -3,13 +3,14 @@ import 'dart:io';
 
 import 'package:dynamic_color/dynamic_color.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_quill/flutter_quill.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:reorderable_grid_view/reorderable_grid_view.dart';
 import 'package:share_plus/share_plus.dart';
 import 'list_item.dart';
 import 'editor_screen.dart';
-import 'checklist_item.dart';
 import 'settings_screen.dart';
 import 'theme_provider.dart';
 
@@ -53,6 +54,15 @@ class MyApp extends StatelessWidget {
                 useMaterial3: true,
               ),
               themeMode: themeProvider.themeMode,
+              localizationsDelegates: const [
+                GlobalMaterialLocalizations.delegate,
+                GlobalWidgetsLocalizations.delegate,
+                GlobalCupertinoLocalizations.delegate,
+                FlutterQuillLocalizations.delegate,
+              ],
+              supportedLocales: const [
+                Locale('en'),
+              ],
               home: const MyHomePage(title: 'Flutter Notes'),
             );
           },
@@ -133,14 +143,6 @@ class _MyHomePageState extends State<MyHomePage> {
       ]),
       lastModified: DateTime.now(),
       backgroundColor: Colors.amber[200]!.toARGB32(),
-      checklist: [
-        ChecklistItem(id: 'c1', text: '← Open the menu for more options.', isChecked: false),
-        ChecklistItem(id: 'c2', text: '↓ Tap the `+` button to create a new note.', isChecked: false),
-        ChecklistItem(id: 'c3', text: 'Long-press a note to select it and see more actions.', isChecked: false),
-        ChecklistItem(id: 'c4', text: 'Customize the background with the palette button in the editor.', isChecked: true),
-        ChecklistItem(id: 'c5', text: 'Create your own checklists like this one.', isChecked: false),
-        ChecklistItem(id: 'c6', text: 'Explore and enjoy the app!', isChecked: false),
-      ]
     );
     setState(() {
       _items = [welcomeNote];
@@ -218,7 +220,7 @@ class _MyHomePageState extends State<MyHomePage> {
       setState(() {
         final index = _items.indexWhere((i) => i.id == result.id);
 
-        if (result.title.isEmpty && result.summary.isEmpty && result.checklist.isEmpty) {
+        if (result.title.isEmpty && result.summary.isEmpty) {
             if (index != -1) {
                 _items.removeAt(index);
             }

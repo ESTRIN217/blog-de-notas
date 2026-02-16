@@ -28,11 +28,9 @@ This document outlines the design and features of a modern, intuitive note-takin
 - **Contextual App Bar:** In selection mode, the app bar transforms to show the number of selected items and provide bulk actions:
     - **Share:** Share the content of all selected notes.
     - **Delete:** Permanently delete all selected notes.
-- **Simultaneous Reordering:** While in selection mode and with "Custom" sort active, users can still reorder notes using a dedicated drag handle, allowing for organization and bulk actions in one seamless workflow.
 
 ### 2.4. Onboarding Experience
-- **Welcome Note:** On the first run, the app generates a single, informative welcome note.
-- **Feature Discovery:** This note contains a checklist that guides the user through the app's key features, such as creating new notes, using the editor, and customizing backgrounds.
+- **Welcome Note:** On the first run, the app generates a single, informative welcome note to guide the user.
 
 ## 3. Code Quality & Versioning
 
@@ -48,33 +46,18 @@ This document outlines the design and features of a modern, intuitive note-takin
 
 ### 4.1. Editor Enhancements
 - **Undo/Redo Functionality:**
-    - **Implementation:** The editor screen now features `undo` and `redo` buttons in the `AppBar`.
-    - **Logic:** A history of text changes is maintained in a stack. The buttons allow users to navigate this history, with their state (enabled/disabled) updating dynamically based on whether actions are available.
-
-- **Checklist Integration:**
-    - **Bottom Toolbar:** A `BottomAppBar` has been added to the editor, containing an "add" button.
-    - **Content Creation:** Tapping the "add" button reveals a `BottomSheet` with options for adding new content types. The first option, "Checklist Item," is now available.
-    - **Item Interaction:** Each checklist item can be:
-        - **Checked/Unchecked:** Toggling the checkbox marks the item as complete and applies a strikethrough style to the text.
-        - **Edited:** The text of each item can be modified directly.
-        - **Deleted:** An individual item can be removed from the list.
-        - **Reordered:** Users can drag and drop checklist items to change their order.
-    - **Undo/Redo Support:** All actions performed on the checklist (adding, deleting, editing, checking, and reordering) are fully integrated into the undo/redo history.
+    - **Implementation:** The editor screen now features `undo` and `redo` buttons directly in the `AppBar` for easy access.
+    - **Logic:** A history of text changes is maintained, allowing users to navigate this history. The buttons are dynamically enabled/disabled based on whether actions are available.
 
 - **Background Customization:**
-    - **Implementation:** A new palette icon in the `BottomAppBar` opens a `BottomSheet` for background customization.
+    - **Implementation:** A palette icon in the `BottomAppBar` opens a `BottomSheet` for background customization.
     - **Color Palette:** Users can select from a predefined list of colors or revert to the default note color.
     - **Image Background:** Users can pick an image from their device's gallery to use as a background for the note.
-    - **Live Preview:** The note's background updates in real-time within the editor as a color or image is selected.
-    - **Readability:** The color of the text (title, content, checklist items) automatically adjusts to be light on dark backgrounds and dark on light backgrounds, ensuring legibility.
-    - **Undo/Redo Support:** All background changes are fully integrated into the undo/redo history.
+    - **Readability:** The color of the text (title, content) automatically adjusts to be light on dark backgrounds and dark on light backgrounds, ensuring legibility.
     - **Main Screen Display:** The selected background color or image is visible on the note's preview card on the main screen.
 
-- **Text Formatting:**
-    - **Implementation:** A new text-fields icon in the `BottomAppBar` will open a `BottomSheet` for text styling.
-    - **Font Size:** Users can adjust the font size of the note's content.
-    - **Font Style:** Users can apply **bold** and *italic* styles to the note's content.
-    - **Live Preview:** Text style changes will be reflected in real-time in the editor.
-    - **Undo/Redo Support:** All text style changes will be integrated into the undo/redo history.
-    - **Main Screen Display:** The selected text styles will be applied to the note's preview on the main screen.
-
+- **Text Formatting & Checklists:**
+    - **Implementation:** A text-fields icon in the `BottomAppBar` opens a `BottomSheet` containing the rich text formatting toolbar.
+    - **Font Size & Style:** Users can adjust the font size and apply **bold** and *italic* styles to the note's content.
+    - **Checklists:** Users can create interactive checklists directly within the note content.
+    - **Live Preview:** All text style and checklist changes are reflected in real-time in the editor.

@@ -7,10 +7,9 @@ Una aplicación de notas simple e intuitiva creada con Flutter. Esta aplicación
 ### v2.0
 
 - **Mejoras en el Editor:**
-    - **Funcionalidad de Deshacer/Rehacer:** Deshacer y rehacer cambios en el texto, listas de verificación y estilo.
-    - **Integración de Listas de Verificación:** Agrega, edita, elimina y reordena elementos de la lista de verificación.
+    - **Funcionalidad de Deshacer/Rehacer:** Deshacer y rehacer cambios en el texto y el estilo directamente desde la barra de la aplicación.
     - **Personalización del Fondo:** Cambia el color de fondo o establece una imagen de la galería como fondo de la nota.
-    - **Formato de Texto:** Ajusta el tamaño de la fuente y aplica estilos de negrita e cursiva.
+    - **Formato de Texto y Listas de Verificación:** Ajusta el tamaño de la fuente, aplica estilos de negrita e cursiva y crea listas de verificación interactivas, todo desde una barra de herramientas de texto enriquecido que aparece en la parte inferior.
 
 ### v1.0
 
