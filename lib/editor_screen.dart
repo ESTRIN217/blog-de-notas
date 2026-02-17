@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_quill/flutter_quill.dart' as quill;
 import 'package:image_picker/image_picker.dart';
 import 'package:share_plus/share_plus.dart';
+import 'package:flutter_tts/flutter_tts.dart';
 import 'list_item.dart';
 
 class EditorScreen extends StatefulWidget {
@@ -18,6 +19,7 @@ class EditorScreen extends StatefulWidget {
 class _EditorScreenState extends State<EditorScreen> {
   late TextEditingController _titleController;
   late quill.QuillController _contentController;
+  late FlutterTts _flutterTts;
 
   int? _backgroundColorValue;
   String? _backgroundImagePath;
@@ -30,6 +32,7 @@ class _EditorScreenState extends State<EditorScreen> {
       document: widget.item.document,
       selection: const TextSelection.collapsed(offset: 0),
     );
+    _flutterTts = FlutterTts();
 
     _backgroundColorValue = widget.item.backgroundColor;
     _backgroundImagePath = widget.item.backgroundImagePath;
@@ -39,6 +42,7 @@ class _EditorScreenState extends State<EditorScreen> {
   void dispose() {
     _titleController.dispose();
     _contentController.dispose();
+    _flutterTts.stop();
     super.dispose();
   }
 
@@ -71,6 +75,17 @@ class _EditorScreenState extends State<EditorScreen> {
   void _deleteItem() {
     if (!mounted) return;
     Navigator.pop(context, "DELETE");
+  }
+
+  Future<void> _speak() async {
+    final title = _titleController.text;
+    final content = _contentController.document.toPlainText();
+    if (title.isNotEmpty) {
+      await _flutterTts.speak(title);
+    }
+    if (content.isNotEmpty) {
+      await _flutterTts.speak(content);
+    }
   }
 
   void _showEditorMenu() {
@@ -286,6 +301,9 @@ class _EditorScreenState extends State<EditorScreen> {
               IconButton(
                   icon: Icon(Icons.text_fields, color: textColor),
                   onPressed: _showTextTools),
+              IconButton(
+                  icon: Icon(Icons.volume_up, color: textColor),
+                  onPressed: _speak),
             ],
           ),
         ),

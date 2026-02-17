@@ -169,7 +169,7 @@ class _MyHomePageState extends State<MyHomePage> {
     setState(() {
       _filteredItems = _items.where((item) {
         final titleMatch = item.title.toLowerCase().contains(query);
-        final summaryMatch = item.summary.toLowerCase().contains(query);
+        final summaryMatch = item.document.toPlainText().toLowerCase().contains(query);
         return titleMatch || summaryMatch;
       }).toList();
       _sortFilteredItems(); 
@@ -220,7 +220,7 @@ class _MyHomePageState extends State<MyHomePage> {
       setState(() {
         final index = _items.indexWhere((i) => i.id == result.id);
 
-        if (result.title.isEmpty && result.summary.isEmpty) {
+        if (result.title.trim().isEmpty && result.document.length <= 1) {
             if (index != -1) {
                 _items.removeAt(index);
             }
@@ -279,13 +279,13 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   void _shareSelectedItems() {
-    final content = _selectedItems.map((item) => "${item.title}\n${item.summary}").join('\n\n---\n\n');
+    final content = _selectedItems.map((item) => "${item.title}\n${item.document.toPlainText()}").join('\n\n---\n\n');
     SharePlus.instance.share(
         ShareParams(
             text: content,
-                subject: 'My Notes',
-                  ),
-                  );
+            subject: 'My Notes',
+        ),
+    );
     _exitSelectionMode();
   }
 
@@ -386,7 +386,7 @@ class _MyHomePageState extends State<MyHomePage> {
           children: <Widget>[
             DrawerHeader(
               decoration: BoxDecoration(color: Theme.of(context).colorScheme.primaryContainer),
-              child: const Text('Menu', style: TextStyle(color: Colors.white, fontSize: 24)),
+              child: Text('Menu', style: TextStyle(color: Theme.of(context).colorScheme.onPrimaryContainer, fontSize: 24)),
             ),
             ListTile(
               leading: const Icon(Icons.home),
@@ -448,8 +448,8 @@ class _MyHomePageState extends State<MyHomePage> {
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
           ),
-        if (item.title.isNotEmpty && item.summary.isNotEmpty) const SizedBox(height: 8),
-        if (item.summary.isNotEmpty)
+        if (item.title.isNotEmpty && item.document.length > 1) const SizedBox(height: 8),
+        if (item.document.length > 1)
           isListView
               ? Text(
                   plainTextSummary,

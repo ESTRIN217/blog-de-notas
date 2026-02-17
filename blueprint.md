@@ -61,3 +61,7 @@ This document outlines the design and features of a modern, intuitive note-takin
     - **Font Size & Style:** Users can adjust the font size and apply **bold** and *italic* styles to the note's content.
     - **Checklists:** Users can create interactive checklists directly within the note content.
     - **Live Preview:** All text style and checklist changes are reflected in real-time in the editor.
+
+- **Text-to-Speech:**
+    - **Implementation:** A new `volume_up` icon button is added to the `BottomAppBar` in the editor.
+    - **Functionality:** When pressed, the app uses the `flutter_tts` package to read the note's title and content aloud.
