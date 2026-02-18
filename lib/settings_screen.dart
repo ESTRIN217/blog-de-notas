@@ -2,7 +2,6 @@ import 'package:dynamic_color/dynamic_color.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'theme_provider.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
@@ -11,7 +10,7 @@ class SettingsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(AppLocalizations.of(context)!.settings),
+        title: const Text('Ajustes'),
       ),
       body: DynamicColorBuilder(
         builder: (ColorScheme? lightDynamic, ColorScheme? darkDynamic) {
@@ -23,34 +22,34 @@ class SettingsScreen extends StatelessWidget {
                 children: [
                   if (isDynamicColorSupported)
                     SwitchListTile(
-                      title: Text(AppLocalizations.of(context)!.useDynamicColors),
+                      title: const Text('Usar colores dinámicos'),
                       value: themeProvider.useDynamicColors,
                       onChanged: (value) {
                         themeProvider.setUseDynamicColors(value);
                       },
                     ),
                   if (isDynamicColorSupported) const Divider(),
-                  ListTile(
-                    title: Text(AppLocalizations.of(context)!.themeMode),
+                  const ListTile(
+                    title: Text('Modo de tema'),
                   ),
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 16.0),
                     child: SegmentedButton<ThemeMode>(
-                      segments: <ButtonSegment<ThemeMode>>[
+                      segments: const <ButtonSegment<ThemeMode>>[
                         ButtonSegment<ThemeMode>(
                           value: ThemeMode.system,
-                          label: Text(AppLocalizations.of(context)!.system),
-                          icon: const Icon(Icons.brightness_auto),
+                          label: Text('Sistema'),
+                          icon: Icon(Icons.brightness_auto),
                         ),
                         ButtonSegment<ThemeMode>(
                           value: ThemeMode.light,
-                          label: Text(AppLocalizations.of(context)!.light),
-                          icon: const Icon(Icons.light_mode),
+                          label: Text('Claro'),
+                          icon: Icon(Icons.light_mode),
                         ),
                         ButtonSegment<ThemeMode>(
                           value: ThemeMode.dark,
-                          label: Text(AppLocalizations.of(context)!.dark),
-                          icon: const Icon(Icons.dark_mode),
+                          label: Text('Oscuro'),
+                          icon: Icon(Icons.dark_mode),
                         ),
                       ],
                       selected: <ThemeMode>{themeProvider.themeMode},

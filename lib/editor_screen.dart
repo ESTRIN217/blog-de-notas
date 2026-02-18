@@ -6,7 +6,6 @@ import 'package:image_picker/image_picker.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 import 'list_item.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class EditorScreen extends StatefulWidget {
   final ListItem item;
@@ -96,14 +95,14 @@ class _EditorScreenState extends State<EditorScreen> {
         return Wrap(children: <Widget>[
           ListTile(
               leading: const Icon(Icons.share),
-              title: Text(AppLocalizations.of(context)!.share),
+              title: const Text('Compartir'),
               onTap: () {
                 Navigator.pop(ctx);
                 _shareItem();
               }),
           ListTile(
               leading: const Icon(Icons.delete),
-              title: Text(AppLocalizations.of(context)!.delete),
+              title: const Text('Eliminar'),
               onTap: () {
                 Navigator.pop(ctx);
                 _deleteItem();
@@ -169,7 +168,7 @@ class _EditorScreenState extends State<EditorScreen> {
               const Divider(),
               ListTile(
                 leading: const Icon(Icons.photo_library_outlined),
-                title: Text(AppLocalizations.of(context)!.imageFromGallery),
+                title: const Text('Imagen de la galería'),
                 onTap: () {
                   _pickImage();
                   Navigator.pop(ctx);
@@ -270,7 +269,7 @@ class _EditorScreenState extends State<EditorScreen> {
                   ),
                   decoration: InputDecoration(
                     border: InputBorder.none,
-                    hintText: AppLocalizations.of(context)!.title,
+                    hintText: 'Título',
                     hintStyle: TextStyle(
                       fontSize: 24,
                       fontWeight: FontWeight.bold,
