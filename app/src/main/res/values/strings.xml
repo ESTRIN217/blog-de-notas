@@ -52,7 +52,7 @@
     <string name="ordenar_notas_por">Ordenar notas por</string>
     <string name="fecha_de_modificacion">Fecha de modificación</string>
     <string name="fecha_de_creacion">Fecha de creación</string>
-    <string name="nombre">Nombre (A-Z)</string>
+    <string name="nombre">Personalizado</string>
     <string name="info">Esta app es un Blog de notas creado con la ayuda de Google Gemini, utilizando Material Design 3. Compilada en un dispositivo móvil mediante Android Code Studio.</string>
     <string name="desarrollado_por">Desarrollado por</string>
     <string name="ver_en_gitHub">Ver en GitHub</string>

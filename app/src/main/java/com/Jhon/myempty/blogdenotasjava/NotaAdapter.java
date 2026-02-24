@@ -122,4 +122,15 @@ public class NotaAdapter extends RecyclerView.Adapter<NotaAdapter.NotaViewHolder
             });
         }
     }
+    // Método para mover items internamente
+public void moverNota(int fromPosition, int toPosition) {
+    Nota nota = listaNotas.get(fromPosition);
+    listaNotas.remove(fromPosition);
+    listaNotas.add(toPosition, nota);
+    notifyItemMoved(fromPosition, toPosition);
+}
+
+public List<Nota> getListaNotas() {
+    return listaNotas;
+}
 }

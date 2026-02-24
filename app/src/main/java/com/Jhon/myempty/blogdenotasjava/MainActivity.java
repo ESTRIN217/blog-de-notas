@@ -18,6 +18,7 @@ import android.widget.Toast;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.Nullable;
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AppCompatDelegate;
 import androidx.core.app.ActivityCompat;
@@ -27,6 +28,7 @@ import androidx.core.view.GravityCompat;
 import androidx.documentfile.provider.DocumentFile;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.StaggeredGridLayoutManager;
 
 import com.google.android.material.color.DynamicColors;
@@ -115,6 +117,46 @@ public class MainActivity extends AppCompatActivity {
 
     // 3. Inicializar componentes
     inicializarVistas();
+    // 1. Configurar el Callback (Solo una vez)
+ItemTouchHelper.SimpleCallback callback = new ItemTouchHelper.SimpleCallback(
+        ItemTouchHelper.UP | ItemTouchHelper.DOWN | ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT, 0) {
+    
+    @Override
+    public boolean onMove(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, @NonNull RecyclerView.ViewHolder target) {
+        if (adaptador == null) return false;
+        
+        int fromPos = viewHolder.getBindingAdapterPosition(); // Usa BindingAdapterPosition
+        int toPos = target.getBindingAdapterPosition();
+
+        adaptador.moverNota(fromPos, toPos);
+        return true;
+    }
+
+    @Override
+    public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {}
+
+    @Override
+    public void onSelectedChanged(@Nullable RecyclerView.ViewHolder viewHolder, int actionState) {
+        super.onSelectedChanged(viewHolder, actionState);
+        if (actionState == ItemTouchHelper.ACTION_STATE_DRAG && viewHolder != null) {
+            viewHolder.itemView.setAlpha(0.7f);
+            viewHolder.itemView.animate().scaleX(1.05f).scaleY(1.05f).setDuration(150).start();
+        }
+    }
+
+    @Override
+    public void clearView(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder) {
+        super.clearView(recyclerView, viewHolder);
+        viewHolder.itemView.setAlpha(1.0f);
+        viewHolder.itemView.animate().scaleX(1.0f).scaleY(1.0f).setDuration(150).start();
+        
+        guardarOrdenPersonalizado();
+    }
+};
+
+// 2. Unirlo al RecyclerView (Solo una vez)
+ItemTouchHelper itemTouchHelper = new ItemTouchHelper(callback);
+itemTouchHelper.attachToRecyclerView(recyclerNotas);
     configurarListeners();
 
     // 4. Recuperar URI y Preferencias
@@ -200,21 +242,32 @@ cargarNotas();
                 DocumentFile[] archivos = root.listFiles();
 
                 Log.d("DEBUG", "Archivos encontrados: " + (archivos != null ? archivos.length : 0));
-                // Ordenar por fecha (Más reciente primero)
-                Arrays.sort(
-                    archivos,
-                    (f1, f2) -> {
-                      switch (criterioOrdenActual) {
-                        case 0: // Fecha Modificación (Más reciente primero)
-                          return Long.compare(f2.lastModified(), f1.lastModified());
-                        case 1: // Fecha Creación (Más antigua primero / orden SAF)
-                          return Long.compare(f1.lastModified(), f2.lastModified());
-                        case 2: // Nombre (A-Z)
-                          return f1.getName().toLowerCase().compareTo(f2.getName().toLowerCase());
-                        default:
-                          return Long.compare(f2.lastModified(), f1.lastModified());
-                      }
-                    });
+
+if (criterioOrdenActual == 2) {
+    // 1. Recuperar el string del orden guardado
+    String ordenGuardado = sharedPreferences.getString("orden_personalizado", "");
+    if (!ordenGuardado.isEmpty()) {
+        List<String> ranking = Arrays.asList(ordenGuardado.split(","));
+
+        // 2. Ordenar los archivos según su posición en la lista guardada
+        Arrays.sort(archivos, (f1, f2) -> {
+            int pos1 = ranking.indexOf(f1.getName().replace(".txt", ""));
+            int pos2 = ranking.indexOf(f2.getName().replace(".txt", ""));
+            
+            // Si un archivo es nuevo y no está en el ranking, va al principio (-1)
+            return Integer.compare(pos1, pos2);
+        });
+    }
+} else {
+    // Tus otros órdenes (Fecha mod, creación, etc.)
+    Arrays.sort(archivos, (f1, f2) -> {
+        switch (criterioOrdenActual) {
+            case 0: return Long.compare(f2.lastModified(), f1.lastModified());
+            case 1: return Long.compare(f1.lastModified(), f2.lastModified());
+            default: return 0;
+        }
+    });
+}
 
                 SimpleDateFormat sdf = new SimpleDateFormat("dd MMM yyyy", Locale.getDefault());
 
@@ -262,7 +315,7 @@ cargarNotas();
                                 (view, nota, position) -> {
                                   // 1. Marcamos visualmente la nota
                                   adaptador.toggleSeleccion(nota,position);
-                                  mostrarMenuOpciones(view, nota);
+                                  //mostrarMenuOpciones(view, nota);
                                 });
                         recyclerNotas.setAdapter(adaptador);
                         aplicarModoVista();
@@ -301,7 +354,7 @@ cargarNotas();
     return plainText.isEmpty() ? "Nota vacía" : plainText;
   }
 
-  // --- ACCIONES DEL MENÚ CONTEXTUAL (RESTAURADOS) ---
+
   private void mostrarMenuOpciones(View view, Nota nota) {
     android.widget.PopupMenu popup = new android.widget.PopupMenu(this, view);
     popup.getMenuInflater().inflate(R.menu.menu_item_nota, popup.getMenu());
@@ -604,10 +657,30 @@ cargarNotas();
     btnNombre.setOnClickListener(
         v -> {
           criterioOrdenActual = 2;
+          sharedPreferences.edit().putInt("criterio_orden", 2).apply();
           cargarNotas();
           bottomSheetDialog.dismiss();
         });
 
     bottomSheetDialog.show();
   }
+  private void guardarOrdenPersonalizado() {
+    if (adaptador == null) return;
+    
+    // Obtenemos la lista de notas tal cual quedó en el adaptador
+    List<Nota> listaActual = adaptador.getListaNotas();
+    StringBuilder sb = new StringBuilder();
+    
+    for (Nota n : listaActual) {
+        // Usamos el nombre del archivo (extraído de la URI o título) como identificador
+        sb.append(n.getTitulo()).append(","); 
+    }
+    
+    // Guardamos el string tipo "nota1,nota3,nota2," en SharedPreferences
+    sharedPreferences.edit().putString("orden_personalizado", sb.toString()).apply();
+    
+    // Forzamos que el criterio actual sea el 2 para que no se pierda al recargar
+    criterioOrdenActual = 2;
+    sharedPreferences.edit().putInt("criterio_orden", 2).apply();
+}
 }
