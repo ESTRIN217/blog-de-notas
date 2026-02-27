@@ -37,6 +37,7 @@ dependencies {
     implementation(libs.androidx.documentfile)
     implementation(libs.androidx.recyclerview)
     implementation(libs.glide)
+    implementation("org.json:json:20231013")
     // Use KSP for Glide 5.x annotation processing
     ksp("com.github.bumptech.glide:ksp:5.0.5")
 }

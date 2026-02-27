@@ -12,7 +12,7 @@ public class Nota {
         this.contenido = contenido;
         this.fecha = fecha;
         this.uri = uri;
-        this: color = color;
+        this.color = color;
     }
 
     // Getters

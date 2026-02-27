@@ -39,6 +39,7 @@ import com.google.android.material.navigation.NavigationView;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 import androidx.drawerlayout.widget.DrawerLayout;
 
+import org.json.JSONObject;
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -273,18 +274,17 @@ if (criterioOrdenActual == 2) {
 
                 for (DocumentFile file : archivos) {
                   if (file.isFile() && file.getName() != null && file.getName().endsWith(".txt")) {
-                    String titulo = file.getName().replace(".txt", "");
 
-                    // Obtener el resumen limpio usando el Helper
-                    String extracto = obtenerResumenSAF(file.getUri());
-                    String fecha = sdf.format(new Date(file.lastModified()));
-                    String fullContent = NoteIOHelper.readContent(this, file.getUri());
-                    int color = NoteIOHelper.extractColor(fullContent);
-
-                    // Creamos el objeto Nota
-                    Nota nota = new Nota(titulo, extracto, fecha, color, file.getUri().toString());
-
-                    notasTemp.add(nota);
+                    String jsonContent = NoteIOHelper.readContent(this, file.getUri());
+                    try {
+                        JSONObject jsonObject = new JSONObject(jsonContent);
+                        Nota nota = NoteIOHelper.aNota(jsonObject);
+                        if (nota != null) {
+                            notasTemp.add(nota);
+                        }
+                    } catch (Exception e) {
+                        Log.e("CARGA_NOTAS", "Error parseando JSON: " + e.getMessage());
+                    }
                   }
                 }
 
@@ -331,28 +331,28 @@ if (criterioOrdenActual == 2) {
   }
 
   private String obtenerResumenSAF(Uri fileUri) {
-    // 1. Leemos el contenido completo usando el Helper
-    String fullContent = NoteIOHelper.readContent(this, fileUri);
+    String jsonContent = NoteIOHelper.readContent(this, fileUri);
+    if (jsonContent.isEmpty()) return "Nota vacía";
 
-    if (fullContent.isEmpty()) return "Nota vacía";
+    try {
+        JSONObject jsonObject = new JSONObject(jsonContent);
+        String contenido = jsonObject.optString("contenido", "");
 
-    // 2. Limpiamos el HTML (quitamos divs de color y checklist)
-    String cleanHtml = NoteIOHelper.cleanHtmlForEditor(fullContent);
+        String plainText;
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
+            plainText = Html.fromHtml(contenido, Html.FROM_HTML_MODE_LEGACY).toString();
+        } else {
+            plainText = Html.fromHtml(contenido).toString();
+        }
 
-    // 3. Convertimos a texto plano para eliminar etiquetas como <b>, <br>, etc.
-    String plainText;
-    if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
-      plainText = Html.fromHtml(cleanHtml, Html.FROM_HTML_MODE_LEGACY).toString();
-    } else {
-      plainText = Html.fromHtml(cleanHtml).toString();
+        if (plainText.length() > 350) {
+            return plainText.substring(0, 100) + "...";
+        }
+        return plainText.isEmpty() ? "Nota vacía" : plainText;
+    } catch (Exception e) {
+        return "Error al leer la nota";
     }
-
-    if (plainText.length() > 350) {
-      return plainText.substring(0, 100) + "...";
-    }
-
-    return plainText.isEmpty() ? "Nota vacía" : plainText;
-  }
+}
 
 
   private void mostrarMenuOpciones(View view, Nota nota) {
@@ -415,44 +415,31 @@ if (criterioOrdenActual == 2) {
 
   // 2. Compartir Texto Plano
   private void compartirComoTexto(Nota nota) {
-    // 1. Leer y Limpiar
-    String fullContent = NoteIOHelper.readContent(this, Uri.parse(nota.getUri()));
-    String cleanHtml = NoteIOHelper.cleanHtmlForEditor(fullContent);
-
-    // 2. Convertir a Texto plano
     String textoCompartir;
     if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
-      textoCompartir = Html.fromHtml(cleanHtml, Html.FROM_HTML_MODE_LEGACY).toString();
+        textoCompartir = Html.fromHtml(nota.getContenido(), Html.FROM_HTML_MODE_LEGACY).toString();
     } else {
-      textoCompartir = Html.fromHtml(cleanHtml).toString();
+        textoCompartir = Html.fromHtml(nota.getContenido()).toString();
     }
 
-    // 3. Enviar Intent
     Intent intent = new Intent(Intent.ACTION_SEND);
     intent.setType("text/plain");
     intent.putExtra(Intent.EXTRA_TEXT, nota.getTitulo() + "\n\n" + textoCompartir);
     startActivity(Intent.createChooser(intent, "Compartir nota vía:"));
-  }
+}
 
   // 3. Compartir PDF
   private void compartirComoPDF(Nota nota) {
-    // 1. Usar el Helper para obtener el contenido REAL (Limpio de metadatos y checklists)
-    String fullContent = NoteIOHelper.readContent(this, Uri.parse(nota.getUri()));
-    String htmlLimpio = NoteIOHelper.cleanHtmlForEditor(fullContent);
-
-    // 2. Convertir a texto plano para el Canvas del PDF
     String contenidoLimpio;
     if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
-      contenidoLimpio =
-          android.text.Html.fromHtml(htmlLimpio, android.text.Html.FROM_HTML_MODE_LEGACY)
-              .toString();
+        contenidoLimpio = Html.fromHtml(nota.getContenido(), Html.FROM_HTML_MODE_LEGACY).toString();
     } else {
-      contenidoLimpio = android.text.Html.fromHtml(htmlLimpio).toString();
+        contenidoLimpio = Html.fromHtml(nota.getContenido()).toString();
     }
 
     if (contenidoLimpio.trim().isEmpty()) {
-      Toast.makeText(this, "La nota está vacía", Toast.LENGTH_SHORT).show();
-      return;
+        Toast.makeText(this, "La nota está vacía", Toast.LENGTH_SHORT).show();
+        return;
     }
 
     // --- Generación del PDF ---

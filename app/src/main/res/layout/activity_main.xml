@@ -46,7 +46,6 @@
                      android:layout_marginHorizontal="8dp"
                      app:boxCornerRadiusBottomStart="28dp"
                      app:boxStrokeWidthFocused="0dp"
-                     app:boxBackgroundColor="?attr/colorSurfaceVariant"
                      app:startIconDrawable="@drawable/search_24px"
                      android:layout_weight="1">
 
