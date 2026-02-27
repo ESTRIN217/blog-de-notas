@@ -8,6 +8,7 @@
   packages = [
     pkgs.gradle
     pkgs.jdk17
+    pkgs.android-tools
     pkgs.sdkmanager
     # pkgs.go
     # pkgs.python311
