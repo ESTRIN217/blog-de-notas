@@ -8,7 +8,7 @@
         <item
             android:id="@+id/settings"
             android:icon="@drawable/settings_24px"
-            android:title="@string/opciones_de_configuracion" />
+            android:title="@string/opciones_de_configuración" />
         <item
             android:id="@+id/nav_sobre"
             android:icon="@drawable/info"
