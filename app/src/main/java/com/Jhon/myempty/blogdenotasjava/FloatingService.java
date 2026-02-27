@@ -443,11 +443,11 @@ public class FloatingService extends Service {
         
         mWindowManager.updateViewLayout(mFloatingView, params);
     }
-    private void guardarNotaFlotante() {
+private void guardarNotaFlotante() {
     if (uriArchivoActual == null || isMinimized) return;
 
     // 1. Obtener el HTML del cuerpo
-    String bodyHtml = Html.toHtml(floatingTxtNota.getText());
+    String bodyHtml = floatingTxtNota.getText() != null ? Html.toHtml(floatingTxtNota.getText()) : "";
 
     // 2. GENERAR EL HTML DEL CHECKLIST DESDE EL ADAPTADOR
     StringBuilder sb = new StringBuilder();
@@ -457,10 +457,10 @@ public class FloatingService extends Service {
             if (item.getTipo() == ItemAdjunto.TIPO_CHECK) {
                 String state = item.isMarcado() ? "true" : "false";
                 // Escapamos caracteres para no romper el HTML
-                String text = item.getContenido()
+                String text = item.getContenido() != null ? item.getContenido()
                         .replace("\"", "&quot;")
                         .replace("<", "&lt;")
-                        .replace(">", "&gt;");
+                        .replace(">", "&gt;") : "";
                 
                 sb.append("<chk state=\"").append(state).append("\">")
                   .append(text).append("</chk>");
@@ -506,9 +506,9 @@ public class FloatingService extends Service {
     }
     
     private void actualizarContador() {
-        String texto = floatingTxtNota.getText().toString().trim();
-        int p = texto.isEmpty() ? 0 : texto.split("\\s+").length;
-        if (lblContadorFlotante != null) {
+       if (floatingTxtNota != null && lblContadorFlotante != null) {
+            String texto = floatingTxtNota.getText().toString().trim();
+            int p = texto.isEmpty() ? 0 : texto.split("\\s+").length;
             lblContadorFlotante.setText(p + "p | " + texto.length() + "c");
         }
     }
