@@ -696,7 +696,7 @@ private final ActivityResultLauncher<Intent> launcherPermisoOverlay = registerFo
     try {
         String jsonContent = NoteIOHelper.readContent(this, uriArchivoActual);
         JSONObject jsonObject = new JSONObject(jsonContent);
-        Nota nota = NotaJsonHelper.aNota(jsonObject);
+        Nota nota = NoteIOHelper.aNota(jsonObject);
 
         if (nota != null) {
             txtTitulo.setText(nota.getTitulo());
