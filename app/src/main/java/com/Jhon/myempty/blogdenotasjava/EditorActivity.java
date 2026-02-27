@@ -757,8 +757,7 @@ private final ActivityResultLauncher<Intent> launcherPermisoOverlay = registerFo
 
         if (uriArchivoActual != null) {
             // Guardar archivo .txt principal
-            Nota nota = new Nota(titulo, bodyHtml, new SimpleDateFormat("dd MMM yyyy", Locale.getDefault()).format(new Date()), colorActual, uriArchivoActual.toString());
-boolean exito = NoteIOHelper.saveNote(this, uriArchivoActual, nota);
+            boolean exito = NoteIOHelper.saveNote(this, uriArchivoActual, bodyHtml, checklistHtml, colorActual, currentBackgroundName, currentBackgroundUri);
 
             // Guardar recursos multimedia (Fotos, Audios, Dibujos)
             if (exito && rootDoc != null) {

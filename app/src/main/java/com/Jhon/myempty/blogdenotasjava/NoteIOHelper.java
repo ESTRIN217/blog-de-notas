@@ -4,11 +4,15 @@ import android.content.Context;
 import android.graphics.Color;
 import android.net.Uri;
 import android.util.Log;
+import androidx.documentfile.provider.DocumentFile;
 import org.json.JSONObject;
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -38,11 +42,28 @@ public class NoteIOHelper {
     public static boolean saveNote(Context context, Uri uri, String bodyHtml, String checklistHtml, int color, String backgroundName, String backgroundImageUri) {
         if (uri == null) return false;
 
-        String fullContent = bodyHtml + checklistHtml; // Combine body and checklist
+        String title = "Untitled";
+        DocumentFile file = DocumentFile.fromSingleUri(context, uri);
+        if (file != null && file.getName() != null) {
+            String name = file.getName();
+            if (name.endsWith(".txt")) {
+                title = name.substring(0, name.length() - 4);
+            } else {
+                title = name;
+            }
+        }
+
+        String fullContent = bodyHtml + checklistHtml;
+        String fecha = new SimpleDateFormat("dd MMM yyyy", Locale.getDefault()).format(new Date());
+        String uriString = uri.toString();
+
+        Nota nota = new Nota(title, fullContent, fecha, color, uriString);
+        JSONObject jsonObject = aJson(nota);
+        if (jsonObject == null) return false;
 
         try (OutputStream os = context.getContentResolver().openOutputStream(uri, "wt")) {
             if (os != null) {
-                os.write(fullContent.getBytes());
+                os.write(jsonObject.toString().getBytes());
                 return true;
             }
         } catch (Exception e) {
@@ -91,13 +112,12 @@ public class NoteIOHelper {
     }
 
     public static int extractColor(String fullContent) {
-        // This is a placeholder. You need to implement a way to store and extract the color from the file content.
-        // For now, it returns a default color.
+        // This is a placeholder.
         return Color.WHITE;
     }
 
     public static String cleanHtmlForEditor(String fullContent) {
-        // This is a placeholder. You need to implement a way to clean the HTML for the editor.
+        // This is a placeholder.
         return fullContent.replaceAll("(<(/)?[a-zA-Z]+>)|(<[a-zA-Z]+\\s*/>)", "");
     }
 }
