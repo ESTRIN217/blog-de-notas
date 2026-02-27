@@ -1,23 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
-<menu xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <group android:checkable="true">
         <item
-          android:id="@+id/nav_notas"
-          android:icon="@drawable/note"
-          android:title="Nota"
-          app:showAsAction="ifRoom"/>
+            android:id="@+id/nav_notas"
+            android:icon="@drawable/note"
+            android:title="Notas" />
         <item
-          android:id="@+id/favorito"
-          app:showAsAction="ifRoom"/>
+            android:id="@+id/settings"
+            android:icon="@drawable/settings_24px"
+            android:title="@string/opciones_de_configuraci_n" />
         <item
-          android:id="@+id/accelerator_item"
-          app:showAsAction="ifRoom"/>
-        <item
-          android:id="@+id/dashboard_item"
-          app:showAsAction="ifRoom"/>
-        <item
-          android:id="@+id/settings"
-          android:icon="@drawable/settings_24px"
-          android:title="@string/opciones_de_configuración"
-          app:showAsAction="ifRoom"/>
+            android:id="@+id/nav_sobre"
+            android:icon="@drawable/info"
+            android:title="Sobre" />
+    </group>
 </menu>

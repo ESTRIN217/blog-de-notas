@@ -215,6 +215,8 @@ cargarNotas();
           if (id == R.id.settings) {
             // Tu lógica()
             startActivity(new Intent(this, SettingsActivity.class));
+          } else if (id == R.id.nav_sobre) { 
+            startActivity(new Intent(this, SobreActivity.class));
           }
 
           drawerLayout.closeDrawer(GravityCompat.START);
