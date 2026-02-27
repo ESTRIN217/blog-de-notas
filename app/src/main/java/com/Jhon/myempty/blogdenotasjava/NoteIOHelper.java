@@ -7,6 +7,9 @@ import android.util.Log;
 import androidx.documentfile.provider.DocumentFile;
 import org.json.JSONObject;
 import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
@@ -20,13 +23,12 @@ public class NoteIOHelper {
 
     private static final String KEY_TITULO = "titulo";
     private static final String KEY_CONTENIDO = "contenido";
-    private static final String KEY_FECHA = "fecha";
     private static final String KEY_COLOR = "color";
-    private static final String KEY_URI = "uri";
+    private static final String KEY_PATH = "path";
 
-    public static String readContent(Context context, Uri uri) {
+    public static String readContent(Context context, String path) {
         StringBuilder contentBuilder = new StringBuilder();
-        try (InputStream is = context.getContentResolver().openInputStream(uri);
+        try (InputStream is = new FileInputStream(new File(path));
              BufferedReader br = new BufferedReader(new InputStreamReader(is))) {
             String line;
             while ((line = br.readLine()) != null) {
@@ -39,33 +41,22 @@ public class NoteIOHelper {
         return contentBuilder.toString();
     }
 
-    public static boolean saveNote(Context context, Uri uri, String bodyHtml, String checklistHtml, int color, String backgroundName, String backgroundImageUri) {
-        if (uri == null) return false;
-
-        String title = "Untitled";
-        DocumentFile file = DocumentFile.fromSingleUri(context, uri);
-        if (file != null && file.getName() != null) {
-            String name = file.getName();
-            if (name.endsWith(".txt")) {
-                title = name.substring(0, name.length() - 4);
-            } else {
-                title = name;
-            }
+    public static boolean saveNote(Context context, String title, String bodyHtml, String checklistHtml, int color, String backgroundName, String backgroundImageUri) {
+        if (title == null || title.isEmpty()) {
+            title = "Untitled";
         }
 
+        File file = new File(context.getFilesDir(), title + ".txt");
         String fullContent = bodyHtml + checklistHtml;
-        String fecha = new SimpleDateFormat("dd MMM yyyy", Locale.getDefault()).format(new Date());
-        String uriString = uri.toString();
+        String path = file.getAbsolutePath();
 
-        Nota nota = new Nota(title, fullContent, fecha, color, uriString);
+        Nota nota = new Nota(title, fullContent, color, path);
         JSONObject jsonObject = aJson(nota);
         if (jsonObject == null) return false;
 
-        try (OutputStream os = context.getContentResolver().openOutputStream(uri, "wt")) {
-            if (os != null) {
-                os.write(jsonObject.toString().getBytes());
-                return true;
-            }
+        try (OutputStream os = new FileOutputStream(file)) {
+            os.write(jsonObject.toString().getBytes());
+            return true;
         } catch (Exception e) {
             Log.e("NoteIOHelper", "Error saving file: " + e.getMessage());
         }
@@ -77,9 +68,8 @@ public class NoteIOHelper {
             JSONObject jsonObject = new JSONObject();
             jsonObject.put(KEY_TITULO, nota.getTitulo());
             jsonObject.put(KEY_CONTENIDO, nota.getContenido());
-            jsonObject.put(KEY_FECHA, nota.getFecha());
             jsonObject.put(KEY_COLOR, nota.getColor());
-            jsonObject.put(KEY_URI, nota.getUri());
+            jsonObject.put(KEY_PATH, nota.getPath()); 
             return jsonObject;
         } catch (Exception e) {
             e.printStackTrace();
@@ -91,10 +81,9 @@ public class NoteIOHelper {
         try {
             String titulo = jsonObject.getString(KEY_TITULO);
             String contenido = jsonObject.getString(KEY_CONTENIDO);
-            String fecha = jsonObject.getString(KEY_FECHA);
             int color = jsonObject.getInt(KEY_COLOR);
-            String uri = jsonObject.getString(KEY_URI);
-            return new Nota(titulo, contenido, fecha, color, uri);
+            String path = jsonObject.getString(KEY_PATH);
+            return new Nota(titulo, contenido, fecha, color, path);
         } catch (Exception e) {
             e.printStackTrace();
             return null;
