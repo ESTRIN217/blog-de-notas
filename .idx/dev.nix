@@ -9,9 +9,10 @@
     pkgs.gradle
     pkgs.jdk17
     pkgs.android-tools
-    pkgs.android-studio
     pkgs.android-studio-tools
-    pkgs.androidenv
+    pkgs.android-studio
+    pkgs.androidenv.androidPkgs_9_0.androidsdk
+    pkgs.androidenv.androidPkgs_9_0.build-tools
     # pkgs.go
     # pkgs.python311
     # pkgs.python311Packages.pip
