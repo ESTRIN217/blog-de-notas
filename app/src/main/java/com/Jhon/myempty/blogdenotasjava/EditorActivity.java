@@ -51,10 +51,10 @@ public class EditorActivity extends AppCompatActivity {
     }
 
     private void inicializarVistas() {
-        // IDs corregidos para que coincidan con editor.xml
-        titulo = findViewById(R.id.txtTitulo);
-        editor = findViewById(R.id.editor_de_texto);
-        adjuntosRecyclerView = findViewById(R.id.lista_adjuntos);
+        // IDs revertidos a los originales. Asegúrate de que tu editor.xml los tenga.
+        titulo = findViewById(R.id.titulo);
+        editor = findViewById(R.id.editor);
+        adjuntosRecyclerView = findViewById(R.id.adjuntos);
     }
 
     private void configurarLanzadores() {
@@ -64,7 +64,8 @@ public class EditorActivity extends AppCompatActivity {
                 if (result.getResultCode() == Activity.RESULT_OK && result.getData() != null) {
                     Uri dibujoUri = result.getData().getData();
                     if (dibujoUri != null) {
-                        ItemAdjunto nuevoDibujo = new ItemAdjunto(ItemAdjunto.TIPO_DIBUJO, dibujoUri.toString(), false);
+                        // CONSTRUCTOR CORREGIDO: Usar el constructor (int, String)
+                        ItemAdjunto nuevoDibujo = new ItemAdjunto(ItemAdjunto.TIPO_DIBUJO, dibujoUri.toString());
                         adjuntoAdapter.agregarItem(nuevoDibujo);
                     }
                 }
@@ -79,7 +80,7 @@ public class EditorActivity extends AppCompatActivity {
     }
 
     private void configurarListeners() {
-        // Se asume que este ID es correcto o se encuentra en un menú/toolbar
+        // ID revertido al original. Asegúrate de que tu layout lo tenga.
         findViewById(R.id.guardar).setOnClickListener(v -> {
             guardarNota();
             finish();

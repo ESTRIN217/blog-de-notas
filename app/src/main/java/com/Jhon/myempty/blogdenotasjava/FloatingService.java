@@ -62,10 +62,10 @@ public class FloatingService extends Service {
 
         windowManager.addView(floatingView, params);
 
-        // IDs corregidos para que coincidan con floating_editor_layout.xml
-        floatingTxtNota = floatingView.findViewById(R.id.floating_editor_text);
-        floatingView.findViewById(R.id.btn_close_floating).setOnClickListener(v -> stopSelf());
-        floatingView.findViewById(R.id.btn_save_floating).setOnClickListener(v -> guardarNota());
+        // IDs revertidos a los originales. Asegúrate de que tu layout los tenga.
+        floatingTxtNota = floatingView.findViewById(R.id.floating_txt_nota);
+        floatingView.findViewById(R.id.btn_cerrar_flotante).setOnClickListener(v -> stopSelf());
+        floatingView.findViewById(R.id.btn_guardar_flotante).setOnClickListener(v -> guardarNota());
 
         floatingView.findViewById(R.id.floating_header).setOnTouchListener(new View.OnTouchListener() {
             private int initialX;

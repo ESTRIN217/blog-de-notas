@@ -24,19 +24,19 @@ public class DibujoActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.dialogo_dibujo);
 
-        // ID corregido para que coincida con dialogo_dibujo.xml
-        lienzoView = findViewById(R.id.lienzo);
+        // ID revertido al original. Asegúrate de que tu dialogo_dibujo.xml lo tenga.
+        lienzoView = findViewById(R.id.lienzoView);
         configurarMenuHerramientas();
         manejarIntent();
     }
 
     private void configurarMenuHerramientas() {
-        // IDs corregidos para que coincidan con dialogo_dibujo.xml
-        findViewById(R.id.btnGuardarDibujo).setOnClickListener(v -> guardarDibujo());
-        findViewById(R.id.btnDeshacer).setOnClickListener(v -> lienzoView.deshacer());
-        findViewById(R.id.btnRehacer).setOnClickListener(v -> lienzoView.rehacer());
-        findViewById(R.id.btnBorrador).setOnClickListener(v -> lienzoView.modoBorrador());
-        findViewById(R.id.btnLapiz).setOnClickListener(v -> lienzoView.modoLapiz());
+        // IDs revertidos a los originales. Asegúrate de que tu layout los tenga.
+        findViewById(R.id.btn_guardar_dibujo).setOnClickListener(v -> guardarDibujo());
+        findViewById(R.id.btn_deshacer).setOnClickListener(v -> lienzoView.deshacer());
+        findViewById(R.id.btn_rehacer).setOnClickListener(v -> lienzoView.rehacer());
+        findViewById(R.id.btn_borrador).setOnClickListener(v -> lienzoView.modoBorrador());
+        findViewById(R.id.btn_lapiz).setOnClickListener(v -> lienzoView.modoLapiz());
     }
 
     private void manejarIntent() {
