@@ -1,5 +1,6 @@
 package com.Jhon.myempty.blogdenotasjava;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
@@ -8,7 +9,10 @@ import android.util.Log;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import org.json.JSONArray;
@@ -29,9 +33,10 @@ public class EditorActivity extends AppCompatActivity {
     private EditText editor;
     private RecyclerView adjuntosRecyclerView;
     private SimpleAdapter adjuntoAdapter;
-    private ArrayList<ItemAdjunto> listaAdjuntos = new ArrayList<>();
 
     private Uri uriDeArchivoActual;
+    
+    public ActivityResultLauncher<Intent> dibujoLauncher;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,22 +44,45 @@ public class EditorActivity extends AppCompatActivity {
         setContentView(R.layout.editor);
 
         inicializarVistas();
+        configurarLanzadores();
+        configurarAdaptadores();
         configurarListeners();
         manejarIntent();
     }
 
     private void inicializarVistas() {
-        titulo = findViewById(R.id.titulo);
-        editor = findViewById(R.id.editor);
-        adjuntosRecyclerView = findViewById(R.id.adjuntos);
-        // Configurar RecyclerView para adjuntos si es necesario
+        // IDs corregidos para que coincidan con editor.xml
+        titulo = findViewById(R.id.txtTitulo);
+        editor = findViewById(R.id.editor_de_texto);
+        adjuntosRecyclerView = findViewById(R.id.lista_adjuntos);
+    }
+
+    private void configurarLanzadores() {
+        dibujoLauncher = registerForActivityResult(
+            new ActivityResultContracts.StartActivityForResult(),
+            result -> {
+                if (result.getResultCode() == Activity.RESULT_OK && result.getData() != null) {
+                    Uri dibujoUri = result.getData().getData();
+                    if (dibujoUri != null) {
+                        ItemAdjunto nuevoDibujo = new ItemAdjunto(ItemAdjunto.TIPO_DIBUJO, dibujoUri.toString(), false);
+                        adjuntoAdapter.agregarItem(nuevoDibujo);
+                    }
+                }
+            }
+        );
+    }
+
+    private void configurarAdaptadores() {
+        adjuntoAdapter = new SimpleAdapter(this);
+        adjuntosRecyclerView.setLayoutManager(new LinearLayoutManager(this));
+        adjuntosRecyclerView.setAdapter(adjuntoAdapter);
     }
 
     private void configurarListeners() {
-        // Ejemplo de un botón de guardado
+        // Se asume que este ID es correcto o se encuentra en un menú/toolbar
         findViewById(R.id.guardar).setOnClickListener(v -> {
             guardarNota();
-            finish(); // Cierra el editor después de guardar
+            finish();
         });
     }
 
@@ -66,7 +94,6 @@ public class EditorActivity extends AppCompatActivity {
             uriDeArchivoActual = Uri.parse(uriString);
             cargarContenido(uriDeArchivoActual);
         } else {
-            // Es una nota nueva, no se carga nada
             titulo.setText("");
             editor.setText("");
         }
@@ -81,21 +108,11 @@ public class EditorActivity extends AppCompatActivity {
 
         try {
             JSONObject jsonObject = new JSONObject(jsonContent);
-            String tituloNota = jsonObject.getString("titulo");
-            String contenidoNota = jsonObject.getString("contenido");
-
-            titulo.setText(tituloNota);
-            editor.setText(Html.fromHtml(contenidoNota, Html.FROM_HTML_MODE_LEGACY));
-
-            // Lógica para cargar adjuntos si existe
-            if (jsonObject.has("adjuntos")) {
-                JSONArray adjuntosArray = jsonObject.getJSONArray("adjuntos");
-                // ... procesar y mostrar adjuntos
-            }
+            titulo.setText(jsonObject.getString("titulo"));
+            editor.setText(Html.fromHtml(jsonObject.getString("contenido"), Html.FROM_HTML_MODE_LEGACY));
 
         } catch (Exception e) {
             Log.e("EditorActivity", "Error al parsear el JSON de la nota", e);
-            Toast.makeText(this, "El formato de la nota es inválido.", Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -128,42 +145,35 @@ public class EditorActivity extends AppCompatActivity {
         try {
             jsonObject.put("titulo", tituloNota);
             jsonObject.put("contenido", contenidoNota);
-            // Lógica para guardar adjuntos en el JSON
-            // jsonObject.put("adjuntos", new JSONArray(...));
+
         } catch (Exception e) {
             Log.e("EditorActivity", "Error creando el JSON de la nota", e);
-            return; // No guardamos si el JSON no se puede crear
+            return;
         }
 
         File file;
         if (uriDeArchivoActual == null) {
-            // Nota nueva: crear un archivo en almacenamiento interno
             File notesDir = new File(getFilesDir(), "notas");
             if (!notesDir.exists() && !notesDir.mkdirs()) {
-                Log.e("EditorActivity", "No se pudo crear el directorio de notas");
                 Toast.makeText(this, "Error al crear directorio", Toast.LENGTH_SHORT).show();
                 return;
             }
             String nombreArchivo = System.currentTimeMillis() + ".txt";
             file = new File(notesDir, nombreArchivo);
         } else {
-            // Nota existente: obtener el archivo desde la URI
             file = new File(uriDeArchivoActual.getPath());
         }
 
-        // Escribir el contenido JSON al archivo
         try (FileOutputStream fos = new FileOutputStream(file);
              OutputStreamWriter writer = new OutputStreamWriter(fos)) {
             writer.write(jsonObject.toString());
             Toast.makeText(this, "Nota guardada", Toast.LENGTH_SHORT).show();
 
-            // Si era una nota nueva, actualizamos la URI para futuros guardados
             if (uriDeArchivoActual == null) {
                 uriDeArchivoActual = Uri.fromFile(file);
             }
         } catch (IOException e) {
             Log.e("EditorActivity", "Error al guardar la nota", e);
-            Toast.makeText(this, "Error al guardar la nota", Toast.LENGTH_SHORT).show();
         }
     }
 }

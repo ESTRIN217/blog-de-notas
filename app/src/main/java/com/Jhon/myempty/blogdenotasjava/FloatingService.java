@@ -62,15 +62,11 @@ public class FloatingService extends Service {
 
         windowManager.addView(floatingView, params);
 
-        floatingTxtNota = floatingView.findViewById(R.id.floating_txt_nota);
+        // IDs corregidos para que coincidan con floating_editor_layout.xml
+        floatingTxtNota = floatingView.findViewById(R.id.floating_editor_text);
+        floatingView.findViewById(R.id.btn_close_floating).setOnClickListener(v -> stopSelf());
+        floatingView.findViewById(R.id.btn_save_floating).setOnClickListener(v -> guardarNota());
 
-        // Lógica para cerrar la ventana
-        floatingView.findViewById(R.id.btn_cerrar_flotante).setOnClickListener(v -> stopSelf());
-        
-        // Lógica para guardar la nota
-        floatingView.findViewById(R.id.btn_guardar_flotante).setOnClickListener(v -> guardarNota());
-
-        // Lógica para mover la ventana
         floatingView.findViewById(R.id.floating_header).setOnTouchListener(new View.OnTouchListener() {
             private int initialX;
             private int initialY;
@@ -147,7 +143,6 @@ public class FloatingService extends Service {
             return;
         }
 
-        // 1. Leer el archivo original para no perder el título y otros metadatos
         File file = new File(uriDeArchivoActual.getPath());
         String originalJsonContent = readContentFromFile(uriDeArchivoActual);
         if (originalJsonContent.isEmpty()) {
@@ -157,13 +152,10 @@ public class FloatingService extends Service {
 
         try {
             JSONObject jsonObject = new JSONObject(originalJsonContent);
-            
-            // 2. Actualizar solo el contenido
             String contenidoActualizado = Html.toHtml(floatingTxtNota.getText());
             jsonObject.put("contenido", contenidoActualizado);
 
-            // 3. Escribir el objeto JSON actualizado de nuevo en el archivo
-            try (FileOutputStream fos = new FileOutputStream(file, false); // false para sobrescribir
+            try (FileOutputStream fos = new FileOutputStream(file, false);
                  OutputStreamWriter writer = new OutputStreamWriter(fos)) {
                 writer.write(jsonObject.toString());
                 Toast.makeText(this, "Nota guardada", Toast.LENGTH_SHORT).show();

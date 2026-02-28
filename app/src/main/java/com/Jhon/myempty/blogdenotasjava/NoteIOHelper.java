@@ -4,7 +4,6 @@ import android.content.Context;
 import android.graphics.Color;
 import android.net.Uri;
 import android.util.Log;
-import androidx.documentfile.provider.DocumentFile;
 import org.json.JSONObject;
 import java.io.BufferedReader;
 import java.io.File;
@@ -13,9 +12,6 @@ import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -24,7 +20,40 @@ public class NoteIOHelper {
     private static final String KEY_TITULO = "titulo";
     private static final String KEY_CONTENIDO = "contenido";
     private static final String KEY_COLOR = "color";
-    private static final String KEY_PATH = "path";
+    private static final String KEY_PATH = "path"; // En el JSON, "path" almacena la URI de la nota
+
+    // Convertir un objeto Nota a un objeto JSON
+    public static JSONObject aJson(Nota nota) {
+        try {
+            JSONObject jsonObject = new JSONObject();
+            jsonObject.put(KEY_TITULO, nota.getTitulo());
+            jsonObject.put(KEY_CONTENIDO, nota.getContenido());
+            jsonObject.put(KEY_COLOR, nota.getColor());
+            jsonObject.put(KEY_PATH, nota.getUri()); // Usar getUri() en lugar del antiguo getPath()
+            return jsonObject;
+        } catch (Exception e) {
+            Log.e("NoteIOHelper", "Error al convertir Nota a JSON", e);
+            return null;
+        }
+    }
+
+    // Convertir un objeto JSON a un objeto Nota
+    public static Nota aNota(JSONObject jsonObject) {
+        try {
+            String titulo = jsonObject.getString(KEY_TITULO);
+            String contenido = jsonObject.getString(KEY_CONTENIDO);
+            int color = jsonObject.optInt(KEY_COLOR, Color.WHITE); // Usar optInt para seguridad
+            String path = jsonObject.getString(KEY_PATH); // El path es la URI guardada
+
+            // Usar el constructor corregido que no requiere fecha
+            return new Nota(titulo, contenido, color, path);
+        } catch (Exception e) {
+            Log.e("NoteIOHelper", "Error al convertir JSON a Nota", e);
+            return null;
+        }
+    }
+
+    // --- Métodos de ayuda (probablemente ya no se usan activamente pero se mantienen por si acaso) ---
 
     public static String readContent(Context context, String path) {
         StringBuilder contentBuilder = new StringBuilder();
@@ -35,22 +64,22 @@ public class NoteIOHelper {
                 contentBuilder.append(line);
             }
         } catch (Exception e) {
-            Log.e("NoteIOHelper", "Error reading file: " + e.getMessage());
+            Log.e("NoteIOHelper", "Error leyendo archivo: " + e.getMessage());
             return "";
         }
         return contentBuilder.toString();
     }
 
-    public static boolean saveNote(Context context, String title, String bodyHtml, String checklistHtml, int color, String backgroundName, String backgroundImageUri) {
+    public static boolean saveNote(Context context, String title, String bodyHtml, String checklistHtml, int color) {
         if (title == null || title.isEmpty()) {
             title = "Untitled";
         }
 
         File file = new File(context.getFilesDir(), title + ".txt");
         String fullContent = bodyHtml + checklistHtml;
-        String path = file.getAbsolutePath();
+        String uri = Uri.fromFile(file).toString();
 
-        Nota nota = new Nota(title, fullContent, color, path);
+        Nota nota = new Nota(title, fullContent, color, uri);
         JSONObject jsonObject = aJson(nota);
         if (jsonObject == null) return false;
 
@@ -58,36 +87,9 @@ public class NoteIOHelper {
             os.write(jsonObject.toString().getBytes());
             return true;
         } catch (Exception e) {
-            Log.e("NoteIOHelper", "Error saving file: " + e.getMessage());
+            Log.e("NoteIOHelper", "Error guardando nota: " + e.getMessage());
         }
         return false;
-    }
-
-    public static JSONObject aJson(Nota nota) {
-        try {
-            JSONObject jsonObject = new JSONObject();
-            jsonObject.put(KEY_TITULO, nota.getTitulo());
-            jsonObject.put(KEY_CONTENIDO, nota.getContenido());
-            jsonObject.put(KEY_COLOR, nota.getColor());
-            jsonObject.put(KEY_PATH, nota.getPath()); 
-            return jsonObject;
-        } catch (Exception e) {
-            e.printStackTrace();
-            return null;
-        }
-    }
-
-    public static Nota aNota(JSONObject jsonObject) {
-        try {
-            String titulo = jsonObject.getString(KEY_TITULO);
-            String contenido = jsonObject.getString(KEY_CONTENIDO);
-            int color = jsonObject.getInt(KEY_COLOR);
-            String path = jsonObject.getString(KEY_PATH);
-            return new Nota(titulo, contenido, fecha, color, path);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return null;
-        }
     }
 
     public static String extractChecklistData(String fullContent) {
@@ -100,13 +102,7 @@ public class NoteIOHelper {
         return checklistData.toString();
     }
 
-    public static int extractColor(String fullContent) {
-        // This is a placeholder.
-        return Color.WHITE;
-    }
-
     public static String cleanHtmlForEditor(String fullContent) {
-        // This is a placeholder.
         return fullContent.replaceAll("(<(/)?[a-zA-Z]+>)|(<[a-zA-Z]+\\s*/>)", "");
     }
 }

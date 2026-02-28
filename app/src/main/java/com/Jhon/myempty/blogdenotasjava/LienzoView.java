@@ -20,20 +20,17 @@ public class LienzoView extends View {
     private Path mCurrentPath;
     private Paint mCurrentPaint;
 
-    // --- SISTEMA DE OBJETOS ---
     private ArrayList<DibujoObjeto> mObjetos = new ArrayList<>();
     private DibujoObjeto objetoSeleccionado = null;
 
-    // --- HISTORIAL (Undo/Redo) ---
     private ArrayList<DibujoObjeto> mUndoneObjetos = new ArrayList<>();
 
     private int mColorActual = Color.BLACK;
     private float mGrosorActual = 10f;
     private String herramientaActual = "PEN";
 
-    // --- VARIABLES DE INTERACCIÓN ---
     private static final int HANDLE_RADIUS = 25;
-    private int handleTocado = -1; 
+    private int handleTocado = -1;
     private float lastTouchX;
     private float lastTouchY;
     private boolean mMostrarCuadricula = false;
@@ -64,32 +61,27 @@ public class LienzoView extends View {
         }
     }
 
-    // --- MÉTODOS REQUERIDOS POR DIBUJOACTIVITY ---
+    // --- MÉTODOS REQUERIDOS POR DIBUJOACTIVITY (Añadidos/Adaptados) ---
 
-    public void setColor(int nuevoColor) {
-        this.mColorActual = nuevoColor;
-    }
-
-    public void setGrosor(float nuevoGrosor) {
-        this.mGrosorActual = nuevoGrosor;
-    }
-
-    public float getGrosorActual() {
-        return mGrosorActual;
-    }
-
-    public Bitmap getDibujo() {
+    public Bitmap getBitmap() {
         return mBitmap;
     }
 
-    public void nuevoDibujo() {
-        mObjetos.clear();
-        mUndoneObjetos.clear();
-        objetoSeleccionado = null;
+    public void setBitmap(Bitmap bitmap) {
+        // Escala el bitmap para que se ajuste al tamaño del lienzo y lo dibuja.
         if (mCanvas != null) {
-            mCanvas.drawColor(Color.WHITE);
+            Bitmap escalado = Bitmap.createScaledBitmap(bitmap, getWidth(), getHeight(), false);
+            mCanvas.drawBitmap(escalado, 0, 0, null);
+            invalidate();
         }
-        invalidate();
+    }
+
+    public void modoBorrador() {
+        activarBorrador();
+    }
+
+    public void modoLapiz() {
+        activarPluma();
     }
 
     public void deshacer() {
@@ -107,6 +99,30 @@ public class LienzoView extends View {
         }
     }
 
+    // --- Lógica interna (existente) ---
+
+    public void setColor(int nuevoColor) {
+        this.mColorActual = nuevoColor;
+    }
+
+    public void setGrosor(float nuevoGrosor) {
+        this.mGrosorActual = nuevoGrosor;
+    }
+
+    public float getGrosorActual() {
+        return mGrosorActual;
+    }
+
+    public void nuevoDibujo() {
+        mObjetos.clear();
+        mUndoneObjetos.clear();
+        objetoSeleccionado = null;
+        if (mCanvas != null) {
+            mCanvas.drawColor(Color.WHITE);
+        }
+        invalidate();
+    }
+
     public void cargarFondo(Bitmap bitmap) {
         this.post(() -> {
             if (mBitmap != null && mCanvas != null) {
@@ -117,33 +133,21 @@ public class LienzoView extends View {
         });
     }
 
-    // --- LÓGICA DE DIBUJO Y SELECCIÓN ---
-
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
 
-        // 1. Dibujar el fondo (bitmap)
         if (mBitmap != null) canvas.drawBitmap(mBitmap, 0, 0, null);
 
-    // --- NUEVO: DIBUJAR CUADRÍCULA ---
-    if (mMostrarCuadricula) {
-        Paint pGrid = new Paint();
-        pGrid.setColor(Color.LTGRAY); // Gris claro
-        pGrid.setStrokeWidth(2f);
-        pGrid.setAlpha(100); // Semitransparente
-
-        int paso = 100; // Tamaño de cada cuadro (píxeles)
-
-        // Líneas Verticales
-        for (int i = 0; i < getWidth(); i += paso) {
-            canvas.drawLine(i, 0, i, getHeight(), pGrid);
+        if (mMostrarCuadricula) {
+            Paint pGrid = new Paint();
+            pGrid.setColor(Color.LTGRAY);
+            pGrid.setStrokeWidth(2f);
+            pGrid.setAlpha(100);
+            int paso = 100;
+            for (int i = 0; i < getWidth(); i += paso) canvas.drawLine(i, 0, i, getHeight(), pGrid);
+            for (int j = 0; j < getHeight(); j += paso) canvas.drawLine(0, j, getWidth(), j, pGrid);
         }
-        // Líneas Horizontales
-        for (int j = 0; j < getHeight(); j += paso) {
-            canvas.drawLine(0, j, getWidth(), j, pGrid);
-        }
-    }
         if (mCurrentPath != null && mCurrentPaint != null) canvas.drawPath(mCurrentPath, mCurrentPaint);
 
         if (objetoSeleccionado != null) {
@@ -302,34 +306,18 @@ public class LienzoView extends View {
         return p;
     }
 
-    // En LienzoView.java
-
     public void setModo(String modo) {
-    // Si salimos de SELECTION, limpiamos la selección visual
-    if (this.herramientaActual.equals("SELECTION") && !modo.equals("SELECTION")) {
-        objetoSeleccionado = null;
-        redrawAllPaths(); 
-    }
-    
-    this.herramientaActual = modo;
-
-    // --- CORRECCIÓN: Asignar grosores predeterminados al cambiar herramienta ---
-    switch (modo) {
-        case "PEN": 
-            mGrosorActual = 10f; 
-            break;
-        case "MARKER": 
-            mGrosorActual = 25f; // Más grueso
-            break;
-        case "RESALTADOR": 
-            mGrosorActual = 50f; // Muy grueso
-            break;
-        case "ERASER": 
-            mGrosorActual = 60f; 
-            break;
-        case "SELECTION":
-            break;
-    }
+        if (this.herramientaActual.equals("SELECTION") && !modo.equals("SELECTION")) {
+            objetoSeleccionado = null;
+            redrawAllPaths(); 
+        }
+        this.herramientaActual = modo;
+        switch (modo) {
+            case "PEN": mGrosorActual = 10f; break;
+            case "MARKER": mGrosorActual = 25f; break;
+            case "RESALTADOR": mGrosorActual = 50f; break;
+            case "ERASER": mGrosorActual = 60f; break;
+        }
     }
 
     private float dist(float x1, float y1, float x2, float y2) {
@@ -356,14 +344,13 @@ public class LienzoView extends View {
         }
     }
     public boolean toggleCuadricula() {
-    mMostrarCuadricula = !mMostrarCuadricula;
-    invalidate(); // Redibujar
-    return mMostrarCuadricula;
+        mMostrarCuadricula = !mMostrarCuadricula;
+        invalidate();
+        return mMostrarCuadricula;
     }
     
     public void activarPluma() {
         setModo("PEN");
-        // Opcional: forzar color negro si vienes de borrador
         if (mColorActual == Color.WHITE) mColorActual = Color.BLACK; 
     }
 
@@ -373,8 +360,6 @@ public class LienzoView extends View {
 
     public void activarResaltador() {
         setModo("RESALTADOR");
-        // Opcional: forzar amarillo si no tiene color definido
-        // setColor(Color.YELLOW); 
     }
 
     public void activarBorrador() {
@@ -384,15 +369,12 @@ public class LienzoView extends View {
     public void activarSeleccion() {
         setModo("SELECTION");
     }
-    // En LienzoView.java
 
     public void setNuevoColor(int color) {
-        // Cambia el color actual
         this.mColorActual = color;
         if (mCurrentPaint != null) {
             mCurrentPaint.setColor(color);
         }
-        // Si hay un objeto seleccionado, le cambiamos el color también
         if (objetoSeleccionado != null) {
             objetoSeleccionado.paint.setColor(color);
             invalidate();

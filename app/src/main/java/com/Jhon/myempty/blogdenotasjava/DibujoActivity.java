@@ -5,9 +5,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
-import android.provider.MediaStore;
 import android.util.Log;
-import android.view.View;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -26,23 +24,23 @@ public class DibujoActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.dialogo_dibujo);
 
-        lienzoView = findViewById(R.id.lienzoView);
+        // ID corregido para que coincida con dialogo_dibujo.xml
+        lienzoView = findViewById(R.id.lienzo);
         configurarMenuHerramientas();
         manejarIntent();
     }
 
     private void configurarMenuHerramientas() {
-        findViewById(R.id.btn_guardar_dibujo).setOnClickListener(v -> guardarDibujo());
-        findViewById(R.id.btn_deshacer).setOnClickListener(v -> lienzoView.deshacer());
-        findViewById(R.id.btn_rehacer).setOnClickListener(v -> lienzoView.rehacer());
-        findViewById(R.id.btn_borrador).setOnClickListener(v -> lienzoView.modoBorrador());
-        findViewById(R.id.btn_lapiz).setOnClickListener(v -> lienzoView.modoLapiz());
-        // Añade más listeners para otras herramientas si es necesario
+        // IDs corregidos para que coincidan con dialogo_dibujo.xml
+        findViewById(R.id.btnGuardarDibujo).setOnClickListener(v -> guardarDibujo());
+        findViewById(R.id.btnDeshacer).setOnClickListener(v -> lienzoView.deshacer());
+        findViewById(R.id.btnRehacer).setOnClickListener(v -> lienzoView.rehacer());
+        findViewById(R.id.btnBorrador).setOnClickListener(v -> lienzoView.modoBorrador());
+        findViewById(R.id.btnLapiz).setOnClickListener(v -> lienzoView.modoLapiz());
     }
 
     private void manejarIntent() {
         Intent intent = getIntent();
-        // Se unifica la carga, ya sea un dibujo o una foto para editar
         if (intent.hasExtra("uri_dibujo_editar")) {
             uriDeArchivoActual = intent.getStringExtra("uri_dibujo_editar");
             cargarImagenParaEdicion(uriDeArchivoActual);
@@ -69,10 +67,8 @@ public class DibujoActivity extends AppCompatActivity {
 
         File file;
         if (uriDeArchivoActual != null) {
-            // Si estamos editando, sobrescribimos el archivo existente
             file = new File(Uri.parse(uriDeArchivoActual).getPath());
         } else {
-            // Si es un dibujo nuevo, creamos un nuevo archivo
             File adjuntosDir = new File(getFilesDir(), "adjuntos");
             if (!adjuntosDir.exists() && !adjuntosDir.mkdirs()) {
                 Toast.makeText(this, "Error al crear carpeta de adjuntos", Toast.LENGTH_SHORT).show();
@@ -87,7 +83,6 @@ public class DibujoActivity extends AppCompatActivity {
             fos.flush();
             Toast.makeText(this, "Dibujo guardado", Toast.LENGTH_SHORT).show();
 
-            // Devolver la URI del archivo guardado a la actividad que nos llamó (EditorActivity)
             Intent resultadoIntent = new Intent();
             resultadoIntent.setData(Uri.fromFile(file));
             setResult(RESULT_OK, resultadoIntent);
