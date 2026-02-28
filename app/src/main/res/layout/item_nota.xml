@@ -38,17 +38,6 @@
              android:id="@+id/txtContenidoNota"
              android:text="Resumen..." />
 
-        <com.google.android.material.textview.MaterialTextView
-             android:layout_height="wrap_content"
-             android:layout_width="match_parent"
-             android:gravity="end"
-             android:textSize="12sp"
-             android:textColor="?attr/colorPrimary"
-             android:layout_marginTop="4dp"
-             android:id="@+id/txtFechaNota"
-             android:text="30 dic. 2025"
-             android:textStyle="italic" />
-
     </LinearLayout>
 
 </com.google.android.material.card.MaterialCardView>

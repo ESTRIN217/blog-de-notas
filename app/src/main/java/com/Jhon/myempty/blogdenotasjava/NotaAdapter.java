@@ -84,21 +84,19 @@ public class NotaAdapter extends RecyclerView.Adapter<NotaAdapter.NotaViewHolder
     }
 
     static class NotaViewHolder extends RecyclerView.ViewHolder {
-        TextView txtTitulo, txtContenido, txtFecha;
+        TextView txtTitulo, txtContenido;
         MaterialCardView background; // Asegúrate de usar MaterialCardView en el XML
 
         public NotaViewHolder(@NonNull View itemView) {
             super(itemView);
             txtTitulo = itemView.findViewById(R.id.txtTituloNota);
             txtContenido = itemView.findViewById(R.id.txtContenidoNota);
-            txtFecha = itemView.findViewById(R.id.txtFechaNota);
             background = itemView.findViewById(R.id.nota_background);
         }
 
         public void bind(final Nota nota, final OnNotaClickListener listener, final OnNotaLongClickListener longListener, int position, boolean isSelected) {
             txtTitulo.setText(nota.getTitulo());
             txtContenido.setText(nota.getContenido());
-            txtFecha.setText(nota.getFecha());
             background.setCardBackgroundColor(nota.getColor());
 
             // 4. CAMBIO VISUAL AL SELECCIONAR
