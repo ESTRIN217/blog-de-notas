@@ -7,6 +7,8 @@ This document outlines the design and features of a modern, intuitive note-takin
 ## 2. Features by Version
 
 ### 2.1. Version 3.0.0
+- **Imagen support in note**
+- **Shared in PDF, Markdown,and JSON**
 
 - **Advanced Theming & UI:**
     - **Theme Modes:** Full support for **Light and Dark modes**, plus a **System** setting to sync with the OS.
