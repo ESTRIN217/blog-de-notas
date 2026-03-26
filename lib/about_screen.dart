@@ -26,11 +26,10 @@ class AboutScreen extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: <Widget>[
-              FaIcon(
-                FontAwesomeIcons.lightbulb,
+              ImageIcon(
+                AssetImage('assets/icon/notas.png'),
                 size: 100,
-                color: Theme.of(context).colorScheme.primary,
-              ),
+                ),
               const SizedBox(height: 20),
               Text(
                 'My Notes',

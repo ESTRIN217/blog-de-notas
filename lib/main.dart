@@ -17,6 +17,8 @@ import 'settings_screen.dart';
 import 'theme_provider.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'floating_service.dart';
+import 'package:flutter_floating_window/flutter_floating_window.dart';
+
 
 // Entry point for the floating window
 @pragma('vm:entry-point')
@@ -616,6 +618,7 @@ class _FloatingNoteWidgetState extends State<FloatingNoteWidget> {
 
   Future<void> _loadNote() async {
     final prefs = await SharedPreferences.getInstance();
+    await prefs.reload();
     setState(() {
       _title = prefs.getString('floating_note_title') ?? 'Nota no encontrada';
       _content = prefs.getString('floating_note_content') ?? '';
@@ -656,6 +659,16 @@ class _FloatingNoteWidgetState extends State<FloatingNoteWidget> {
                       overflow: TextOverflow.ellipsis,
                     ),
                   ),
+                    // BOTÓN DE CIERRE OBLIGATORIO
+                    IconButton(
+                      icon: const Icon(Icons.close, color: Colors.white),
+                      onPressed: () async {
+                        final prefs = await SharedPreferences.getInstance();
+                        await prefs.remove('floating_note_title');
+                        await prefs.remove('floating_note_content');
+                        await FloatingWindowManager.instance.closeWindow("");
+                        },
+                        ),
                 ],
               ),
             ),

@@ -40,7 +40,7 @@ try {
   // Continúa con tu lógica...
 final config = FloatingWindowConfig(
   width: 300, // Ajusta el tamaño según necesites
-  height: 200,
+  height: 400,
   isDraggable: true,
   // El color de fondo se suele manejar dentro del widget que pasas, 
   // no en la configuración de la ventana del sistema.
