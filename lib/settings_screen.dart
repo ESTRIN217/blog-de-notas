@@ -22,27 +22,40 @@ class SettingsScreen extends StatelessWidget {
                 padding: const EdgeInsets.all(8),
                 children: [
                   if (isDynamicColorSupported)
-                    Card(
-                      clipBehavior: Clip.hardEdge,
-                      child: SwitchListTile(
-                        title: const Text('Usar colores dinámicos'),
-                        secondary: const Icon(Icons.palette),
-                        value: themeProvider.useDynamicColors,
-                        onChanged: (value) {
-                          themeProvider.setUseDynamicColors(value);
-                        },
-                        thumbIcon: WidgetStateProperty.resolveWith<Icon?>((
-                          Set<WidgetState> states,
-                        ) {
-                          // Si el switch ESTÁ seleccionado (ON)
-                          if (states.contains(WidgetState.selected)) {
-                            return const Icon(Icons.check);
-                          }
-                          // Si NO está seleccionado (OFF)
-                          return const Icon(Icons.close);
-                        }),
+                    const Padding(
+                      padding: EdgeInsets.only(
+                        top: 16.0,
+                        left: 16.0,
+                        right: 16.0,
+                        bottom: 8.0,
+                      ),
+                      child: Text(
+                        'Apariencia',
+                        style: TextStyle(fontWeight: FontWeight.bold),
                       ),
                     ),
+
+                  Card(
+                    clipBehavior: Clip.hardEdge,
+                    child: SwitchListTile(
+                      title: const Text('Usar colores dinámicos'),
+                      secondary: const Icon(Icons.palette),
+                      value: themeProvider.useDynamicColors,
+                      onChanged: (value) {
+                        themeProvider.setUseDynamicColors(value);
+                      },
+                      thumbIcon: WidgetStateProperty.resolveWith<Icon?>((
+                        Set<WidgetState> states,
+                      ) {
+                        // Si el switch ESTÁ seleccionado (ON)
+                        if (states.contains(WidgetState.selected)) {
+                          return const Icon(Icons.check);
+                        }
+                        // Si NO está seleccionado (OFF)
+                        return const Icon(Icons.close);
+                      }),
+                    ),
+                  ),
                   Card(
                     child: Column(
                       children: [
