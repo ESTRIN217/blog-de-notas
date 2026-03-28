@@ -18,6 +18,7 @@ import 'theme_provider.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'floating_service.dart';
 import 'package:flutter_overlay_window_sdk34/flutter_overlay_window_sdk34.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 
 // Entry point for the floating window
 @pragma("vm:entry-point")
@@ -26,10 +27,11 @@ void overlayMain() {
   runApp(
     const MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: FloatingNoteWidget(), // Tu widget que ya tienes creado 
+      home: FloatingNoteWidget(), // Tu widget que ya tienes creado
     ),
   );
 }
+
 void main() {
   runApp(
     ChangeNotifierProvider(
@@ -51,12 +53,20 @@ class MyApp extends StatelessWidget {
             ColorScheme lightColorScheme;
             ColorScheme darkColorScheme;
 
-            if (themeProvider.useDynamicColors && lightDynamic != null && darkDynamic != null) {
+            if (themeProvider.useDynamicColors &&
+                lightDynamic != null &&
+                darkDynamic != null) {
               lightColorScheme = lightDynamic;
               darkColorScheme = darkDynamic;
             } else {
-              lightColorScheme = ColorScheme.fromSeed(seedColor: Colors.deepPurple, brightness: Brightness.light);
-              darkColorScheme = ColorScheme.fromSeed(seedColor: Colors.deepPurple, brightness: Brightness.dark);
+              lightColorScheme = ColorScheme.fromSeed(
+                seedColor: Colors.deepPurple,
+                brightness: Brightness.light,
+              );
+              darkColorScheme = ColorScheme.fromSeed(
+                seedColor: Colors.deepPurple,
+                brightness: Brightness.dark,
+              );
             }
 
             return MaterialApp(
@@ -82,10 +92,7 @@ class MyApp extends StatelessWidget {
                 GlobalCupertinoLocalizations.delegate,
                 FlutterQuillLocalizations.delegate,
               ],
-              supportedLocales: const [
-                Locale('en'),
-                Locale('es'),
-              ],
+              supportedLocales: const [Locale('en'), Locale('es')],
               home: const MyHomePage(),
             );
           },
@@ -113,7 +120,7 @@ class _MyHomePageState extends State<MyHomePage> {
   final List<ListItem> _selectedItems = [];
   bool _isLoading = true;
 
-   @override
+  @override
   void initState() {
     super.initState();
     _items = [];
@@ -155,7 +162,7 @@ class _MyHomePageState extends State<MyHomePage> {
       }
     } catch (e) {
       debugPrint("Error loading items: $e");
-       _createWelcomeNote();
+      _createWelcomeNote();
     }
   }
 
@@ -164,7 +171,10 @@ class _MyHomePageState extends State<MyHomePage> {
       id: 'welcome_note',
       title: '¡Bienvenido a Flutter Notes!',
       summary: jsonEncode([
-        {'insert': 'Esta es una nota de ejemplo para ayudarte a explorar las funciones.\n'}
+        {
+          'insert':
+              'Esta es una nota de ejemplo para ayudarte a explorar las funciones.\n',
+        },
       ]),
       lastModified: DateTime.now(),
       backgroundColor: Colors.amber[200]!.toARGB32(),
@@ -179,7 +189,9 @@ class _MyHomePageState extends State<MyHomePage> {
 
   Future<void> _saveItems() async {
     try {
-      final List<Map<String, dynamic>> jsonList = _items.map((item) => item.toJson()).toList();
+      final List<Map<String, dynamic>> jsonList = _items
+          .map((item) => item.toJson())
+          .toList();
       final contents = jsonEncode(jsonList);
       if (kIsWeb) {
         final prefs = await SharedPreferences.getInstance();
@@ -194,30 +206,33 @@ class _MyHomePageState extends State<MyHomePage> {
     }
   }
 
-
   void _filterItems() {
     final query = _searchController.text.toLowerCase();
     setState(() {
       _filteredItems = _items.where((item) {
         final titleMatch = item.title.toLowerCase().contains(query);
-        final summaryMatch = item.document.toPlainText().toLowerCase().contains(query);
+        final summaryMatch = item.document.toPlainText().toLowerCase().contains(
+          query,
+        );
         return titleMatch || summaryMatch;
       }).toList();
-      _sortFilteredItems(); 
+      _sortFilteredItems();
     });
   }
 
   void _sortFilteredItems() {
-     if (_sortMethod == SortMethod.alphabetical) {
-      _filteredItems.sort((a, b) => a.title.toLowerCase().compareTo(b.title.toLowerCase()));
+    if (_sortMethod == SortMethod.alphabetical) {
+      _filteredItems.sort(
+        (a, b) => a.title.toLowerCase().compareTo(b.title.toLowerCase()),
+      );
     } else if (_sortMethod == SortMethod.byDate) {
       _filteredItems.sort((a, b) => b.lastModified.compareTo(a.lastModified));
     } else if (_sortMethod == SortMethod.custom) {
-        _filteredItems.sort((a,b) {
-            final aIndex = _items.indexOf(a);
-            final bIndex = _items.indexOf(b);
-            return aIndex.compareTo(bIndex);
-        });
+      _filteredItems.sort((a, b) {
+        final aIndex = _items.indexOf(a);
+        final bIndex = _items.indexOf(b);
+        return aIndex.compareTo(bIndex);
+      });
     }
   }
 
@@ -228,42 +243,47 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   Future<void> _navigateToEditor([ListItem? item]) async {
-    if (_isSelectionMode) return; 
+    if (_isSelectionMode) return;
 
-    final originalItem = item ?? ListItem(id: DateTime.now().millisecondsSinceEpoch.toString(), title: '', summary: '', lastModified: DateTime.now());
+    final originalItem =
+        item ??
+        ListItem(
+          id: DateTime.now().millisecondsSinceEpoch.toString(),
+          title: '',
+          summary: '',
+          lastModified: DateTime.now(),
+        );
 
     final result = await Navigator.push(
       context,
-      MaterialPageRoute(
-        builder: (context) => EditorScreen(item: originalItem),
-      ),
+      MaterialPageRoute(builder: (context) => EditorScreen(item: originalItem)),
     );
 
     if (result == null) return;
 
     if (result == "DELETE") {
-        setState(() {
-            _items.removeWhere((i) => i.id == originalItem.id);
-            _filterItems();
-             _saveItems();
-        });
+      setState(() {
+        _items.removeWhere((i) => i.id == originalItem.id);
+        _filterItems();
+        _saveItems();
+      });
     } else if (result is ListItem) {
       setState(() {
         final index = _items.indexWhere((i) => i.id == result.id);
 
         if (result.title.trim().isEmpty && result.document.length <= 1) {
-            if (index != -1) {
-                _items.removeAt(index);
-            }
-            _filterItems();
-            _saveItems();
-            return;
+          if (index != -1) {
+            _items.removeAt(index);
+          }
+          _filterItems();
+          _saveItems();
+          return;
         }
 
         if (index != -1) {
-          _items[index] = result; 
+          _items[index] = result;
         } else {
-          _items.insert(0, result); 
+          _items.insert(0, result);
         }
 
         _filterItems();
@@ -273,7 +293,7 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   void _startSelectionMode(ListItem item) {
-    if (_isSelectionMode) return; 
+    if (_isSelectionMode) return;
     setState(() {
       _isSelectionMode = true;
       _selectedItems.add(item);
@@ -303,20 +323,17 @@ class _MyHomePageState extends State<MyHomePage> {
   void _deleteSelectedItems() {
     setState(() {
       _items.removeWhere((item) => _selectedItems.contains(item));
-       _filterItems();
+      _filterItems();
       _exitSelectionMode();
-       _saveItems();
+      _saveItems();
     });
   }
 
   void _shareSelectedItems() {
-    final content = _selectedItems.map((item) => "${item.title}\\n${item.document.toPlainText()}").join('\n\n---\n\n');
-    SharePlus.instance.share(
-        ShareParams(
-            text: content,
-            subject: 'Mis notas',
-        ),
-    );
+    final content = _selectedItems
+        .map((item) => "${item.title}\\n${item.document.toPlainText()}")
+        .join('\n\n---\n\n');
+    SharePlus.instance.share(ShareParams(text: content, subject: 'Mis notas'));
     _exitSelectionMode();
   }
 
@@ -325,9 +342,21 @@ class _MyHomePageState extends State<MyHomePage> {
       context: context,
       builder: (context) => Wrap(
         children: <Widget>[
-          ListTile(leading: const Icon(Icons.sort_by_alpha), title: const Text('Ordenar alfabéticamente'), onTap: () => _sortAlphabetically()),
-          ListTile(leading: Icon(Icons.date_range), title: Text('Ordenar por fecha'), onTap: () => _sortByDate()),
-          ListTile(leading: Icon(Icons.drag_handle), title: Text('Orden personalizado'), onTap: () => _setCustomSort()),
+          ListTile(
+            leading: const Icon(Icons.sort_by_alpha),
+            title: const Text('Ordenar alfabéticamente'),
+            onTap: () => _sortAlphabetically(),
+          ),
+          ListTile(
+            leading: Icon(Icons.date_range),
+            title: Text('Ordenar por fecha'),
+            onTap: () => _sortByDate(),
+          ),
+          ListTile(
+            leading: Icon(Icons.drag_handle),
+            title: Text('Orden personalizado'),
+            onTap: () => _setCustomSort(),
+          ),
         ],
       ),
     );
@@ -345,17 +374,19 @@ class _MyHomePageState extends State<MyHomePage> {
     if (preserveState) Navigator.pop(context);
     setState(() {
       _sortMethod = SortMethod.alphabetical;
-      _items.sort((a, b) => a.title.toLowerCase().compareTo(b.title.toLowerCase()));
+      _items.sort(
+        (a, b) => a.title.toLowerCase().compareTo(b.title.toLowerCase()),
+      );
       _filterItems();
     });
   }
 
   void _sortByDate({bool preserveState = true}) {
-     if (preserveState) Navigator.pop(context);
+    if (preserveState) Navigator.pop(context);
     setState(() {
       _sortMethod = SortMethod.byDate;
       _items.sort((a, b) => b.lastModified.compareTo(a.lastModified));
-       _filterItems();
+      _filterItems();
     });
   }
 
@@ -377,33 +408,70 @@ class _MyHomePageState extends State<MyHomePage> {
   PreferredSizeWidget _buildAppBar() {
     if (_isSelectionMode) {
       return AppBar(
-        leading: IconButton(icon: const Icon(Icons.close), onPressed: _exitSelectionMode),
+        leading: IconButton(
+          icon: const Icon(Icons.close),
+          onPressed: _exitSelectionMode,
+        ),
         title: Text('${_selectedItems.length} seleccionados'),
         actions: [
           if (!kIsWeb && Platform.isAndroid)
-            IconButton(icon: const Icon(Icons.picture_in_picture), onPressed: () => FloatingService.showFloatingWindow(context, _selectedItems.first), tooltip: 'Modo flotante'),
-          IconButton(icon: const Icon(Icons.share), onPressed: _shareSelectedItems, tooltip: 'Compartir'),
-          IconButton(icon: const Icon(Icons.delete), onPressed: _deleteSelectedItems, tooltip: 'Eliminar'),
+            IconButton(
+              icon: const Icon(Icons.picture_in_picture),
+              onPressed: () => FloatingService.showFloatingWindow(
+                context,
+                _selectedItems.first,
+              ),
+              tooltip: 'Modo flotante',
+            ),
+          IconButton(
+            icon: const Icon(Icons.share),
+            onPressed: _shareSelectedItems,
+            tooltip: 'Compartir',
+          ),
+          IconButton(
+            icon: const Icon(Icons.delete),
+            onPressed: _deleteSelectedItems,
+            tooltip: 'Eliminar',
+          ),
         ],
       );
     }
 
     return AppBar(
-      leading: Builder(builder: (context) => IconButton(icon: const Icon(Icons.menu), onPressed: () => Scaffold.of(context).openDrawer())),
+      leading: Builder(
+        builder: (context) => IconButton(
+          icon: const Icon(Icons.menu),
+          onPressed: () => Scaffold.of(context).openDrawer(),
+        ),
+      ),
       title: TextField(
         controller: _searchController,
         decoration: InputDecoration(
           hintText: 'Buscar...',
           prefixIcon: const Icon(Icons.search),
-          border: OutlineInputBorder(borderRadius: BorderRadius.circular(30.0), borderSide: BorderSide.none),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(30.0),
+            borderSide: BorderSide.none,
+          ),
           filled: true,
           fillColor: Theme.of(context).colorScheme.surface,
-          contentPadding: const EdgeInsets.symmetric(vertical: 0, horizontal: 20),
+          contentPadding: const EdgeInsets.symmetric(
+            vertical: 0,
+            horizontal: 20,
+          ),
         ),
       ),
       actions: [
-        IconButton(icon: Icon(_isListView ? Icons.grid_view : Icons.view_list), onPressed: _toggleView, tooltip: 'Cambiar vista'),
-        IconButton(icon: const Icon(Icons.import_export), onPressed: _showSortOptions, tooltip: 'Ordenar'),
+        IconButton(
+          icon: Icon(_isListView ? Icons.grid_view : Icons.view_list),
+          onPressed: _toggleView,
+          tooltip: 'Cambiar vista',
+        ),
+        IconButton(
+          icon: const Icon(Icons.import_export),
+          onPressed: _showSortOptions,
+          tooltip: 'Ordenar',
+        ),
       ],
       backgroundColor: Theme.of(context).colorScheme.primaryContainer,
     );
@@ -418,8 +486,16 @@ class _MyHomePageState extends State<MyHomePage> {
           padding: EdgeInsets.zero,
           children: <Widget>[
             DrawerHeader(
-              decoration: BoxDecoration(color: Theme.of(context).colorScheme.primaryContainer),
-              child: Text('Menú', style: TextStyle(color: Theme.of(context).colorScheme.onPrimaryContainer, fontSize: 24)),
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.primaryContainer,
+              ),
+              child: Text(
+                'Menú',
+                style: TextStyle(
+                  color: Theme.of(context).colorScheme.onPrimaryContainer,
+                  fontSize: 24,
+                ),
+              ),
             ),
             ListTile(
               leading: const Icon(Icons.home),
@@ -433,14 +509,41 @@ class _MyHomePageState extends State<MyHomePage> {
                 Navigator.pop(context);
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => const SettingsScreen()),
+                  MaterialPageRoute(
+                    builder: (context) => const SettingsScreen(),
+                  ),
                 );
               },
             ),
             const Divider(),
-            const ListTile(
-              title: Text('v3.0'),
-              enabled: false,
+            ListTile(
+              enabled:
+                  false, // Mantiene el ícono y texto con un tono desactivado
+              leading: const Icon(
+                Icons.info_outline,
+                size: 20,
+              ), // El nuevo ícono
+              title: FutureBuilder<PackageInfo>(
+                future: PackageInfo.fromPlatform(),
+                builder: (context, snapshot) {
+                  if (snapshot.hasData) {
+                    final version = snapshot.data!.version;
+                    final buildNumber = snapshot.data!.buildNumber;
+                    return Text(
+                      'Versión $version ($buildNumber) • UNIVERSAL',
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 12,
+                      ),
+                    );
+                  } else {
+                    return const Text(
+                      'Cargando...',
+                      style: TextStyle(fontSize: 12),
+                    );
+                  }
+                },
+              ),
             ),
           ],
         ),
@@ -448,27 +551,31 @@ class _MyHomePageState extends State<MyHomePage> {
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
           : (_isListView ? _buildListView() : _buildGridView()),
-      floatingActionButton: _isSelectionMode ? null : FloatingActionButton(
-        onPressed: () => _navigateToEditor(),
-        tooltip: 'Añadir nota',
-        child: const Icon(Icons.add),
-      ),
+      floatingActionButton: _isSelectionMode
+          ? null
+          : FloatingActionButton(
+              onPressed: () => _navigateToEditor(),
+              tooltip: 'Añadir nota',
+              child: const Icon(Icons.add),
+            ),
     );
   }
 
   bool _isColorDark(int? colorValue) {
-    if (colorValue == null) return Theme.of(context).brightness == Brightness.dark;
+    if (colorValue == null)
+      return Theme.of(context).brightness == Brightness.dark;
     return Color(colorValue).computeLuminance() < 0.5;
   }
 
   Widget _buildItem(ListItem item, {bool isListView = true}) {
     final isSelected = _selectedItems.contains(item);
-    final bool canReorder = _sortMethod == SortMethod.custom && _searchController.text.isEmpty;
+    final bool canReorder =
+        _sortMethod == SortMethod.custom && _searchController.text.isEmpty;
 
     final isDark = _isColorDark(item.backgroundColor);
     final textColor = isDark ? Colors.white : Colors.black;
 
-     final plainTextSummary = item.document.toPlainText();
+    final plainTextSummary = item.document.toPlainText();
 
     final contentColumn = Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -477,23 +584,32 @@ class _MyHomePageState extends State<MyHomePage> {
         if (item.title.isNotEmpty)
           Text(
             item.title,
-            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: textColor),
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+              color: textColor,
+            ),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
           ),
-        if (item.title.isNotEmpty && item.document.length > 1) const SizedBox(height: 8),
+        if (item.title.isNotEmpty && item.document.length > 1)
+          const SizedBox(height: 8),
         if (item.document.length > 1)
           isListView
               ? Text(
                   plainTextSummary,
-                  style: TextStyle(color: textColor.withAlpha((255 * 0.8).round())),
+                  style: TextStyle(
+                    color: textColor.withAlpha((255 * 0.8).round()),
+                  ),
                   maxLines: 10,
                   overflow: TextOverflow.ellipsis,
                 )
               : Expanded(
                   child: Text(
                     plainTextSummary,
-                    style: TextStyle(color: textColor.withAlpha((255 * 0.8).round())),
+                    style: TextStyle(
+                      color: textColor.withAlpha((255 * 0.8).round()),
+                    ),
                     maxLines: 6,
                     overflow: TextOverflow.ellipsis,
                   ),
@@ -505,11 +621,16 @@ class _MyHomePageState extends State<MyHomePage> {
       elevation: 2,
       clipBehavior: Clip.antiAlias,
       color: isSelected
-          ? Theme.of(context).colorScheme.primaryContainer.withAlpha((255 * 0.6).round())
-          : (item.backgroundColor != null ? Color(item.backgroundColor!) : null),
+          ? Theme.of(
+              context,
+            ).colorScheme.primaryContainer.withAlpha((255 * 0.6).round())
+          : (item.backgroundColor != null
+                ? Color(item.backgroundColor!)
+                : null),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: InkWell(
-        onTap: () => _isSelectionMode ? _toggleSelection(item) : _navigateToEditor(item),
+        onTap: () =>
+            _isSelectionMode ? _toggleSelection(item) : _navigateToEditor(item),
         onLongPress: () {
           if (!_isSelectionMode) {
             _startSelectionMode(item);
@@ -537,8 +658,15 @@ class _MyHomePageState extends State<MyHomePage> {
                 ReorderableDragStartListener(
                   index: _filteredItems.indexOf(item),
                   child: Padding(
-                    padding: const EdgeInsets.only(right: 12.0, top: 12.0, left: 4.0),
-                    child: Icon(Icons.drag_handle, color: textColor.withAlpha((255 * 0.6).round())),
+                    padding: const EdgeInsets.only(
+                      right: 12.0,
+                      top: 12.0,
+                      left: 4.0,
+                    ),
+                    child: Icon(
+                      Icons.drag_handle,
+                      color: textColor.withAlpha((255 * 0.6).round()),
+                    ),
                   ),
                 ),
             ],
@@ -549,14 +677,19 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   Widget _buildListView() {
-    final bool canReorder = _sortMethod == SortMethod.custom && _searchController.text.isEmpty;
+    final bool canReorder =
+        _sortMethod == SortMethod.custom && _searchController.text.isEmpty;
     if (canReorder) {
       return ReorderableListView.builder(
         buildDefaultDragHandles: false,
         itemCount: _filteredItems.length,
         itemBuilder: (context, index) {
           final item = _filteredItems[index];
-          return Container(key: ValueKey(item.id), margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8), child: _buildItem(item));
+          return Container(
+            key: ValueKey(item.id),
+            margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            child: _buildItem(item),
+          );
         },
         onReorder: _onReorder,
       );
@@ -565,17 +698,21 @@ class _MyHomePageState extends State<MyHomePage> {
       itemCount: _filteredItems.length,
       itemBuilder: (context, index) {
         final item = _filteredItems[index];
-        return Container(margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8), child: _buildItem(item, isListView: true));
+        return Container(
+          margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          child: _buildItem(item, isListView: true),
+        );
       },
     );
   }
 
   Widget _buildGridView() {
-    final bool canReorder = _sortMethod == SortMethod.custom && _searchController.text.isEmpty;
+    final bool canReorder =
+        _sortMethod == SortMethod.custom && _searchController.text.isEmpty;
     const gridDelegate = SliverGridDelegateWithMaxCrossAxisExtent(
-      maxCrossAxisExtent: 200, 
-      crossAxisSpacing: 16, 
-      mainAxisSpacing: 16, 
+      maxCrossAxisExtent: 200,
+      crossAxisSpacing: 16,
+      mainAxisSpacing: 16,
       childAspectRatio: 0.75,
     );
 
@@ -584,7 +721,10 @@ class _MyHomePageState extends State<MyHomePage> {
         padding: const EdgeInsets.all(16.0),
         gridDelegate: gridDelegate,
         itemCount: _filteredItems.length,
-        itemBuilder: (context, index) => Container(key: ValueKey(_filteredItems[index].id), child: _buildItem(_filteredItems[index], isListView: false)),
+        itemBuilder: (context, index) => Container(
+          key: ValueKey(_filteredItems[index].id),
+          child: _buildItem(_filteredItems[index], isListView: false),
+        ),
         onReorder: _onReorder,
       );
     }
@@ -592,7 +732,8 @@ class _MyHomePageState extends State<MyHomePage> {
       padding: const EdgeInsets.all(16.0),
       gridDelegate: gridDelegate,
       itemCount: _filteredItems.length,
-      itemBuilder: (context, index) => _buildItem(_filteredItems[index], isListView: false),
+      itemBuilder: (context, index) =>
+          _buildItem(_filteredItems[index], isListView: false),
     );
   }
 }
@@ -612,15 +753,15 @@ class _FloatingNoteWidgetState extends State<FloatingNoteWidget> {
   @override
   void initState() {
     super.initState();
-  // Escuchar datos en tiempo real
-  FlutterOverlayWindow.overlayListener.listen((data) {
-    if (data != null && data is Map) {
-      setState(() {
-        _title = data['title'] ?? "Sin título";
-        _content = data['content'] ?? "";
-      });
-    }
-  });
+    // Escuchar datos en tiempo real
+    FlutterOverlayWindow.overlayListener.listen((data) {
+      if (data != null && data is Map) {
+        setState(() {
+          _title = data['title'] ?? "Sin título";
+          _content = data['content'] ?? "";
+        });
+      }
+    });
     _loadNote();
   }
 
@@ -638,9 +779,7 @@ class _FloatingNoteWidgetState extends State<FloatingNoteWidget> {
     return Card(
       elevation: 8.0,
       margin: const EdgeInsets.all(8),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       clipBehavior: Clip.antiAlias,
       child: Container(
         width: 300,
@@ -667,12 +806,13 @@ class _FloatingNoteWidgetState extends State<FloatingNoteWidget> {
                       overflow: TextOverflow.ellipsis,
                     ),
                   ),
-                    // BOTÓN DE CIERRE OBLIGATORIO
-                    IconButton(
-                      icon: const Icon(Icons.close, color: Colors.white),
-                      onPressed: () async {
-                        await FlutterOverlayWindow.closeOverlay();},
-                        ),
+                  // BOTÓN DE CIERRE OBLIGATORIO
+                  IconButton(
+                    icon: const Icon(Icons.close, color: Colors.white),
+                    onPressed: () async {
+                      await FlutterOverlayWindow.closeOverlay();
+                    },
+                  ),
                 ],
               ),
             ),
@@ -684,7 +824,7 @@ class _FloatingNoteWidgetState extends State<FloatingNoteWidget> {
                   style: const TextStyle(fontSize: 14, color: Colors.black),
                 ),
               ),
-            )
+            ),
           ],
         ),
       ),

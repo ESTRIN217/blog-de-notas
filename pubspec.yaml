@@ -28,6 +28,7 @@ dependencies:
   url_launcher: ^6.3.2
   flutter_launcher_icons: ^0.14.4
   flutter_overlay_window_sdk34: ^0.4.7
+  package_info_plus: ^9.0.0
 
 dev_dependencies:
   flutter_test:

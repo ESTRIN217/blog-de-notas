@@ -65,6 +65,12 @@ class _EditorScreenState extends State<EditorScreen> {
         _ttsState = TtsState.stopped;
       });
     });
+    _flutterTts.setCancelHandler(() {
+      if (!mounted) return;
+      setState(() {
+        _ttsState = TtsState.stopped;
+      });
+    });
   }
 
   @override
@@ -110,6 +116,11 @@ class _EditorScreenState extends State<EditorScreen> {
   Future<void> _toggleSpeak() async {
     if (_ttsState == TtsState.playing) {
       await _flutterTts.stop();
+      if (mounted) {
+        setState(() {
+          _ttsState = TtsState.stopped;
+        });
+      }
     } else {
       final title = _titleController.text;
       final content = _contentController.document.toPlainText();

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 
 class AboutScreen extends StatelessWidget {
   const AboutScreen({super.key});
@@ -14,6 +15,14 @@ class AboutScreen extends StatelessWidget {
 
   void _launchGITHUB() async {
     const url = 'https://github.com/ESTRIN217';
+    if (!await launchUrl(Uri.parse(url))) {
+      throw 'Could not launch $url';
+    }
+  }
+
+  void _launchLicense() async {
+    const url =
+        'https://github.com/ESTRIN217/Blog-de-notas/blob/master/LICENSE';
     if (!await launchUrl(Uri.parse(url))) {
       throw 'Could not launch $url';
     }
@@ -56,13 +65,25 @@ class AboutScreen extends StatelessWidget {
                         const SizedBox(
                           height: 4,
                         ), // Pequeño espacio entre textos
-                        Text(
-                          '3.0.0 • UNIVERSAL',
-                          style: Theme.of(context).textTheme.bodySmall
-                              ?.copyWith(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 14,
-                              ),
+                        FutureBuilder<PackageInfo>(
+                          future: PackageInfo.fromPlatform(),
+                          builder: (context, snapshot) {
+                            if (snapshot.hasData) {
+                              final version = snapshot.data!.version;
+                              final buildNumber = snapshot.data!.buildNumber;
+                              return Text(
+                                '$version ($buildNumber) • UNIVERSAL',
+                                style: Theme.of(context).textTheme.bodySmall
+                                    ?.copyWith(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 14,
+                                    ),
+                              );
+                            } else {
+                              // Mientras carga la info, ponemos un texto genérico o vacío
+                              return const Text('Cargando versión...');
+                            }
+                          },
                         ),
                       ],
                     ),
@@ -94,7 +115,7 @@ class AboutScreen extends StatelessWidget {
               const SizedBox(height: 10),
               const Text(
                 'ESTRIN217',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold),
               ),
               Card.outlined(
                 clipBehavior: Clip
@@ -108,16 +129,48 @@ class AboutScreen extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 20),
-              ElevatedButton.icon(
-                onPressed: _launchURL,
-                icon: const FaIcon(FontAwesomeIcons.github),
-                label: const Text('Ver repositorio'),
-                style: ElevatedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 30,
-                    vertical: 15,
-                  ),
-                  textStyle: const TextStyle(fontSize: 16),
+
+              const Padding(
+                padding: EdgeInsets.only(
+                  top: 16.0,
+                  left: 16.0,
+                  right: 16.0,
+                  bottom: 8.0,
+                ),
+                child: Text(
+                  'Enlaces utiles',
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
+              ),
+              Card.outlined(
+                clipBehavior: Clip.hardEdge,
+                child: Column(
+                  children: [
+                    ListTile(
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 16.0,
+                        vertical: 4.0,
+                      ),
+                      leading: const FaIcon(FontAwesomeIcons.github),
+                      title: const Text('Ver repositorio'),
+                      onTap: _launchURL,
+                    ),
+                    const Divider(
+                      height: 1,
+                      indent: 56,
+                    ), // Una línea sutil para separar
+                    ListTile(
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 16.0,
+                        vertical: 4.0,
+                      ),
+                      leading: const Icon(
+                        Icons.description_outlined,
+                      ), // Ícono para la licencia
+                      title: const Text('MIT LICENCIA'),
+                      onTap: _launchLicense,
+                    ),
+                  ],
                 ),
               ),
             ],
