@@ -1,60 +1,66 @@
-# Blueprint: Note-Taking App
+# Blueprint: Blog de notas
 
-## 1. Overview
+## 1. Descripción general
 
-This document outlines the design and features of a modern, intuitive note-taking application built with Flutter. The app provides a flexible and user-friendly interface for creating, managing, and organizing notes, with advanced customization and localization features.
+Este documento describe el diseño y las características de una aplicación moderna e intuitiva para tomar notas con Flutter. La aplicación proporciona una interfaz flexible y fácil de usar para crear, Gestiona y organiza notas, con funciones avanzadas de personalización y localización.
 
-## 2. Features by Version
+## 2. Características por versión
 
-### 2.1. Version 3.0.0
+### 2.1. Versión 3.0.0
 
-- **Advanced Theming & UI:**
-- **Theme Modes:** Full support for **Light and Dark modes**, plus a **System** setting to sync with the OS.
-- **Dynamic Color:** The app's color scheme can be dynamically generated from the user's wallpaper on supported Android versions (Material You).
-- **Custom Typography:** Integration with **Google Fonts** for a polished and consistent text appearance.
-- **Settings Persistence:** All user preferences, including theme, language, and sort order, are saved across app sessions using `shared_preferences`.
-- **Internationalization (i10n):**
-- **Multi-Language Support:** The UI is fully localized for **English** and **Spanish**.
-- **Language Selection:** Users can manually switch the app's language from the settings screen.
-- **Enhanced Rich Text Editor (Flutter Quill):**
-- The previous custom editor has been replaced with the powerful `flutter_quill` library, providing a more robust and feature-rich editing experience.
-- **Text-to-Speech:**
-- **Accessibility:** An integrated text-to-speech feature can read notes aloud.
+- **Temas e interfaz de usuario avanzados:**
+  - **Modos de tema:** Compatibilidad total con los modos **claro y oscuro**, además de una configuración del **sistema** para sincronizar con el sistema operativo.
+  - **Color dinámico:** En las versiones de Android compatibles (Material You), la combinación de colores de la aplicación se puede generar dinámicamente a partir del fondo de pantalla del usuario.
+  - **Tipografía personalizada:** Integración con **Google Fonts** para una apariencia de texto pulida y uniforme.
+  - **Persistencia de la configuración:** Todas las preferencias del usuario, incluidos el tema, el idioma y el orden de clasificación, se guardan entre sesiones de la aplicación mediante `shared_preferences`.
+- **Internacionalización (i10n):**
+  - **Soporte multilingüe:** La interfaz de usuario está totalmente localizada para **inglés** y **español**.
+  - **Selección de idioma:** Los usuarios pueden cambiar manualmente el idioma de la aplicación desde la pantalla de configuración.
+- **Editor de texto enriquecido mejorado (Flutter Quill):**
+  - El editor personalizado anterior ha sido reemplazado por la potente biblioteca `flutter_quill`, que proporciona una experiencia de edición más robusta y con más funciones.
+- **Conversión de texto a voz:**
+  - **Accesibilidad:** Una función integrada de conversión de texto a voz puede leer las notas en voz alta.
 
-### 2.2. Version 2.0.0 (Features integrated and enhanced in v3.0)
+### 2.2. Versión 2.0.0 (Características integradas y mejoradas en v3.0)
 
-- **Editor Enhancements:**
-- **Undo/Redo Functionality:** Undo and redo text and style changes.
-- **Background Customization:** Change a note's background color or set a background image from the gallery.
-- **Text Formatting:** Basic text styling like font size, bold, and italics.
-- **Checklists:** Create interactive checklists within notes.
-    *Note: These features were originally part of a custom editor and have now been superseded by the `flutter_quill` implementation in v3.0.*
+- **Mejoras en el editor:**
+  - **Funcionalidad de deshacer/rehacer:** Deshacer y rehacer los cambios de texto y estilo.
+  - **Personalización del fondo:** Cambia el color de fondo de una nota o establece una imagen de fondo desde la galería.
+  - **Formato de texto:** Formato básico de texto, como tamaño de fuente, negrita y cursiva.
+  - **Listas de verificación:** Crea listas de verificación interactivas dentro de las notas.
+    
+*Nota: Estas funciones formaban parte originalmente de un editor personalizado y han sido reemplazadas por la implementación de `flutter_quill` en la versión 3.0.*
 
-### 2.3. Version 1.0.0 (Core Features)
+### 2.3. Versión 1.0.0 (Características principales)
 
-- **Main Screen & Layout:**
-- **Dual View Modes:** Switch between list and grid views.
-- **Customizable Sorting:** Sort notes alphabetically, by modification date, or use a custom drag-and-drop order.
-- **Functional Search:** Real-time note filtering by title or content.
-- **Note Editor:**
-- **Rich Text Editing:** A dedicated screen for editing notes.
-- **Automatic Saving:** Changes are saved automatically when the user exits the editor.
-- **Empty Note Handling:** Blank notes are automatically discarded.
-- **Selection & Bulk Actions:**
-- **Selection Mode:** Long-press a note to enter selection mode and choose multiple items.
-- **Contextual App Bar:** Appears in selection mode to allow bulk sharing or deleting of selected notes.
+- **Pantalla principal y diseño:**
+  - **Modos de doble visualización:** Cambia entre la vista de lista y la vista de cuadrícula.
+  - **Clasificación personalizable:** Ordena las notas alfabéticamente, por fecha de modificación o utiliza un orden personalizado arrastrando y soltando.
+  - **Búsqueda funcional:** Filtrado de notas en tiempo real por título o contenido.
+- **Editor de notas:**
+  - **Edición de texto enriquecido:** Una pantalla dedicada para editar notas.
+  - **Ahorro automático:** Los cambios se guardan automáticamente cuando el usuario sale del editor.
+  - **Manejo de notas vacías:** Las notas en blanco se descartan automáticamente..
+- **Selección y acción masivas:**
+  - **Modo de selección:** Mantén pulsada una nota para entrar en el modo de selección y elegir varios elementos.
+  - **Barra de aplicaciones contextual:** Aparece en el modo de selección para permitir compartir o eliminar en bloque las notas seleccionadas.
 
-### 2.4 Version 4.0.0
+### 2.4 Versión 4.0.0
 
-- **Imagen support in note**
-- **Shared in PDF, Markdown,and JSON**
+- **Mejoras en el editor:**
+  - **Soporte de imagen en nota**
+  - **Soporte de audio en nota**
+  - **Soporte de dibujo en nota**
 
-## 3. Code Quality & Versioning
+- **Mas formatos para compartir:**
+  - **PDF, Markdown, HTML, CSV, and JSON**
 
-### 3.1. Dependencies
+## 3. Calidad del código y control de versiones
 
-- The project utilizes `flutter_quill`, `provider`, `dynamic_color`, `google_fonts`, `shared_preferences`, `flutter_tts`, `floating_draggable_widget`, and more to support its advanced feature set.
+### 3.1. Dependencias
 
-### 3.2. Versioning
+- El proyecto utiliza `flutter_quill`, `provider`, `dynamic_color`, `google_fonts`, `shared_preferences`, `flutter_tts`, y más para respaldar su conjunto de funciones avanzadas.
 
-- **Current Version:** `3.0.0+1`
+### 3.2. Control de versiones
+
+- **Versión actual:** `3.0.0+1`
