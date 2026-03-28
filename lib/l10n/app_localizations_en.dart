@@ -12,7 +12,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get helloWorld => 'Hello World!';
 
   @override
-  String get flutterNotes => 'Flutter Notes';
+  String get flutterNotes => 'NOTEBOOK';
 
   @override
   String get search => 'Search...';
@@ -33,7 +33,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settings => 'Settings';
 
   @override
-  String get addItem => 'Add Item';
+  String get addItem => 'Add Note';
 
   @override
   String selected(Object count) {
@@ -68,14 +68,35 @@ class AppLocalizationsEn extends AppLocalizations {
   String get useDynamicColors => 'Use Dynamic Colors';
 
   @override
-  String get themeMode => 'Theme Mode';
+  String get themeMode => 'Mode dark';
 
   @override
   String get system => 'System';
 
   @override
-  String get light => 'Light';
+  String get light => 'Off';
 
   @override
-  String get dark => 'Dark';
+  String get dark => 'On';
+
+  @override
+  String get apariencia => 'Appearance';
+
+  @override
+  String get idioma => 'Language';
+
+  @override
+  String get informacion => 'Information';
+
+  @override
+  String get sobre => 'About';
+
+  @override
+  String get desarrolador => 'Developed by';
+
+  @override
+  String get enlaces => 'Useful links';
+
+  @override
+  String get repositorio => 'View repository';
 }

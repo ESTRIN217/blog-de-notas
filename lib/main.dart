@@ -16,6 +16,7 @@ import 'editor_screen.dart';
 import 'settings_screen.dart';
 import 'theme_provider.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:myapp/l10n/app_localizations.dart';
 import 'floating_service.dart';
 import 'package:flutter_overlay_window_sdk34/flutter_overlay_window_sdk34.dart';
 import 'package:package_info_plus/package_info_plus.dart';
@@ -86,7 +87,9 @@ class MyApp extends StatelessWidget {
                 ),
               ),
               themeMode: themeProvider.themeMode,
+              locale: themeProvider.locale,
               localizationsDelegates: const [
+                AppLocalizations.delegate,
                 GlobalMaterialLocalizations.delegate,
                 GlobalWidgetsLocalizations.delegate,
                 GlobalCupertinoLocalizations.delegate,
@@ -344,17 +347,17 @@ class _MyHomePageState extends State<MyHomePage> {
         children: <Widget>[
           ListTile(
             leading: const Icon(Icons.sort_by_alpha),
-            title: const Text('Ordenar alfabéticamente'),
+            title: Text(AppLocalizations.of(context)!.sortAlphabetically),
             onTap: () => _sortAlphabetically(),
           ),
           ListTile(
             leading: Icon(Icons.date_range),
-            title: Text('Ordenar por fecha'),
+            title: Text(AppLocalizations.of(context)!.sortByDate),
             onTap: () => _sortByDate(),
           ),
           ListTile(
             leading: Icon(Icons.drag_handle),
-            title: Text('Orden personalizado'),
+            title: Text(AppLocalizations.of(context)!.customSort),
             onTap: () => _setCustomSort(),
           ),
         ],
@@ -426,12 +429,12 @@ class _MyHomePageState extends State<MyHomePage> {
           IconButton(
             icon: const Icon(Icons.share),
             onPressed: _shareSelectedItems,
-            tooltip: 'Compartir',
+            tooltip: AppLocalizations.of(context)!.share,
           ),
           IconButton(
             icon: const Icon(Icons.delete),
             onPressed: _deleteSelectedItems,
-            tooltip: 'Eliminar',
+            tooltip: AppLocalizations.of(context)!.delete,
           ),
         ],
       );
@@ -447,7 +450,7 @@ class _MyHomePageState extends State<MyHomePage> {
       title: TextField(
         controller: _searchController,
         decoration: InputDecoration(
-          hintText: 'Buscar...',
+          hintText: AppLocalizations.of(context)!.search,
           prefixIcon: const Icon(Icons.search),
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(30.0),
@@ -465,12 +468,12 @@ class _MyHomePageState extends State<MyHomePage> {
         IconButton(
           icon: Icon(_isListView ? Icons.grid_view : Icons.view_list),
           onPressed: _toggleView,
-          tooltip: 'Cambiar vista',
+          tooltip: AppLocalizations.of(context)!.toggleView,
         ),
         IconButton(
           icon: const Icon(Icons.import_export),
           onPressed: _showSortOptions,
-          tooltip: 'Ordenar',
+          tooltip: AppLocalizations.of(context)!.sort,
         ),
       ],
       backgroundColor: Theme.of(context).colorScheme.primaryContainer,
@@ -490,7 +493,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 color: Theme.of(context).colorScheme.primaryContainer,
               ),
               child: Text(
-                'Menú',
+                AppLocalizations.of(context)!.menu,
                 style: TextStyle(
                   color: Theme.of(context).colorScheme.onPrimaryContainer,
                   fontSize: 24,
@@ -499,12 +502,12 @@ class _MyHomePageState extends State<MyHomePage> {
             ),
             ListTile(
               leading: const Icon(Icons.home),
-              title: const Text('Inicio'),
+              title: Text(AppLocalizations.of(context)!.home),
               onTap: () => Navigator.pop(context),
             ),
             ListTile(
               leading: const Icon(Icons.settings),
-              title: const Text('Ajustes'),
+              title: Text(AppLocalizations.of(context)!.settings),
               onTap: () {
                 Navigator.pop(context);
                 Navigator.push(
@@ -555,15 +558,16 @@ class _MyHomePageState extends State<MyHomePage> {
           ? null
           : FloatingActionButton(
               onPressed: () => _navigateToEditor(),
-              tooltip: 'Añadir nota',
+              tooltip: AppLocalizations.of(context)!.addItem,
               child: const Icon(Icons.add),
             ),
     );
   }
 
   bool _isColorDark(int? colorValue) {
-    if (colorValue == null)
+    if (colorValue == null) {
       return Theme.of(context).brightness == Brightness.dark;
+    }
     return Color(colorValue).computeLuminance() < 0.5;
   }
 

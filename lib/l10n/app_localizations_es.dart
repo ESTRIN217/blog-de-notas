@@ -12,13 +12,13 @@ class AppLocalizationsEs extends AppLocalizations {
   String get helloWorld => '¡Hola Mundo!';
 
   @override
-  String get flutterNotes => 'Notas de Flutter';
+  String get flutterNotes => 'BLOG DE NOTAS';
 
   @override
   String get search => 'Buscar...';
 
   @override
-  String get toggleView => 'Alternar Vista';
+  String get toggleView => 'Cambiar Vista';
 
   @override
   String get sort => 'Ordenar';
@@ -33,7 +33,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get settings => 'Configuración';
 
   @override
-  String get addItem => 'Añadir Elemento';
+  String get addItem => 'Añadir nota';
 
   @override
   String selected(Object count) {
@@ -68,14 +68,35 @@ class AppLocalizationsEs extends AppLocalizations {
   String get useDynamicColors => 'Usar Colores Dinámicos';
 
   @override
-  String get themeMode => 'Modo de Tema';
+  String get themeMode => 'Modo Oscuro';
 
   @override
   String get system => 'Sistema';
 
   @override
-  String get light => 'Claro';
+  String get light => 'Apagado';
 
   @override
-  String get dark => 'Oscuro';
+  String get dark => 'Encendido';
+
+  @override
+  String get apariencia => 'Apariencia';
+
+  @override
+  String get idioma => 'Idioma';
+
+  @override
+  String get informacion => 'Información';
+
+  @override
+  String get sobre => 'Sobre la aplicación';
+
+  @override
+  String get desarrolador => 'Desarrollado por';
+
+  @override
+  String get enlaces => 'Enlaces utiles';
+
+  @override
+  String get repositorio => 'Ver repositorio';
 }

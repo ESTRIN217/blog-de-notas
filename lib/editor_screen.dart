@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_quill/flutter_quill.dart' as quill;
 import 'package:image_picker/image_picker.dart';
+import 'package:myapp/l10n/app_localizations.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 import 'list_item.dart';
@@ -146,14 +147,14 @@ class _EditorScreenState extends State<EditorScreen> {
                 }),
           ListTile(
               leading: const Icon(Icons.share),
-              title: const Text('Compartir'),
+              title:  Text(AppLocalizations.of(context)!.share),
               onTap: () {
                 Navigator.pop(ctx);
                 _shareItem();
               }),
           ListTile(
               leading: const Icon(Icons.delete),
-              title: const Text('Eliminar'),
+              title: Text(AppLocalizations.of(context)!.delete),
               onTap: () {
                 Navigator.pop(ctx);
                 _deleteItem();
@@ -219,7 +220,7 @@ class _EditorScreenState extends State<EditorScreen> {
               const Divider(),
               ListTile(
                 leading: const Icon(Icons.photo_library_outlined),
-                title: const Text('Imagen de la galería'),
+                title:  Text(AppLocalizations.of(context)!.imageFromGallery),
                 onTap: () {
                   _pickImage();
                   Navigator.pop(ctx);

@@ -1,13 +1,14 @@
 {
+  "@@locale": "es",
   "helloWorld": "¡Hola Mundo!",
-  "flutterNotes": "Notas de Flutter",
+  "flutterNotes": "BLOG DE NOTAS",
   "search": "Buscar...",
-  "toggleView": "Alternar Vista",
+  "toggleView": "Cambiar Vista",
   "sort": "Ordenar",
   "menu": "Menú",
   "home": "Inicio",
   "settings": "Configuración",
-  "addItem": "Añadir Elemento",
+  "addItem": "Añadir nota",
   "selected": "{count} seleccionados",
   "share": "Compartir",
   "delete": "Eliminar",
@@ -18,8 +19,17 @@
   "imageFromGallery": "Imagen de la galería",
   "title": "Título",
   "useDynamicColors": "Usar Colores Dinámicos",
-  "themeMode": "Modo de Tema",
+  "themeMode": "Modo Oscuro",
   "system": "Sistema",
-  "light": "Claro",
-  "dark": "Oscuro"
+  "light": "Apagado",
+  "dark": "Encendido",
+  "apariencia": "Apariencia",
+  "idioma": "Idioma",
+  "informacion": "Información",
+  "sobre": "Sobre la aplicación",
+  "desarrolador": "Desarrollado por",
+  "enlaces": "Enlaces utiles",
+  "repositorio": "Ver repositorio",
+  "@repositorio": {}
+
 }

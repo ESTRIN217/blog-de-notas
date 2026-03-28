@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:myapp/l10n/app_localizations.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 
@@ -31,7 +32,7 @@ class AboutScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Sobre')),
+      appBar: AppBar(title: Text(AppLocalizations.of(context)!.sobre)),
       body: Center(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(16.0),
@@ -58,7 +59,7 @@ class AboutScreen extends StatelessWidget {
                         ),
                         const SizedBox(height: 20),
                         Text(
-                          'BLOG DE NOTAS',
+                          AppLocalizations.of(context)!.flutterNotes,
                           style: Theme.of(context).textTheme.headlineSmall
                               ?.copyWith(fontWeight: FontWeight.bold),
                         ),
@@ -102,8 +103,8 @@ class AboutScreen extends StatelessWidget {
                 style: TextStyle(fontSize: 16),
               ),
               const SizedBox(height: 40),
-              const Text(
-                'Desarrollado por',
+               Text(
+                AppLocalizations.of(context)!.desarrolador,
                 style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
               ),
               SizedBox(height: 10),
@@ -130,7 +131,7 @@ class AboutScreen extends StatelessWidget {
               ),
               const SizedBox(height: 20),
 
-              const Padding(
+               Padding(
                 padding: EdgeInsets.only(
                   top: 16.0,
                   left: 16.0,
@@ -138,7 +139,7 @@ class AboutScreen extends StatelessWidget {
                   bottom: 8.0,
                 ),
                 child: Text(
-                  'Enlaces utiles',
+                  AppLocalizations.of(context)!.enlaces,
                   style: TextStyle(fontWeight: FontWeight.bold),
                 ),
               ),
@@ -152,7 +153,7 @@ class AboutScreen extends StatelessWidget {
                         vertical: 4.0,
                       ),
                       leading: const FaIcon(FontAwesomeIcons.github),
-                      title: const Text('Ver repositorio'),
+                      title: Text(AppLocalizations.of(context)!.repositorio),
                       onTap: _launchURL,
                     ),
                     const Divider(

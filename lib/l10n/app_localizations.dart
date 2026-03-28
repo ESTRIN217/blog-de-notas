@@ -107,7 +107,7 @@ abstract class AppLocalizations {
   /// No description provided for @flutterNotes.
   ///
   /// In en, this message translates to:
-  /// **'Flutter Notes'**
+  /// **'NOTEBOOK'**
   String get flutterNotes;
 
   /// No description provided for @search.
@@ -149,7 +149,7 @@ abstract class AppLocalizations {
   /// No description provided for @addItem.
   ///
   /// In en, this message translates to:
-  /// **'Add Item'**
+  /// **'Add Note'**
   String get addItem;
 
   /// No description provided for @selected.
@@ -215,7 +215,7 @@ abstract class AppLocalizations {
   /// No description provided for @themeMode.
   ///
   /// In en, this message translates to:
-  /// **'Theme Mode'**
+  /// **'Mode dark'**
   String get themeMode;
 
   /// No description provided for @system.
@@ -227,14 +227,56 @@ abstract class AppLocalizations {
   /// No description provided for @light.
   ///
   /// In en, this message translates to:
-  /// **'Light'**
+  /// **'Off'**
   String get light;
 
   /// No description provided for @dark.
   ///
   /// In en, this message translates to:
-  /// **'Dark'**
+  /// **'On'**
   String get dark;
+
+  /// No description provided for @apariencia.
+  ///
+  /// In en, this message translates to:
+  /// **'Appearance'**
+  String get apariencia;
+
+  /// No description provided for @idioma.
+  ///
+  /// In en, this message translates to:
+  /// **'Language'**
+  String get idioma;
+
+  /// No description provided for @informacion.
+  ///
+  /// In en, this message translates to:
+  /// **'Information'**
+  String get informacion;
+
+  /// No description provided for @sobre.
+  ///
+  /// In en, this message translates to:
+  /// **'About'**
+  String get sobre;
+
+  /// No description provided for @desarrolador.
+  ///
+  /// In en, this message translates to:
+  /// **'Developed by'**
+  String get desarrolador;
+
+  /// No description provided for @enlaces.
+  ///
+  /// In en, this message translates to:
+  /// **'Useful links'**
+  String get enlaces;
+
+  /// No description provided for @repositorio.
+  ///
+  /// In en, this message translates to:
+  /// **'View repository'**
+  String get repositorio;
 }
 
 class _AppLocalizationsDelegate
