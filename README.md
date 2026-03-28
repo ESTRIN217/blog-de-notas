@@ -1,6 +1,8 @@
-# Flutter Notes
+# Blog de notas
 
 Una aplicación de notas simple e intuitiva creada con Flutter. Esta aplicación permite a los usuarios crear, editar y organizar notas con una interfaz moderna y fácil de usar, con funciones avanzadas de personalización y localización.
+
+![texto](https://github.com/ESTRIN217/Blog-de-notas/blob/master/assets/Screenshot_20260328-165034.png)
 
 ## Características
 
@@ -66,7 +68,7 @@ Una aplicación de notas simple e intuitiva creada con Flutter. Esta aplicación
 
 ## Contribuciones
 
-¡Las contribuciones son bienvenidas! Si tienes alguna idea para una nueva característica o has encontrado un error, abre un [issue](https://github.com/ESTRIN217/flutter-notes/issues) o envía un [pull request](https://github.com/ESTRIN217/flutter-notes/pulls).
+¡Las contribuciones son bienvenidas! Si tienes alguna idea para una nueva característica o has encontrado un error, abre un [issue](https://github.com/ESTRIN217/Blog-de-notas/issues) o envía un [pull request](https://github.com/ESTRIN217/Blog-de-notas/pulls).
 
 ## Licencia
 
